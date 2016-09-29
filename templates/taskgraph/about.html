@@ -1,0 +1,18 @@
+{% extends 'taskgraph/mainpage.html' %}
+
+{% load staticfiles %}
+
+{% block title_block %}
+    About
+{% endblock %}
+
+{% block body_block %}
+    <div>
+        {%  for br in breaks %}
+            <br>
+        {% endfor %}
+        Here comes an about page ...</div>
+        {%  for br in breaks %}
+            <br>
+        {% endfor %}
+{% endblock %}

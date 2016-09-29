@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+
+{% load staticfiles %}
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static "css/fromdjangoproject.css"%}" >
+
+
+    <title>TaskGraph | {% block title_block %}Web-app for popular task trackers{% endblock %}</title>
+    <style type="text/css">
+        .site-logo {
+
+
+            text-decoration:none;  
+            color: white;
+            float: left;
+            margin: 20px;
+            font-weight: bold;
+
+
+
+        }
+    </style>
+</head>
+<body>
+
+<div role="banner" id="top">
+  <div class="container">
+    <a href="{% url 'taskgraph' %}" class="site-logo">TaskGraph</a>
+    <p class="meta">Web-app for popular task trackers.</p>
+    <div role="navigation">
+      <ul>
+          {% for menu_item in menu_items %}
+              {% if  menu_item == active_menu_item %}
+                  <li class="active">
+              {% else %}
+                  <li>
+              {% endif %}
+                  <a href="{% url menu_item.url_alias %}">{{menu_item.name}}</a>
+              </li>
+          {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div>
+        {% block body_block %}
+        {% endblock %}
+</div>
+
+<div role="contentinfo">
+    <div class="footer">
+        <div class="container">
+            <div class="footer-logo">
+                 <a class="site-logo" href="{% url 'taskgraph' %}">TaskGraph</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
