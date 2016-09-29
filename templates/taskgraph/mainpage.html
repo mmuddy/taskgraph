@@ -34,7 +34,7 @@
     <div role="navigation">
       <ul>
           {% for menu_item in menu_items %}
-              {% if  menu_item == active_menu_item %}
+              {% if  menu_item.name == active_menu_item.name %}
                   <li class="active">
               {% else %}
                   <li>
