@@ -1,0 +1,121 @@
+{% extends 'taskgraph/base.html' %}
+
+{% load staticfiles %}
+
+{% block title_block %}
+    Trackers
+{% endblock %}
+
+{% block navbar_list_block %}
+    <ul class="nav navbar-nav">
+        <li class="nav-item"><a href="{% url 'projects'%}">Projects</a>
+        </li>
+        <li class="nav-item active"><a href="{% url 'trackers'%}">Trackers</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block body_block %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 col-md-2 sidebar">
+                <ul class="nav nav-sidebar">
+                    <li class="active"><a href="{% url 'trackers-list' %}">All <span class="sr-only">(current)</span></a></li> <!--  -->
+                    <li ><a href="{% url 'trackers-add' %}">New <span class="sr-only">(current)</span></a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th></th>
+                        <th>Tracker</th>
+                        <th>Url</th>
+                        <th>Username</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr class="rowlink">
+                        <td>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    Action
+                                </a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                    <li>
+                                        <a tabindex="-1" href="#">
+                                            Delete
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a tabindex="-1" href="#">
+                                            Edit
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+
+                        <td>Redmine</td>
+                        <td>https://some.super.address/</td>
+                        <td>user</td>
+                    </tr>
+                    <tr class="rowlink">
+                        <td>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    Action
+                                </a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                    <li>
+                                        <a tabindex="-1" href="#">
+                                            Delete
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a tabindex="-1" href="#">
+                                            Edit
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+
+                        <td>Redmine</td>
+                        <td>https://some.super.address2/</td>
+                        <td>user2</td>
+                    </tr>
+                    <tr class="rowlink">
+                        <td>
+                            <div class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    Action
+                                </a>
+                                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                                    <li>
+                                        <a tabindex="-1" href="#">
+                                            Delete
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a tabindex="-1" href="#">
+                                            Edit
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+
+                        <td>Redmine</td>
+                        <td>https://some.super.address3/</td>
+                        <td>user3</td>
+                    </tr>
+                    <tr></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
