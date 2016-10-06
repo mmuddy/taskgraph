@@ -20,6 +20,89 @@
     <!-- Custom styles for this template -->
     <link href="{% static "css/base.css" %}" rel="stylesheet">
 
+    <style>
+        .vertex{
+            position: absolute;
+            height: 34px;
+            font-size: 15px;
+            line-height:17px;
+            overflow: hidden;
+            width: 74px;
+            border-style: solid;
+            border-color: #ff717f;
+            border-width: 3px;
+            background-color: #ffcea9;
+            text-align: center;
+        }
+
+        .solved{
+            background-color: #82d467;
+            border-color: #269900;
+        }
+
+        .vertex:hover{
+            background-color: #b89fdd;
+            border-color: #8a62c8;
+        }
+
+        .active_vertex{
+            background-color: #b89fdd;
+            border-color: #8a62c8;
+        }
+
+        .arrow{
+            position: absolute;
+            height: 2px;
+            background-color: black;
+        }
+
+        .arrow:after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 0px;
+            height: 0px;
+            border: 20px solid transparent;
+            border-right: 0;
+            top: -2px;
+            right: -14px;
+            border-left-color: black;
+            border-width: 3px 0 3px 16px;
+        }
+
+        .active_arrow{
+            background-color: #8a62c8;
+        }
+
+        .active_arrow:after{
+            border-left-color: #8a62c8;
+        }
+
+        .line_vertical{
+            position: absolute;
+            width: 2px;
+            background-color: black;
+        }
+
+        .line_horizontal{
+            position: absolute;
+            height: 2px;
+            background-color: black;
+        }
+
+        .line_vertical_active{
+            position: absolute;
+            width: 2px;
+            background-color: #8a62c8;
+        }
+
+        .line_horizontal_active{
+            position: absolute;
+            height: 2px;
+            background-color: #8a62c8;
+        }
+    </style>
+
 </head>
 
 <body>
