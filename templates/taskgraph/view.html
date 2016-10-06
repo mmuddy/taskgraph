@@ -5,23 +5,47 @@
 {% endblock %}
 
 {% block body_block %}
-    <div class='vertex' style="margin-left: 50px;margin-top: 180px">Task1</div>
+    <div class='vertex' style="margin-left: 50px;margin-top: 180px"
+         onmouseover="document.getElementById('Task1').style.display = 'block'"
+         onmouseout="document.getElementById('Task1').style.display = 'none'">Task1</div>
 
-    <div class='vertex' style="margin-left: 176px;margin-top: 80px">Task2</div>
-    <div class='vertex' style="margin-left: 176px;margin-top: 180px">Task3</div>
-    <div class='vertex' style="margin-left: 176px;margin-top: 280px">Task4</div>
+    <div class='vertex' style="margin-left: 176px;margin-top: 80px"
+         onmouseover="document.getElementById('Task2').style.display = 'block'"
+         onmouseout="document.getElementById('Task2').style.display = 'none'">Task2</div>
+    <div class='vertex' style="margin-left: 176px;margin-top: 180px"
+         onmouseover="document.getElementById('Task3').style.display = 'block'"
+         onmouseout="document.getElementById('Task3').style.display = 'none'">Task3</div>
+    <div class='vertex' style="margin-left: 176px;margin-top: 280px"
+         onmouseover="document.getElementById('Task4').style.display = 'block'"
+         onmouseout="document.getElementById('Task4').style.display = 'none'">Task4</div>
 
-    <div class='vertex' style="margin-left: 306px;margin-top: 80px">Task5</div>
-    <div class='vertex' style="margin-left: 306px;margin-top: 180px">Task6</div>
+    <div class='vertex' style="margin-left: 306px;margin-top: 80px"
+         onmouseover="document.getElementById('Task5').style.display = 'block'"
+         onmouseout="document.getElementById('Task5').style.display = 'none'">Task5</div>
+    <div class='vertex' style="margin-left: 306px;margin-top: 180px"
+         onmouseover="document.getElementById('Task6').style.display = 'block'"
+         onmouseout="document.getElementById('Task6').style.display = 'none'">Task6</div>
 
-    <div class='vertex' style="margin-left: 428px;margin-top: 80px">Task7</div>
-    <div class='vertex' style="margin-left: 428px;margin-top: 180px">Task8</div>
+    <div class='vertex' style="margin-left: 428px;margin-top: 80px"
+         onmouseover="document.getElementById('Task7').style.display = 'block'"
+         onmouseout="document.getElementById('Task7').style.display = 'none'">Task7</div>
+    <div class='vertex' style="margin-left: 428px;margin-top: 180px"
+         onmouseover="document.getElementById('Task8').style.display = 'block'"
+         onmouseout="document.getElementById('Task8').style.display = 'none'">Task8</div>
 
-    <div class='vertex' style="margin-left: 554px;margin-top: 80px">Task9</div>
-    <div class='vertex' style="margin-left: 554px;margin-top: 180px">Task10</div>
-    <div class='vertex' style="margin-left: 554px;margin-top: 280px">Task11</div>
+    <div class='vertex' style="margin-left: 554px;margin-top: 80px"
+         onmouseover="document.getElementById('Task9').style.display = 'block'"
+         onmouseout="document.getElementById('Task9').style.display = 'none'">Task9</div>
+    <div class='vertex' style="margin-left: 554px;margin-top: 180px"
+         onmouseover="document.getElementById('Task10').style.display = 'block'"
+         onmouseout="document.getElementById('Task10').style.display = 'none'">Task10</div>
+    <div class='vertex' style="margin-left: 554px;margin-top: 280px"
+         onmouseover="document.getElementById('Task11').style.display = 'block'"
+         onmouseout="document.getElementById('Task11').style.display = 'none'">Task11</div>
 
-    <div class='vertex' style="margin-left: 680px;margin-top: 180px">Task12</div>
+    <div class='vertex' style="margin-left: 680px;margin-top: 180px"
+         onmouseover="document.getElementById('Task12').style.display = 'block'"
+         onmouseout="document.getElementById('Task12').style.display = 'none'">Task12</div>
 
 
 
@@ -97,5 +121,81 @@
     <div class='line_vertical' style="margin-left: 658px;margin-top: 210px;height: 90px;"></div>
     <div class='arrow' style="margin-left: 660px;margin-top: 210px;width: 6px"></div>
 
-    <div style="height:420px"></div> <!-- Чтобы нижняя панель TaskGraph была внизу -->
+
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task1'>
+        Task1<br>
+        Task1 category<br>
+        Task1 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task2'>
+        Task2<br>
+        Task2 category<br>
+        Task2 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task3'>
+        Task3<br>
+        Task3 category<br>
+        Task3 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task4'>
+        Task4<br>
+        Task4 category<br>
+        Task4 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task5'>
+        Task5<br>
+        Task5 category<br>
+        Task5 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task6'>
+        Task6<br>
+        Task6 category<br>
+        Task6 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task7'>
+        Task7<br>
+        Task7 category<br>
+        Task7 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task8'>
+        Task8<br>
+        Task8 category<br>
+        Task8 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task9'>
+        Task9<br>
+        Task9 category<br>
+        Task9 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task10'>
+        Task10<br>
+        Task10 category<br>
+        Task10 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task11'>
+        Task11<br>
+        Task11 category<br>
+        Task11 performer<br>
+    </div>
+
+    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task12'>
+        Task12<br>
+        Task12 category<br>
+        Task12 performer<br>
+    </div>
+
+    <div style="height:420px"></div>
+
+
 {% endblock %}
