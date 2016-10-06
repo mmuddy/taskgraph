@@ -16,11 +16,14 @@
 {% endblock %}
 
 {% block body_block %}
-    {%  for br in 'xxxxxxxxx' %}
-        <br>
-    {% endfor %}
-    <div>Here comes trackers ...</div>
-    {%  for br in 'xxxxxxxxx' %}
-        <br>
-    {% endfor %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><a href="{% url 'trackers-list' %}">All</a></li> <!-- <span class="sr-only">(current)</span> -->
+            <li><a href="{% url 'trackers-add' %}">New</a></li>
+          </ul>
+        </div>
+       </div>
+    </div>
 {% endblock %}

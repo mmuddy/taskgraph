@@ -17,5 +17,7 @@ urlpatterns = [
     url(r'analysis/', views.analysis_page, name='analysis'),
 
     url(r'trackers/', views.trackers_page, name='trackers'),
+    url(r'trackers-list/', views.trackers_list_page, name='trackers-list'),
+    url(r'trackers-add/', views.trackers_add_page, name='trackers-add'),
 
 ]
