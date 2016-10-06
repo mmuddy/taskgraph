@@ -1,0 +1,33 @@
+{% extends 'taskgraph/base.html' %}
+
+{% load staticfiles %}
+
+{% block title_block %}
+    Analysis
+{% endblock %}
+
+{% block navbar_list_block %}
+    <ul class="nav navbar-nav">
+        <li class="nav-item"><a href="{% url 'projects'%}">Projects</a>
+        </li>
+        <li class="divider-vertical"></li>
+        <li class="nav-item"><a href="{% url 'view'%}">View</a>
+        </li>
+        <li class="divider-vertical"></li>
+        <li class="nav-item"><a href="{% url 'edit'%}">Edit</a>
+        </li>
+        <li class="divider-vertical"></li>
+        <li class="nav-item active"><a href="{% url 'analysis'%}">Analysis</a>
+        </li>
+    </ul>
+{% endblock %}
+
+{% block body_block %}
+    {%  for br in 'xxxxxxxxx' %}
+        <br>
+    {% endfor %}
+    <div>Here comes analysis ...</div>
+    {%  for br in 'xxxxxxxxx' %}
+        <br>
+    {% endfor %}
+{% endblock %}

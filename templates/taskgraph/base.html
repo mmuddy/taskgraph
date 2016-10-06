@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+{% load staticfiles %}
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- <link rel="icon" href="../../favicon.ico"> -->
+
+    <title>TaskGraph | {% block title_block %}Web-app for popular task trackers{% endblock %}</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{% static "bootstrap-3.3.5-dist/css/bootstrap.min.css" %}" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="{% static "css/base.css" %}" rel="stylesheet">
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{% url 'overview' %}">TaskGraph</a>
+        </div>
+        {% if is_user_active %}
+            <div class="nav-item navbar-right" style="margin-top: 17px">
+                <div class="dropdown-menu-right">
+                    <a href="" class="dropdown-toggle" id="menu1" data-toggle="dropdown">
+                         <span class="glyphicon glyphicon-user"></span>
+                        Username
+                    </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'trackers' %}">Profile</a></li>
+                        <li role="presentation" class="divider"></li>
+                        <li role="presentation"><a role="menuitem" tabindex="-1" href="{% url 'signup' %}">Logout</a></li>
+                    </ul>
+                </div>
+                <!--- <a href="{% url 'trackers' %}">
+                    <span class="glyphicon glyphicon-user"></span> Username
+                </a> -->
+            </div>
+        {% endif %}
+    </div><!-- /.container-fluid -->
+</nav>
+
+{% if contains_menu %}
+    <nav class="navbar navbar-default navbar-lower" role="navigation">
+        <div class="container">
+            <div class="collapse navbar-collapse collapse-buttons">
+                {% block navbar_list_block %}
+                {% endblock %}
+            </div>
+        </div>
+    </nav>
+{% endif %}
+
+<div class="container">
+
+    {% block body_block %}
+    {% endblock %}
+
+</div><!-- /.container -->
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.0.0/jquery.min.js" integrity="sha384-THPy051/pYDQGanwU6poAc/hOdQxjnOEXzbT+OuUAFqNqFjL+4IGLBgCJC3ZOShY" crossorigin="anonymous"></script>
+<!-- <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>  -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.2.0/js/tether.min.js" integrity="sha384-Plbmg8JY28KFelvJVai01l8WyZzrYWG825m+cZ0eDDS1f7d/js6ikvy1+X+guPIB" crossorigin="anonymous"></script>
+<script src="{% static "bootstrap-3.3.5-dist/js/bootstrap.min.js" %}"></script>
+<script>
+    $('.navbar-lower').affix({
+        offset: {top: 0}
+    });
+</script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<!-- <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script> -->
+</body>
+</html>
