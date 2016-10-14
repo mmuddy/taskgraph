@@ -28,25 +28,24 @@ def graph_view_page(request):
         1: ['Task1', 'Task1 category', 'Task1 performer', 1, 'Solved'],
         2: ['Task2', 'Task2 category', 'Task2 performer', 1, 'Solved'],
         3: ['Task3', 'Task3 category', 'Task3 performer', 1, 'Solved'],
-        4: ['Task4', 'Task4 category', 'Task4 performer', 1, 'Solved'],
+        4: ['Task4', 'Task4 category', 'Task4 performer', 0.66, 'Solved'],
         5: ['Task5', 'Task5 category', 'Task5 performer', 1, 'Unsolved'],
-        6: ['Task6', 'Task6 category', 'Task6 performer', 1, 'Solved'],
-        7: ['Task7', 'Task7 category', 'Task7 performer', 1, 'Unsolved'],
+        6: ['Task6', 'Task6 category', 'Task6 performer', 1.66, 'Solved'],
+        7: ['Task7', 'Task7 category', 'Task7 performer', 1.33, 'Unsolved'],
         8: ['Task8', 'Task8 category', 'Task8 performer', 1, 'Unsolved'],
-        9: ['Task9', 'Task9 category', 'Task9 performer', 1, 'Unsolved'],
+        9: ['Task9', 'Task9 category', 'Task9 performer', 0.66, 'Unsolved'],
         10: ['Task10', 'Task10 category', 'Task10 performer', 1, 'Unsolved'],
-        11: ['Task11', 'Task11 category', 'Task11 performer', 1, 'Unsolved'],
+        11: ['Task11', 'Task11 category', 'Task11 performer', 0.66, 'Unsolved'],
         12: ['Task12', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
         13: ['Task13', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
-        14: ['Task14', 'Task12 category', 'Task12 performer', 1, 'Unsolved']
     }
 
     save_graph = {
         1: [2, 3, 4, 6],
         2: [5, 6, 7, 8, 10, 11],
         3: [5, 6],
-        4: [6, 14],
-        5: [7],
+        4: [6],
+        5: [7, 11],
         6: [7, 8],
         7: [9, 10],
         8: [10, 11],
@@ -54,8 +53,7 @@ def graph_view_page(request):
         10: [12],
         11: [12],
         12: [13],
-        13: [],
-        14: [8],
+        13: []
     }
 
     save_graph1 = {
@@ -195,6 +193,7 @@ def graph_view_page(request):
     vertex_coords = {i: [0, 0] for i in graph}
 
     curr_x_coord = margin_left_graph
+    curr_imaginary_vertex = -1
 
     for curr_layer in vertices_by_layers:
 
@@ -205,10 +204,18 @@ def graph_view_page(request):
         for index, curr_elem in enumerate(curr_layer):
             # TODO: учесть мнимые вершины
 
-            vertex_coords[curr_elem][0] = curr_x_coord
+            if isinstance(curr_elem, list):
+                vertex_coords[curr_imaginary_vertex] = [curr_x_coord,
+                                                        len_between_vertices_in_layer * (
+                                                            start_height_in_layer + index) - vertex_height // 2]
 
-            vertex_coords[curr_elem][1] = len_between_vertices_in_layer * (
-            start_height_in_layer + index) - vertex_height // 2
+                id_list[curr_imaginary_vertex] = [str(curr_elem[0]) + '->' + str(curr_elem[1])]
+                curr_imaginary_vertex -= 1
+            else:
+                vertex_coords[curr_elem][0] = curr_x_coord
+
+                vertex_coords[curr_elem][1] = len_between_vertices_in_layer * (
+                start_height_in_layer + index) - vertex_height // 2
 
         curr_x_coord += vertex_width + len_after_start_arrow + len_before_end_arrow  # TODO: ... + count of edges
 

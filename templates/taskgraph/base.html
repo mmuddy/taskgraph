@@ -35,6 +35,39 @@
             text-align: center;
         }
 
+        .imaginary{
+            position: absolute;
+            height: 40px;
+            width: 80px;
+            font-size: 15px;
+            text-align: center;
+            background-color: #ffffff;
+        }
+
+        .imaginary:before{
+            content: "";
+            display: block;
+            position: absolute;
+            height: 6px;
+            width: 16px;
+            top: 18px;
+            left: -16px;
+            background-color: white;
+            z-index: 1;
+        }
+
+        .imaginary:after{
+            content: "";
+            display: block;
+            position: absolute;
+            height: 2px;
+            width: 96px;
+            top: 20px;
+            left: -16px;
+            background-color: black;
+            z-index: 2;
+        }
+
         .solved{
             background-color: #82d467;
             border-color: #269900;
