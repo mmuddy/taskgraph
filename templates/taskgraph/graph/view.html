@@ -23,6 +23,22 @@
 {% endblock %}
 
 {% block body_block %}
+
+    {% for vertex in vertex_coords %}
+        <div class="{% if vertex.7 == 'Solved' %}vertex solved{% else %}vertex{% endif %}"
+             style="margin-left: {{vertex.0}}px;margin-top: {{vertex.1}}px"
+             onmouseover="document.getElementById('{{vertex.2}}').style.display = 'block'"
+             onmouseout="document.getElementById('{{vertex.2}}').style.display = 'none'">{{vertex.3}}</div>
+
+        <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='{{vertex.2}}'>
+            Name: {{vertex.3}}<br>
+            Category: {{vertex.4}}<br>
+            Assign: {{vertex.5}}<br>
+            Critical rank: {{vertex.6}}<br>
+            Status: {{vertex.7}}<br>
+        </div>
+    {% endfor %}
+<!--
     <div class='vertex solved' style="margin-left: 50px;margin-top: 183px"
          onmouseover="document.getElementById('Task1').style.display = 'block'"
          onmouseout="document.getElementById('Task1').style.display = 'none'">Task1</div>
@@ -238,6 +254,6 @@
     </div>
 
     <div style="height:420px"></div>
-
+-->
 
 {% endblock %}
