@@ -176,58 +176,193 @@ def graph_view_page(request):
 
     vertex_height = 40
     vertex_width = 80
-    len_after_start_arrow = 20
+    len_after_start_arrow = 5
     len_before_end_arrow = 20
-    len_between_vertices_in_layer = 100
+    len_between_vertices_in_layer = 50
     len_between_arrows = 2
+    len_css_triangle = 14
+    arrow_width = 2
     margin_left_graph = 50
 
     max_in_layers = max(len(i) for i in vertices_by_layers)
 
     graph_height = len_between_vertices_in_layer * (max_in_layers + 1)
 
-    middle_y = graph_height // 2
-
-    #  Просчёт координат вершин
+    #  Просчёт координат вершин и рёбер
 
     vertex_coords = {i: [0, 0] for i in graph}
 
     curr_x_coord = margin_left_graph
     curr_imaginary_vertex = -1
 
-    for curr_layer in vertices_by_layers:
+    all_edges = []
+
+    for index_layer, (curr_layer, next_layer) in enumerate(
+            zip(vertices_by_layers, vertices_by_layers[1:] + vertices_by_layers[0])):
 
         count_in_layer = len(curr_layer)
 
         start_height_in_layer = (max_in_layers - count_in_layer) // 2 + 1
 
-        for index, curr_elem in enumerate(curr_layer):
-            # TODO: учесть мнимые вершины
+        count_of_edges = 0  # Количество ребер в текущем слое, которые будут рендерится как изгибающиеся
+        curr_edge = 0
 
+        for index_elem, curr_elem in enumerate(curr_layer):
             if isinstance(curr_elem, list):
+
+                if (start_height_in_layer + index_elem != (max_in_layers - len(next_layer)) // 2 + 1 +
+                    next_layer.index(curr_elem if curr_elem in next_layer else curr_elem[1])):
+                    count_of_edges += 1
+            else:
+                for index_next, next_elem in enumerate(forward_graph[curr_elem]):
+
+                    if (start_height_in_layer + index_elem != (max_in_layers - len(next_layer)) // 2 + 1 +
+                        next_layer.index(next_elem if next_elem in next_layer else [curr_elem, next_elem])):
+                        count_of_edges += 1
+
+        next_layer_x = curr_x_coord + vertex_width + len_after_start_arrow + len_before_end_arrow + count_of_edges * (
+            len_between_arrows + arrow_width) - len_between_arrows
+
+        dist_between_layers = next_layer_x - curr_x_coord - vertex_width - len_css_triangle
+
+        for index_elem, curr_elem in enumerate(curr_layer):
+
+            if isinstance(curr_elem, list):  # Если из мнимого элемента
                 vertex_coords[curr_imaginary_vertex] = [curr_x_coord,
                                                         len_between_vertices_in_layer * (
-                                                            start_height_in_layer + index) - vertex_height // 2]
+                                                        start_height_in_layer + index_elem) - vertex_height // 2]
 
                 id_list[curr_imaginary_vertex] = [str(curr_elem[0]) + '->' + str(curr_elem[1])]
+
+                to_arrow_x = next_layer_x
+                to_arrow_y = len_between_vertices_in_layer * (
+                (max_in_layers - len(next_layer)) // 2 + 1 + next_layer.index(
+                    curr_elem if curr_elem in next_layer else curr_elem[1]))
+
+                if vertex_coords[curr_imaginary_vertex][
+                    1] + vertex_height // 2 == to_arrow_y:  # Если просто прямая стрелка
+                    all_edges += [(curr_elem + [1, curr_x_coord + vertex_width, to_arrow_y, dist_between_layers])]
+
+                elif vertex_coords[curr_imaginary_vertex][
+                    1] + vertex_height // 2 > to_arrow_y:  # Если изгибающаяся стрелка вверх
+                    all_edges += [(curr_elem + [2, curr_x_coord + vertex_width,
+                                                vertex_coords[curr_imaginary_vertex][1] + vertex_height // 2,
+                                                len_after_start_arrow + curr_edge * (
+                                                arrow_width + len_between_arrows) + arrow_width,
+
+                                                curr_x_coord + vertex_width + len_after_start_arrow + curr_edge * (
+                                                arrow_width + len_between_arrows),
+                                                to_arrow_y,
+                                                vertex_coords[curr_imaginary_vertex][
+                                                    1] + vertex_height // 2 - to_arrow_y,
+
+                                                curr_x_coord + vertex_width + len_after_start_arrow + curr_edge * (
+                                                arrow_width + len_between_arrows) + arrow_width,
+                                                to_arrow_y,
+                                                dist_between_layers - len_after_start_arrow - curr_edge * (
+                                                arrow_width + len_between_arrows) - arrow_width])]
+                    curr_edge += 1
+
+                else:  # Если изгибающаяся стрелка вниз
+                    all_edges += [(curr_elem + [3, curr_x_coord + vertex_width,
+                                                vertex_coords[curr_imaginary_vertex][1] + vertex_height // 2,
+                                                len_after_start_arrow + curr_edge * (
+                                                arrow_width + len_between_arrows) + arrow_width,
+
+                                                curr_x_coord + vertex_width + len_after_start_arrow + curr_edge * (
+                                                arrow_width + len_between_arrows),
+                                                vertex_coords[curr_imaginary_vertex][
+                                                    1] + vertex_height // 2 + arrow_width,
+                                                to_arrow_y - vertex_coords[curr_imaginary_vertex][
+                                                    1] - vertex_height // 2,
+
+                                                curr_x_coord + vertex_width + len_after_start_arrow + curr_edge * (
+                                                arrow_width + len_between_arrows) + arrow_width,
+                                                to_arrow_y,
+                                                dist_between_layers - len_after_start_arrow - curr_edge * (
+                                                arrow_width + len_between_arrows) - arrow_width])]
+                    curr_edge += 1
+
                 curr_imaginary_vertex -= 1
+
+
             else:
                 vertex_coords[curr_elem][0] = curr_x_coord
-
                 vertex_coords[curr_elem][1] = len_between_vertices_in_layer * (
-                start_height_in_layer + index) - vertex_height // 2
+                start_height_in_layer + index_elem) - vertex_height // 2
 
-        curr_x_coord += vertex_width + len_after_start_arrow + len_before_end_arrow  # TODO: ... + count of edges
+                for to_vertex in forward_graph[curr_elem]:
+
+                    to_arrow_x = next_layer_x
+                    to_arrow_y = len_between_vertices_in_layer * (
+                    (max_in_layers - len(next_layer)) // 2 + 1 + next_layer.index(
+                        to_vertex if to_vertex in next_layer else [curr_elem, to_vertex]))
+
+                    if vertex_coords[curr_elem][1] + vertex_height // 2 == to_arrow_y:  # Если просто прямая стрелка
+                        all_edges += [([curr_elem, to_vertex] + [1, curr_x_coord + vertex_width, to_arrow_y,
+                                                                 dist_between_layers])]
+
+                    elif vertex_coords[curr_elem][
+                        1] + vertex_height // 2 > to_arrow_y:  # Если изгибающаяся стрелка вверх
+                        all_edges += [([curr_elem, to_vertex] + [2, curr_x_coord + vertex_width,
+                                                                 vertex_coords[curr_elem][1] + vertex_height // 2,
+                                                                 len_after_start_arrow + curr_edge * (
+                                                                 arrow_width + len_between_arrows) + arrow_width,
+
+                                                                 curr_x_coord + vertex_width + len_after_start_arrow + curr_edge * (
+                                                                 arrow_width + len_between_arrows),
+                                                                 to_arrow_y,
+                                                                 vertex_coords[curr_elem][
+                                                                     1] + vertex_height // 2 - to_arrow_y,
+
+                                                                 curr_x_coord + vertex_width + len_after_start_arrow + curr_edge * (
+                                                                 arrow_width + len_between_arrows) + arrow_width,
+                                                                 to_arrow_y,
+                                                                 dist_between_layers - len_after_start_arrow - curr_edge * (
+                                                                 arrow_width + len_between_arrows) - arrow_width])]
+                        curr_edge += 1
+
+                    else:  # Если изгибающаяся стрелка вниз
+                        all_edges += [([curr_elem, to_vertex] + [3, curr_x_coord + vertex_width,
+                                                                 vertex_coords[curr_elem][1] + vertex_height // 2,
+                                                                 len_after_start_arrow + curr_edge * (
+                                                                 arrow_width + len_between_arrows) + arrow_width,
+
+                                                                 curr_x_coord + vertex_width + len_after_start_arrow + curr_edge * (
+                                                                 arrow_width + len_between_arrows),
+                                                                 vertex_coords[curr_elem][
+                                                                     1] + vertex_height // 2 + arrow_width,
+                                                                 to_arrow_y - vertex_coords[curr_elem][
+                                                                     1] - vertex_height // 2,
+
+                                                                 curr_x_coord + vertex_width + len_after_start_arrow + curr_edge * (
+                                                                 arrow_width + len_between_arrows) + arrow_width,
+                                                                 to_arrow_y,
+                                                                 dist_between_layers - len_after_start_arrow - curr_edge * (
+                                                                 arrow_width + len_between_arrows) - arrow_width])]
+                        curr_edge += 1
+
+        curr_x_coord = next_layer_x
 
     pprint(vertex_coords)
+    pprint(all_edges)
 
     vertex_coords = [[vertex_coords[i][0],vertex_coords[i][1]]+[i]+id_list[i] for i in vertex_coords]
+
+    for edge in all_edges:  # edge fix for bootstrap
+        edge[3] -= 6
+        edge[5] += 6
+
+    for vertex in vertex_coords:  # vertex fix for bootstrap
+        if vertex[2] > 0:
+            vertex[1] += 3
 
     context = {
         'is_user_active': True,
         'contains_menu': True,
         'vertex_coords': vertex_coords,
-        'id_list': id_list
+        'id_list': id_list,
+        'all_edges': all_edges
     }
 
     return render(request, 'taskgraph/graph/view.html', context)
