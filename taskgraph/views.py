@@ -42,15 +42,17 @@ def graph_view_page(request):
         15: ['Task15', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
         16: ['Task16', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
         17: ['Task17', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
+        18: ['Task18', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
+        19: ['Task19', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
     }
 
     save_graph = {
         1: [2, 3, 4, 6],
         2: [5, 6, 7, 8, 10, 11, 15],
         3: [5, 6],
-        4: [6],
+        4: [],
         5: [7, 11],
-        6: [7, 8],
+        6: [7, 8, 4],
         7: [9, 10],
         8: [10, 11],
         9: [12],
@@ -62,6 +64,8 @@ def graph_view_page(request):
         15: [14],
         16: [15],
         17: [16],
+        18: [17],
+        19: [18],
     }
 
     save_graph1 = {
@@ -185,36 +189,35 @@ def graph_view_page(request):
     print('VERTICES BY LAYERS')
     print(vertices_by_layers)
 
-
-
     #  Определение важных констант
 
     vertex_height = 40
-    vertex_width  = 80
+    vertex_width = 80
     len_after_start_arrow = 20
     len_before_end_arrow = 20
     len_between_vertices_in_layer = 100
     len_between_arrows = 2
     len_css_triangle = 14
     arrow_width = 2
-    margin_left_graph = 50
-    distance_between_slots = 10
+    margin_left_graph = -100
+    margin_top_graph = 0
+    distance_between_slots = 7
 
     max_in_layers = max(len(i) for i in vertices_by_layers)
 
-    graph_height = len_between_vertices_in_layer * (max_in_layers + 1)
+    graph_height = margin_top_graph + len_between_vertices_in_layer * (max_in_layers + 1)
 
     #  Расставление разных слотов выхода и прихода рёбер в вершины
     edges_slots = {}
     max_slots = max(len(i) for i in [j for j in forward_graph.values()] + [j for j in backward_graph.values()])
-    range_slots = [-i for i in range(1, max_slots // 2 + 1)] + [0] + [i for i in range(1, max_slots // 2 + 1)]
+    range_slots = [-i for i in range(1, max_slots // 2 + 1)][::-1] + [0] + [i for i in range(1, max_slots // 2 + 1)]
     count_of_slots = len(range_slots)
 
     edges_available_slots_forward = {
-    elem: [-i for i in range(1, max_slots // 2 + 1)] + [0] + [i for i in range(1, max_slots // 2 + 1)] for elem in
+    elem: [-i for i in range(1, max_slots // 2 + 1)][::-1] + [0] + [i for i in range(1, max_slots // 2 + 1)] for elem in
     graph}
     edges_available_slots_backward = {
-    elem: [-i for i in range(1, max_slots // 2 + 1)] + [0] + [i for i in range(1, max_slots // 2 + 1)] for elem in
+    elem: [-i for i in range(1, max_slots // 2 + 1)][::-1] + [0] + [i for i in range(1, max_slots // 2 + 1)] for elem in
     graph}
 
     for curr_layer, next_layer in zip(vertices_by_layers, vertices_by_layers[1:]):
@@ -237,8 +240,6 @@ def graph_view_page(request):
                     # Выбирается ближайший к нулевому слоту положительный кроме нуля, иначе ближайший к нулевому слоту отрицательный
                     slot_number = curr_slot[-1] if all(i <= 0 for i in curr_slot) else [i for i in curr_slot if i > 0][
                         0]
-
-                    print('%%%%%%%%', curr_elem, curr_slot)
 
                     edges_slots[curr_elem[0], curr_elem[1]] += [slot_number]
                     del curr_slot[curr_slot.index(slot_number)]
@@ -335,8 +336,6 @@ def graph_view_page(request):
                                                 index_from < (
                                                 max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(
                                                 right_vertex if right_vertex in curr_layer else right_vertex[0])):
-                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot, candidate_slot,
-                                              right_vertex, index_to, index_from)
                                         slot_number = candidate_slot
                                         break
 
@@ -377,8 +376,6 @@ def graph_view_page(request):
                                             right_vertex, int) else candidate_slot != 0 or (index_from < (
                                                 max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(
                                         right_vertex if right_vertex in curr_layer else right_vertex[0])):
-                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot, candidate_slot,
-                                              right_vertex, index_to, index_from)
                                         slot_number = candidate_slot
                                         break
 
@@ -413,10 +410,6 @@ def graph_view_page(request):
                             curr_slot_from = edges_available_slots_forward[curr_elem]
                             curr_slot_to = edges_available_slots_backward[to_vertex]
 
-                            # slot_number_from = curr_slot_from[0]
-
-                            # print('!!!',  curr_layer, curr_elem, to_vertex, (max_in_layers - len(next_layer)) // 2 + len(next_layer),index_from, (max_in_layers - len(next_layer)) // 2 + 1)
-
                             if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (
                                 max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
 
@@ -429,8 +422,6 @@ def graph_view_page(request):
                                                 index_from < (
                                                 max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(
                                                 right_vertex if right_vertex in curr_layer else right_vertex[0])):
-                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot_from, candidate_slot,
-                                              right_vertex, index_to, index_from)
                                         slot_number_from = candidate_slot
                                         break
 
@@ -474,8 +465,6 @@ def graph_view_page(request):
                                             right_vertex, int) else candidate_slot != 0 or (index_from < (
                                                 max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(
                                         right_vertex if right_vertex in curr_layer else right_vertex[0])):
-                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot_from, candidate_slot,
-                                              right_vertex, index_to, index_from)
                                         slot_number_from = candidate_slot
                                         break
 
@@ -485,8 +474,6 @@ def graph_view_page(request):
                                     slot_number_to = curr_slot_to[0] if all(i >= 0 for i in curr_slot_to) else \
                                     [i for i in curr_slot_to if i < 0][-1]
                                     edges_slots[curr_elem, to_vertex] = [range_slots[-1] + 1, slot_number_to]
-                                    print('TAAAAAAASK !^^^^^^^^^^^^^', curr_slot_from,
-                                          edges_available_slots_backward[right_vertex])
                                     continue
                             else:
                                 slot_number_from = curr_slot_from[0]
@@ -500,9 +487,9 @@ def graph_view_page(request):
                             del curr_slot_from[curr_slot_from.index(slot_number_from)]
                             del curr_slot_to[curr_slot_to.index(slot_number_to)]
 
-        # Корректируем (Там, где всего одна стрелка и она не на середине, ставим её на середину)
+        # Корректируем (Там, где всего одна стрелка и она не на середине, ставим её на середину, если это не вызовет наложения стрелок)
 
-        for curr_elem in curr_layer:
+        for curr_elem in curr_layer:  # Проверяем вершины, из которых выходит одно ребро
 
             if isinstance(curr_elem, int):
 
@@ -518,18 +505,37 @@ def graph_view_page(request):
                         right_vertex = next_layer[index_from - (max_in_layers - len(next_layer)) // 2 - 1]
 
                         if isinstance(right_vertex, int) and 0 in edges_available_slots_backward[right_vertex]:
+                            edges_available_slots_forward[curr_elem] = sorted(
+                                i for i in edges_available_slots_forward[curr_elem] +
+                                [edges_slots[curr_elem, forward_graph[curr_elem][0]][0]] if i != 0)
+
                             edges_slots[curr_elem, forward_graph[curr_elem][0]][0] = 0
                     else:
                         edges_slots[curr_elem, forward_graph[curr_elem][0]][0] = 0
 
-        for curr_elem in next_layer:
+        for curr_elem in next_layer:  # Проверяем вершины, в которые входит одно ребро
 
             if isinstance(curr_elem, int):
 
                 unused_backward_slots = edges_available_slots_backward[curr_elem]
 
                 if len(unused_backward_slots) == count_of_slots - 1 and 0 in unused_backward_slots:
-                    edges_slots[backward_graph[curr_elem][0], curr_elem][1] = 0
+
+                    index_from = (max_in_layers - len(next_layer)) // 2 + 1 + next_layer.index(curr_elem)
+
+                    if (max_in_layers - len(curr_layer)) // 2 + len(curr_layer) >= index_from >= (
+                        max_in_layers - len(curr_layer)) // 2 + 1:  # Если слева есть вершина
+
+                        left_vertex = curr_layer[index_from - (max_in_layers - len(curr_layer)) // 2 - 1]
+
+                        if isinstance(left_vertex, int) and 0 in edges_available_slots_forward[left_vertex]:
+                            edges_available_slots_backward[curr_elem] = sorted(
+                                i for i in edges_available_slots_backward[curr_elem] +
+                                [edges_slots[backward_graph[curr_elem][0], curr_elem][1]] if i != 0)
+
+                            edges_slots[backward_graph[curr_elem][0], curr_elem][1] = 0
+                    else:
+                        edges_slots[backward_graph[curr_elem][0], curr_elem][1] = 0
 
     print('USED SLOTS')
     pprint(edges_slots)
@@ -538,26 +544,23 @@ def graph_view_page(request):
     print('BACKWARD SLOTS')
     pprint(edges_available_slots_backward)
 
-
-
-
-
-
-
     #  Просчёт координат вершин и рёбер
 
-    vertex_coords = {i: [0,0] for i in graph}
+    vertex_coords = {i: [0, 0] for i in graph}
 
     curr_x_coord = margin_left_graph
+    curr_y_coord = margin_top_graph
+
     curr_imaginary_vertex = -1
 
     all_edges = []
 
-    for index_layer, (curr_layer, next_layer) in enumerate(zip(vertices_by_layers, vertices_by_layers[1:] + vertices_by_layers[0])):
+    for index_layer, (curr_layer, next_layer) in enumerate(
+            zip(vertices_by_layers, vertices_by_layers[1:] + vertices_by_layers[0])):
 
         count_in_layer = len(curr_layer)
 
-        start_height_in_layer = (max_in_layers - count_in_layer) // 2 + 1
+        start_height_in_layer = (max_in_layers - count_in_layer) // 2
 
         count_of_edges = 0  # Количество ребер в текущем слое, которые будут рендерится как изгибающиеся
         curr_edge = 0
@@ -565,34 +568,72 @@ def graph_view_page(request):
         for index_elem, curr_elem in enumerate(curr_layer):
             if isinstance(curr_elem, list):
 
-                if ( start_height_in_layer + index_elem != (max_in_layers - len(next_layer)) // 2 + 1 +
-                    next_layer.index(curr_elem if curr_elem in next_layer else curr_elem[1]) ):
-
+                if (start_height_in_layer + index_elem != (max_in_layers - len(next_layer)) // 2 +
+                    next_layer.index(curr_elem if curr_elem in next_layer else curr_elem[1])):
                     count_of_edges += 1
             else:
                 for index_next, next_elem in enumerate(forward_graph[curr_elem]):
 
-                    if ( start_height_in_layer + index_elem != (max_in_layers - len(next_layer)) // 2 + 1 +
-                                    next_layer.index(next_elem if next_elem in next_layer else [curr_elem, next_elem]) ):
-
+                    if (start_height_in_layer + index_elem != (max_in_layers - len(next_layer)) // 2 +
+                        next_layer.index(next_elem if next_elem in next_layer else [curr_elem, next_elem])):
                         count_of_edges += 1
 
         next_layer_x = curr_x_coord + vertex_width + len_after_start_arrow + len_before_end_arrow + count_of_edges * (
-                        len_between_arrows + arrow_width) - len_between_arrows
+            len_between_arrows + arrow_width) - len_between_arrows
 
         dist_between_layers = next_layer_x - curr_x_coord - vertex_width - len_css_triangle
 
-        for index_elem, curr_elem in [(i, j) for i, j in enumerate(curr_layer) if isinstance(j, list)] + [(i, j) for i, j in enumerate(curr_layer) if isinstance(j, int)]:
+        for index_elem, curr_elem in [(index_elem, curr_elem) for index_elem, curr_elem in enumerate(curr_layer) if
+                                      isinstance(curr_elem, list) and len_between_vertices_in_layer * (
+                                          start_height_in_layer + index_elem) >
+                                                              len_between_vertices_in_layer * (
+                                                              (max_in_layers - len(next_layer)) // 2 + next_layer.index(
+                                                          curr_elem if
+                                                              curr_elem in next_layer else curr_elem[
+                                                              1])) + distance_between_slots * (
+                                              edges_slots[curr_elem[0], curr_elem[1]][1] if
+                                                  curr_elem[1] in next_layer else 0)] + [(index_elem, curr_elem) for
+                                                                                         index_elem, curr_elem in
+                                                                                         enumerate(curr_layer) if
+                                                                                         isinstance(curr_elem,
+                                                                                                    list) and len_between_vertices_in_layer * (
+                                                                                             start_height_in_layer + index_elem) <=
+                                                                                                                 len_between_vertices_in_layer * (
+                                                                                                                 (
+                                                                                                                     max_in_layers - len(
+                                                                                                                     next_layer)) // 2 + next_layer.index(
+                                                                                                             curr_elem if
+                                                                                                                 curr_elem in next_layer else
+                                                                                                             curr_elem[
+                                                                                                                 1])) + distance_between_slots * (
+                                                                                                 edges_slots[
+                                                                                                     curr_elem[0],
+                                                                                                     curr_elem[1]][1] if
+                                                                                                     curr_elem[
+                                                                                                         1] in next_layer else 0)][
+                                                                                        ::-1] + [(index_elem, curr_elem)
+                                                                                                 for
+                                                                                                 index_elem, curr_elem
+                                                                                                 in
+                                                                                                 enumerate(curr_layer)
+                                                                                                 if
+                                                                                                 isinstance(curr_elem,
+                                                                                                            int)]:
 
             if isinstance(curr_elem, list):  # Если стрелка выходит из мнимого элемента
 
-                vertex_coords[curr_imaginary_vertex] = [curr_x_coord, len_between_vertices_in_layer * (start_height_in_layer + index_elem) - vertex_height // 2]
+                vertex_coords[curr_imaginary_vertex] = [curr_x_coord,
+                                                        margin_top_graph + len_between_vertices_in_layer * (
+                                                        start_height_in_layer + index_elem) - vertex_height // 2]
 
-                id_list[curr_imaginary_vertex] = [str(curr_elem[0])+'->'+str(curr_elem[1])]
+                id_list[curr_imaginary_vertex] = [str(curr_elem[0]) + '->' + str(curr_elem[1])]
 
                 to_arrow_x = next_layer_x
-                to_arrow_y = len_between_vertices_in_layer * ((max_in_layers - len(next_layer)) // 2 + 1 + next_layer.index(curr_elem if curr_elem in next_layer else curr_elem[1])
-                                        ) + distance_between_slots * (edges_slots[curr_elem[0], curr_elem[1]][1] if curr_elem[1] in next_layer else 0)
+                to_arrow_y = margin_top_graph + len_between_vertices_in_layer * (
+                (max_in_layers - len(next_layer)) // 2 + next_layer.index(
+                    curr_elem if curr_elem in next_layer else curr_elem[1])
+                ) + distance_between_slots * (
+                edges_slots[curr_elem[0], curr_elem[1]][1] if curr_elem[1] in next_layer else 0)
 
                 from_arrow_x = curr_x_coord + vertex_width
                 from_arrow_y = vertex_coords[curr_imaginary_vertex][1] + vertex_height // 2
@@ -600,34 +641,34 @@ def graph_view_page(request):
                 edge_offset = len_after_start_arrow + curr_edge * (arrow_width + len_between_arrows)
 
                 if from_arrow_y == to_arrow_y:  # Если просто прямая стрелка
-                    all_edges += [(curr_elem+[1, from_arrow_x, from_arrow_y, dist_between_layers])]
+                    all_edges += [(curr_elem + [1, from_arrow_x, from_arrow_y, dist_between_layers])]
 
                 elif from_arrow_y > to_arrow_y:  # Если изгибающаяся стрелка вверх
-                    all_edges += [(curr_elem+[2, from_arrow_x,
-                                              from_arrow_y,
-                                              edge_offset + arrow_width,
+                    all_edges += [(curr_elem + [2, from_arrow_x,
+                                                from_arrow_y,
+                                                edge_offset,
 
-                                              from_arrow_x + edge_offset,
-                                              to_arrow_y,
-                                              from_arrow_y - to_arrow_y,
+                                                from_arrow_x + edge_offset,
+                                                to_arrow_y,
+                                                from_arrow_y - to_arrow_y + arrow_width,
 
-                                              from_arrow_x + edge_offset + arrow_width,
-                                              to_arrow_y,
-                                              dist_between_layers - edge_offset - arrow_width])]
+                                                from_arrow_x + edge_offset + arrow_width,
+                                                to_arrow_y,
+                                                dist_between_layers - edge_offset - arrow_width])]
                     curr_edge += 1
 
-                else: # Если изгибающаяся стрелка вниз
-                    all_edges += [(curr_elem+[3,from_arrow_x,
-                                              from_arrow_y,
-                                              edge_offset + arrow_width,
+                else:  # Если изгибающаяся стрелка вниз
+                    all_edges += [(curr_elem + [3, from_arrow_x,
+                                                from_arrow_y,
+                                                edge_offset,
 
-                                              from_arrow_x + edge_offset,
-                                              from_arrow_y + arrow_width,
-                                              to_arrow_y - from_arrow_y,
+                                                from_arrow_x + edge_offset,
+                                                from_arrow_y,
+                                                to_arrow_y - from_arrow_y + arrow_width,
 
-                                              from_arrow_x + edge_offset + arrow_width,
-                                              to_arrow_y,
-                                              dist_between_layers - edge_offset - arrow_width])]
+                                                from_arrow_x + edge_offset + arrow_width,
+                                                to_arrow_y,
+                                                dist_between_layers - edge_offset - arrow_width])]
                     curr_edge += 1
 
                 curr_imaginary_vertex -= 1
@@ -636,16 +677,22 @@ def graph_view_page(request):
             else:  # Если стрелка выходит из нормального элемента
 
                 vertex_coords[curr_elem][0] = curr_x_coord
-                vertex_coords[curr_elem][1] = len_between_vertices_in_layer * (start_height_in_layer + index_elem) - vertex_height // 2
+                vertex_coords[curr_elem][1] = margin_top_graph + len_between_vertices_in_layer * (
+                start_height_in_layer + index_elem) - vertex_height // 2
 
                 for to_vertex in forward_graph[curr_elem]:
 
                     to_arrow_x = next_layer_x
-                    to_arrow_y = len_between_vertices_in_layer * ((max_in_layers - len(next_layer)) // 2 + 1 + next_layer.index(to_vertex if to_vertex in next_layer else
-                                        [curr_elem, to_vertex])) + distance_between_slots * (edges_slots[curr_elem, to_vertex][1] if to_vertex in next_layer else 0)
+                    to_arrow_y = margin_top_graph + len_between_vertices_in_layer * (
+                    (max_in_layers - len(next_layer)) // 2 + next_layer.index(to_vertex if to_vertex in next_layer else
+                                                                              [curr_elem,
+                                                                               to_vertex])) + distance_between_slots * (
+                    edges_slots[curr_elem, to_vertex][1] if to_vertex in next_layer else 0)
 
                     from_arrow_x = curr_x_coord + vertex_width
-                    from_arrow_y = vertex_coords[curr_elem][1] + vertex_height // 2 + distance_between_slots * edges_slots[curr_elem, to_vertex][0]
+                    from_arrow_y = vertex_coords[curr_elem][1] + vertex_height // 2 + distance_between_slots * \
+                                                                                      edges_slots[curr_elem, to_vertex][
+                                                                                          0]
 
                     edge_offset = len_after_start_arrow + curr_edge * (arrow_width + len_between_arrows)
 
@@ -654,30 +701,30 @@ def graph_view_page(request):
 
                     elif from_arrow_y > to_arrow_y:  # Если изгибающаяся стрелка вверх
                         all_edges += [([curr_elem, to_vertex] + [2, from_arrow_x,
-                                                    from_arrow_y,
-                                                    edge_offset + arrow_width,
+                                                                 from_arrow_y,
+                                                                 edge_offset,
 
-                                                    from_arrow_x + edge_offset,
-                                                    to_arrow_y,
-                                                    from_arrow_y - to_arrow_y,
+                                                                 from_arrow_x + edge_offset,
+                                                                 to_arrow_y,
+                                                                 from_arrow_y - to_arrow_y + arrow_width,
 
-                                                    from_arrow_x + edge_offset + arrow_width,
-                                                    to_arrow_y,
-                                                    dist_between_layers - edge_offset - arrow_width])]
+                                                                 from_arrow_x + edge_offset + arrow_width,
+                                                                 to_arrow_y,
+                                                                 dist_between_layers - edge_offset - arrow_width])]
                         curr_edge += 1
 
                     else:  # Если изгибающаяся стрелка вниз
                         all_edges += [([curr_elem, to_vertex] + [3, from_arrow_x,
-                                                    from_arrow_y,
-                                                    edge_offset + arrow_width,
+                                                                 from_arrow_y,
+                                                                 edge_offset,
 
-                                                    from_arrow_x + edge_offset,
-                                                    from_arrow_y + arrow_width,
-                                                    to_arrow_y - from_arrow_y,
+                                                                 from_arrow_x + edge_offset,
+                                                                 from_arrow_y,
+                                                                 to_arrow_y - from_arrow_y + arrow_width,
 
-                                                    from_arrow_x + edge_offset + arrow_width,
-                                                    to_arrow_y,
-                                                    dist_between_layers - edge_offset - arrow_width])]
+                                                                 from_arrow_x + edge_offset + arrow_width,
+                                                                 to_arrow_y,
+                                                                 dist_between_layers - edge_offset - arrow_width])]
                         curr_edge += 1
 
         curr_x_coord = next_layer_x
@@ -686,7 +733,6 @@ def graph_view_page(request):
     pprint(vertex_coords)
     print('ALL EDGES COORDINATES')
     pprint(all_edges)
-
 
     vertex_coords = [[vertex_coords[i][0],vertex_coords[i][1]]+[i]+id_list[i] for i in vertex_coords]
 

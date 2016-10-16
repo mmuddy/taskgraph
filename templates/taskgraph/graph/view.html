@@ -58,7 +58,7 @@
         {% else %}
 
             <div class='line_horizontal' style="margin-left: {{edge.3}}px;margin-top: {{edge.4}}px;width: {{edge.5}}px;"></div>
-            <div class='line_vertical' style="margin-left: {{edge.6}}px;margin-top: {{edge.7}}px;height: {{edge.8}}px;"></div>
+            <div class='line_vertical {% if edge.2 == 2 %}up{% else %}down{% endif %}' style="margin-left: {{edge.6}}px;margin-top: {{edge.7}}px;height: {{edge.8}}px;"></div>
             <div class='arrow' style="margin-left: {{edge.9}}px;margin-top: {{edge.10}}px;width: {{edge.11}}px"></div>
 
         {% endif %}
