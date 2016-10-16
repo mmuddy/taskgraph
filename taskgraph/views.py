@@ -40,11 +40,13 @@ def graph_view_page(request):
         13: ['Task13', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
         14: ['Task14', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
         15: ['Task15', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
+        16: ['Task16', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
+        17: ['Task17', 'Task12 category', 'Task12 performer', 1, 'Unsolved'],
     }
 
     save_graph = {
         1: [2, 3, 4, 6],
-        2: [5, 6, 7, 8, 10, 11],
+        2: [5, 6, 7, 8, 10, 11, 15],
         3: [5, 6],
         4: [6],
         5: [7, 11],
@@ -58,6 +60,8 @@ def graph_view_page(request):
         13: [],
         14: [13],
         15: [14],
+        16: [15],
+        17: [16],
     }
 
     save_graph1 = {
@@ -67,7 +71,7 @@ def graph_view_page(request):
         4: [],
     }
 
-    ## TODO: проверить граф на цикличность?
+    # TODO: проверить граф на цикличность?
     # TODO: проверить граф на связность?
 
     graph = deepcopy(save_graph)
@@ -200,25 +204,63 @@ def graph_view_page(request):
 
     graph_height = len_between_vertices_in_layer * (max_in_layers + 1)
 
-
-
-
-
     #  Расставление разных слотов выхода и прихода рёбер в вершины
     edges_slots = {}
     max_slots = max(len(i) for i in [j for j in forward_graph.values()] + [j for j in backward_graph.values()])
-    range_slots = [-i for i in range(1,max_slots // 2 + 1)] + [0] + [i for i in range(1,max_slots // 2 + 1)]
+    range_slots = [-i for i in range(1, max_slots // 2 + 1)] + [0] + [i for i in range(1, max_slots // 2 + 1)]
     count_of_slots = len(range_slots)
 
-    edges_available_slots_forward  = {elem: [-i for i in range(1,max_slots // 2 + 1)] + [0] + [i for i in range(1,max_slots // 2 + 1)] for elem in graph}
-    edges_available_slots_backward = {elem: [-i for i in range(1,max_slots // 2 + 1)] + [0] + [i for i in range(1,max_slots // 2 + 1)] for elem in graph}
+    edges_available_slots_forward = {
+    elem: [-i for i in range(1, max_slots // 2 + 1)] + [0] + [i for i in range(1, max_slots // 2 + 1)] for elem in
+    graph}
+    edges_available_slots_backward = {
+    elem: [-i for i in range(1, max_slots // 2 + 1)] + [0] + [i for i in range(1, max_slots // 2 + 1)] for elem in
+    graph}
 
     for curr_layer, next_layer in zip(vertices_by_layers, vertices_by_layers[1:]):
+
         for curr_elem in curr_layer:
 
-            ## Сначала забиваем все прямые связи в нулевые слоты
+            ## Сначала забиваем все непрямые связи типа ( мнимая вершина - нормальная вершина ) в ненулевые слоты
 
-            if isinstance(curr_elem, list) and curr_elem not in next_layer:  # Если мнимый элемент соединяется с нормальным
+            if isinstance(curr_elem,
+                          list) and curr_elem not in next_layer:  # Если мнимый элемент соединяется с нормальным
+
+                index_to = (max_in_layers - len(next_layer)) // 2 + 1 + next_layer.index(curr_elem[1])
+                index_from = (max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(curr_elem)
+
+                if index_to < index_from:  # Стрелка поедет вверх
+                    # !!! Стрелка точно определена в edges_slots и имеет длину 1
+
+                    curr_slot = edges_available_slots_backward[curr_elem[1]]
+
+                    # Выбирается ближайший к нулевому слоту положительный кроме нуля, иначе ближайший к нулевому слоту отрицательный
+                    slot_number = curr_slot[-1] if all(i <= 0 for i in curr_slot) else [i for i in curr_slot if i > 0][
+                        0]
+
+                    print('%%%%%%%%', curr_elem, curr_slot)
+
+                    edges_slots[curr_elem[0], curr_elem[1]] += [slot_number]
+                    del curr_slot[curr_slot.index(slot_number)]
+
+                elif index_to > index_from:  # Стрелка идёт вниз
+                    # !!! Стрелка точно определена в edges_slots и имеет длину 1
+
+                    curr_slot = edges_available_slots_backward[curr_elem[1]]
+
+                    # Выбирается ближайший к нулевому слоту отрицательный, иначе ближайший к нулевому слоту положительный кроме нуля
+                    slot_number = (curr_slot[0] or curr_slot[1]) if all(i >= 0 for i in curr_slot) else \
+                    [i for i in curr_slot if i < 0][-1]
+
+                    edges_slots[curr_elem[0], curr_elem[1]] += [slot_number]
+                    del curr_slot[curr_slot.index(slot_number)]
+
+        for curr_elem in curr_layer:
+
+            ## Потом забиваем все прямые связи в нулевые слоты
+
+            if isinstance(curr_elem,
+                          list) and curr_elem not in next_layer:  # Если мнимый элемент соединяется с нормальным
 
                 index_to = (max_in_layers - len(next_layer)) // 2 + 1 + next_layer.index(curr_elem[1])
                 index_from = (max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(curr_elem)
@@ -233,7 +275,6 @@ def graph_view_page(request):
                     curr_slot = edges_available_slots_backward[curr_elem[1]]
                     del curr_slot[curr_slot.index(0)]
 
-
             elif isinstance(curr_elem, int):
 
                 for to_vertex in forward_graph[curr_elem]:
@@ -244,7 +285,6 @@ def graph_view_page(request):
                         index_from = (max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(curr_elem)
 
                         if index_to == index_from:
-
                             edges_slots[curr_elem, to_vertex] = [0]
                             curr_slot = edges_available_slots_forward[curr_elem]
                             del curr_slot[curr_slot.index(0)]
@@ -255,7 +295,6 @@ def graph_view_page(request):
                         index_from = (max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(curr_elem)
 
                         if index_to == index_from:
-
                             edges_slots[curr_elem, to_vertex] = [0, 0]
                             curr_slot = edges_available_slots_forward[curr_elem]
                             del curr_slot[curr_slot.index(0)]
@@ -266,33 +305,9 @@ def graph_view_page(request):
 
             ## Затем расставляем оставшиеся
 
-            if isinstance(curr_elem, list) and curr_elem not in next_layer:  # Если мнимый элемент соединяется с нормальным
-
-                index_to = (max_in_layers - len(next_layer)) // 2 + 1 + next_layer.index(curr_elem[1])
-                index_from = (max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(curr_elem)
-
-                if index_to < index_from:  # Стрелка поедет вверх
-                    # !!! Стрелка точно определена в edges_slots и имеет длину 1
-
-                    curr_slot = edges_available_slots_backward[curr_elem[1]]
-
-                    # Выбирается ближайший к нулевому слоту положительный, иначе ближайший к нулевому слоту отрицательный
-                    slot_number = curr_slot[-1] if all(i <= 0 for i in curr_slot) else [i for i in curr_slot if i > 0][0]
-
-                    edges_slots[curr_elem[0], curr_elem[1]] += [slot_number]
-                    del curr_slot[curr_slot.index(slot_number)]
-
-                elif index_to > index_from:  # Стрелка идёт вниз
-                    # !!! Стрелка точно определена в edges_slots и имеет длину 1
-
-                    curr_slot = edges_available_slots_backward[curr_elem[1]]
-
-                    # Выбирается ближайший к нулевому слоту отрицательный, иначе ближайший к нулевому слоту положительный
-                    slot_number = curr_slot[0] if all(i >= 0 for i in curr_slot) else [i for i in curr_slot if i < 0][-1]
-
-                    edges_slots[curr_elem[0], curr_elem[1]] += [slot_number]
-                    del curr_slot[curr_slot.index(slot_number)]
-
+            if isinstance(curr_elem,
+                          list) and curr_elem not in next_layer:  # Если мнимый элемент соединяется с нормальным
+                pass
 
             elif isinstance(curr_elem, int):
 
@@ -308,21 +323,24 @@ def graph_view_page(request):
 
                             curr_slot = edges_available_slots_forward[curr_elem]
 
-                            if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
+                            if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (
+                                max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
 
                                 right_vertex = next_layer[index_from - (max_in_layers - len(next_layer)) // 2 - 1]
 
                                 for candidate_slot in curr_slot:
 
-                                    if candidate_slot in edges_available_slots_backward[right_vertex] if isinstance(right_vertex, int) else candidate_slot != 0 or (
-                                            index_from < (max_in_layers-len(curr_layer))//2+1+curr_layer.index(right_vertex if right_vertex in curr_layer else right_vertex[0])):
-
-                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot, candidate_slot, right_vertex, index_to, index_from)
+                                    if candidate_slot in edges_available_slots_backward[right_vertex] if isinstance(
+                                            right_vertex, int) else candidate_slot != 0 or (
+                                                index_from < (
+                                                max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(
+                                                right_vertex if right_vertex in curr_layer else right_vertex[0])):
+                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot, candidate_slot,
+                                              right_vertex, index_to, index_from)
                                         slot_number = candidate_slot
                                         break
 
                                 else:
-                                    1
                                     # TODO: обработать очень редкую ситуацию, когда нельзя выйти ни из какого слота - всё приведёт к наложению стрелок
                                     # Здесь HOTFIX, чтобы хотя бы не падало
                                     slot_number = range_slots[-1] + 1
@@ -332,7 +350,8 @@ def graph_view_page(request):
                                         edges_slots[curr_elem, to_vertex] = [slot_number]
                                     continue
 
-                            else: slot_number = curr_slot[0]
+                            else:
+                                slot_number = curr_slot[0]
 
                             if (curr_elem, to_vertex) in edges_slots:
                                 edges_slots[curr_elem, to_vertex][0] = slot_number
@@ -346,15 +365,20 @@ def graph_view_page(request):
 
                             curr_slot = edges_available_slots_forward[curr_elem]
 
-                            if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
+                            if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (
+                                max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
 
                                 right_vertex = next_layer[index_from - (max_in_layers - len(next_layer)) // 2 - 1]
 
-                                for candidate_slot in [i for i in curr_slot if i > 0] or curr_slot[::-1]:
+                                for candidate_slot in [i for i in curr_slot if i > 0] + [i for i in curr_slot_from[::-1]
+                                                                                         if i <= 0]:
 
-                                    if candidate_slot in edges_available_slots_backward[right_vertex] if isinstance(right_vertex, int) else candidate_slot != 0 or (index_from < (
-                                                        max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(right_vertex if right_vertex in curr_layer else right_vertex[0])):
-                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot, candidate_slot,right_vertex, index_to, index_from)
+                                    if candidate_slot in edges_available_slots_backward[right_vertex] if isinstance(
+                                            right_vertex, int) else candidate_slot != 0 or (index_from < (
+                                                max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(
+                                        right_vertex if right_vertex in curr_layer else right_vertex[0])):
+                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot, candidate_slot,
+                                              right_vertex, index_to, index_from)
                                         slot_number = candidate_slot
                                         break
 
@@ -368,7 +392,8 @@ def graph_view_page(request):
                                         edges_slots[curr_elem, to_vertex] = [slot_number]
                                     continue
 
-                            else: slot_number = curr_slot_from[0]
+                            else:
+                                slot_number = curr_slot[0]
 
                             if (curr_elem, to_vertex) in edges_slots:
                                 edges_slots[curr_elem, to_vertex][0] = slot_number
@@ -388,34 +413,41 @@ def graph_view_page(request):
                             curr_slot_from = edges_available_slots_forward[curr_elem]
                             curr_slot_to = edges_available_slots_backward[to_vertex]
 
-                            #slot_number_from = curr_slot_from[0]
+                            # slot_number_from = curr_slot_from[0]
 
-                            #print('!!!',  curr_layer, curr_elem, to_vertex, (max_in_layers - len(next_layer)) // 2 + len(next_layer),index_from, (max_in_layers - len(next_layer)) // 2 + 1)
+                            # print('!!!',  curr_layer, curr_elem, to_vertex, (max_in_layers - len(next_layer)) // 2 + len(next_layer),index_from, (max_in_layers - len(next_layer)) // 2 + 1)
 
-                            if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
+                            if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (
+                                max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
 
                                 right_vertex = next_layer[index_from - (max_in_layers - len(next_layer)) // 2 - 1]
 
                                 for candidate_slot in curr_slot_from:
 
-                                    if candidate_slot in edges_available_slots_backward[right_vertex] if isinstance(right_vertex, int) else candidate_slot != 0 or (
-                                            index_from < (max_in_layers-len(curr_layer))//2+1+curr_layer.index(right_vertex if right_vertex in curr_layer else right_vertex[0])):
-
-                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot_from, candidate_slot, right_vertex, index_to, index_from)
+                                    if candidate_slot in edges_available_slots_backward[right_vertex] if isinstance(
+                                            right_vertex, int) else candidate_slot != 0 or (
+                                                index_from < (
+                                                max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(
+                                                right_vertex if right_vertex in curr_layer else right_vertex[0])):
+                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot_from, candidate_slot,
+                                              right_vertex, index_to, index_from)
                                         slot_number_from = candidate_slot
                                         break
 
                                 else:
                                     # TODO: обработать очень редкую ситуацию, когда нельзя выйти ни из какого слота - всё приведёт к наложению стрелок
                                     # Здесь HOTFIX, чтобы хотя бы не падало
-                                    slot_number_to = curr_slot_to[-1] if all(i <= 0 for i in curr_slot_to) else [i for i in curr_slot_to if i > 0][0]
+                                    slot_number_to = curr_slot_to[-1] if all(i <= 0 for i in curr_slot_to) else \
+                                    [i for i in curr_slot_to if i > 0][0]
                                     edges_slots[curr_elem, to_vertex] = [range_slots[-1] + 1, slot_number_to]
                                     continue
 
-                            else: slot_number_from = curr_slot_from[0]
+                            else:
+                                slot_number_from = curr_slot_from[0]
 
                             # Выбирается ближайший к нулевому слоту положительный, иначе ближайший к нулевому слоту отрицательный
-                            slot_number_to = curr_slot_to[-1] if all(i <= 0 for i in curr_slot_to) else [i for i in curr_slot_to if i > 0][0]
+                            slot_number_to = curr_slot_to[-1] if all(i <= 0 for i in curr_slot_to) else \
+                            [i for i in curr_slot_to if i > 0][0]
 
                             edges_slots[curr_elem, to_vertex] = [slot_number_from, slot_number_to]
 
@@ -429,35 +461,44 @@ def graph_view_page(request):
                             curr_slot_from = edges_available_slots_forward[curr_elem]
                             curr_slot_to = edges_available_slots_backward[to_vertex]
 
-                            if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
+                            if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (
+                                max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
 
                                 right_vertex = next_layer[index_from - (max_in_layers - len(next_layer)) // 2 - 1]
 
-                                for candidate_slot in [i for i in curr_slot_from if i > 0] or curr_slot_from[::-1]:
+                                for candidate_slot in [i for i in curr_slot_from if i > 0] + [i for i in
+                                                                                              curr_slot_from[::-1] if
+                                                                                              i <= 0]:
 
-                                    if candidate_slot in edges_available_slots_backward[right_vertex] if isinstance(right_vertex, int) else candidate_slot != 0 or (index_from < (
-                                                        max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(right_vertex if right_vertex in curr_layer else right_vertex[0])):
-                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot_from, candidate_slot,right_vertex, index_to, index_from)
+                                    if candidate_slot in edges_available_slots_backward[right_vertex] if isinstance(
+                                            right_vertex, int) else candidate_slot != 0 or (index_from < (
+                                                max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(
+                                        right_vertex if right_vertex in curr_layer else right_vertex[0])):
+                                        print('###', curr_layer, curr_elem, to_vertex, curr_slot_from, candidate_slot,
+                                              right_vertex, index_to, index_from)
                                         slot_number_from = candidate_slot
                                         break
 
                                 else:
                                     # TODO: обработать очень редкую ситуацию, когда нельзя выйти ни из какого слота - всё приведёт к наолжению стрелок
                                     # Здесь HOTFIX, чтобы хотя бы не падало
-                                    slot_number_to = curr_slot_to[0] if all(i >= 0 for i in curr_slot_to) else [i for i in curr_slot_to if i < 0][-1]
+                                    slot_number_to = curr_slot_to[0] if all(i >= 0 for i in curr_slot_to) else \
+                                    [i for i in curr_slot_to if i < 0][-1]
                                     edges_slots[curr_elem, to_vertex] = [range_slots[-1] + 1, slot_number_to]
+                                    print('TAAAAAAASK !^^^^^^^^^^^^^', curr_slot_from,
+                                          edges_available_slots_backward[right_vertex])
                                     continue
                             else:
                                 slot_number_from = curr_slot_from[0]
 
                             # Выбирается ближайший к нулевому слоту отрицательный, иначе ближайший к нулевому слоту положительный
-                            slot_number_to = curr_slot_to[0] if all(i >= 0 for i in curr_slot_to) else [i for i in curr_slot_to if i < 0][-1]
+                            slot_number_to = curr_slot_to[0] if all(i >= 0 for i in curr_slot_to) else \
+                            [i for i in curr_slot_to if i < 0][-1]
 
                             edges_slots[curr_elem, to_vertex] = [slot_number_from, slot_number_to]
 
                             del curr_slot_from[curr_slot_from.index(slot_number_from)]
                             del curr_slot_to[curr_slot_to.index(slot_number_to)]
-
 
         # Корректируем (Там, где всего одна стрелка и она не на середине, ставим её на середину)
 
@@ -469,7 +510,17 @@ def graph_view_page(request):
 
                 if len(unused_forward_slots) == count_of_slots - 1 and 0 in unused_forward_slots:
 
-                    edges_slots[curr_elem, forward_graph[curr_elem][0]][0] = 0
+                    index_from = (max_in_layers - len(curr_layer)) // 2 + 1 + curr_layer.index(curr_elem)
+
+                    if (max_in_layers - len(next_layer)) // 2 + len(next_layer) >= index_from >= (
+                        max_in_layers - len(next_layer)) // 2 + 1:  # Если справа есть вершина
+
+                        right_vertex = next_layer[index_from - (max_in_layers - len(next_layer)) // 2 - 1]
+
+                        if isinstance(right_vertex, int) and 0 in edges_available_slots_backward[right_vertex]:
+                            edges_slots[curr_elem, forward_graph[curr_elem][0]][0] = 0
+                    else:
+                        edges_slots[curr_elem, forward_graph[curr_elem][0]][0] = 0
 
         for curr_elem in next_layer:
 
@@ -478,14 +529,7 @@ def graph_view_page(request):
                 unused_backward_slots = edges_available_slots_backward[curr_elem]
 
                 if len(unused_backward_slots) == count_of_slots - 1 and 0 in unused_backward_slots:
-
                     edges_slots[backward_graph[curr_elem][0], curr_elem][1] = 0
-
-
-
-
-
-
 
     print('USED SLOTS')
     pprint(edges_slots)
@@ -538,7 +582,7 @@ def graph_view_page(request):
 
         dist_between_layers = next_layer_x - curr_x_coord - vertex_width - len_css_triangle
 
-        for index_elem, curr_elem in enumerate(curr_layer):
+        for index_elem, curr_elem in [(i, j) for i, j in enumerate(curr_layer) if isinstance(j, list)] + [(i, j) for i, j in enumerate(curr_layer) if isinstance(j, int)]:
 
             if isinstance(curr_elem, list):  # Если стрелка выходит из мнимого элемента
 
