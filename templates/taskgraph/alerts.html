@@ -1,0 +1,9 @@
+{% if alerts %}
+    {% for alert in alerts %}
+        <div class="container {{ alert.css_container_class }}">
+        <div class="alert {{ alert.css_class }}">
+            <strong>{{ alert.name }}!</strong> {{ alert.message }}
+        </div>
+        </div>
+    {% endfor %}
+{% endif %}
