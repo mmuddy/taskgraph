@@ -1,0 +1,25 @@
+{% extends 'taskgraph/profile/trackers.html' %}
+
+{% load staticfiles %}
+
+{% block content_block %}
+
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <form action="{% url 'trackers-edit' tracker_hash %}"
+              method="post" class="form-signin" role="form">
+            {% csrf_token %}
+            <h2 class="form-signin-heading">Edit task tracker connection information</h2>
+            <label for="url">Server address</label>
+            <input name="url" id="url" type="url" class="form-control"
+                   placeholder="Server address" required autofocus value="{{ tracker_url }}">
+            <label for="login">Login</label>
+            <input name="login" id="login" type="email" class="form-control"
+                   placeholder="Login" required autofocus value="{{ tracker_login }}">
+            <label for="password">Password</label>
+            <input name="password" id="password" type="password" class="form-control"
+                   placeholder="Password" required value="{{ tracker_password }}">
+            <input type="submit" class="btn btn-lg btn-default" value="Edit">
+        </form>
+    </div>
+
+{% endblock %}

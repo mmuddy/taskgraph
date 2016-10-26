@@ -1,4 +1,4 @@
-{% extends 'taskgraph/base.html' %}
+{% extends 'taskgraph/profile/trackers.html' %}
 
 {% load staticfiles %}
 
@@ -13,104 +13,50 @@
     </ul>
 {% endblock %}
 
-{% block body_block %}
+{% block content_block %}
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-3 col-md-2 sidebar">
-                <ul class="nav nav-sidebar">
-                    <li class="active"><a href="{% url 'trackers-list' %}">All <span class="sr-only">(current)</span></a></li> <!--  -->
-                    <li ><a href="{% url 'trackers-add' %}">New <span class="sr-only">(current)</span></a></li>
-                </ul>
-            </div>
-        </div>
+
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
                     <tr>
-                        <th></th>
                         <th>Tracker</th>
                         <th>Url</th>
                         <th>Username</th>
+                        <th></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr class="rowlink">
+                    {% for tracker in tracker_list %}
+                    <tr>
+                        <td>{{ tracker.type }}</td>
+                        <td>{{ tracker.url }}</td>
+                        <td>{{ tracker.user_name }}</td>
+
                         <td>
-                            <div class="dropdown">
-                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <div class="dropdown btn-group">
+                                <a class="dropdown-toggle btn btn-lg btn-default" data-toggle="dropdown" href="#">
                                     Action
                                 </a>
                                 <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
                                     <li>
-                                        <a tabindex="-1" href="#">
+                                        <a tabindex="-1"
+                                           href={% url 'trackers-delete' tracker.hash %}>
                                             Delete
                                         </a>
                                     </li>
                                     <li>
-                                        <a tabindex="-1" href="#">
+                                        <a tabindex="-1"
+                                           href={% url 'trackers-edit' tracker.hash %}>
                                             Edit
                                         </a>
                                     </li>
                                 </ul>
                             </div>
                         </td>
-
-                        <td>Redmine</td>
-                        <td>https://some.super.address/</td>
-                        <td>user</td>
                     </tr>
-                    <tr class="rowlink">
-                        <td>
-                            <div class="dropdown">
-                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                    Action
-                                </a>
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                    <li>
-                                        <a tabindex="-1" href="#">
-                                            Delete
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a tabindex="-1" href="#">
-                                            Edit
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-
-                        <td>Redmine</td>
-                        <td>https://some.super.address2/</td>
-                        <td>user2</td>
-                    </tr>
-                    <tr class="rowlink">
-                        <td>
-                            <div class="dropdown">
-                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                    Action
-                                </a>
-                                <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
-                                    <li>
-                                        <a tabindex="-1" href="#">
-                                            Delete
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a tabindex="-1" href="#">
-                                            Edit
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-
-                        <td>Redmine</td>
-                        <td>https://some.super.address3/</td>
-                        <td>user3</td>
-                    </tr>
-                    <tr></tr>
+                    {% endfor %}
                     </tbody>
                 </table>
             </div>

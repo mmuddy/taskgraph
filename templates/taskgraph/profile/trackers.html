@@ -14,14 +14,34 @@
 {% endblock %}
 
 {% block body_block %}
+
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li><a href="{% url 'trackers-list' %}">All</a></li> <!-- <span class="sr-only">(current)</span> -->
-            <li><a href="{% url 'trackers-add' %}">New</a></li>
+            {% for sub_menu_item in sub_menu %}
+            {% autoescape off %}
+            <li {{ sub_menu_item.css_class }}>
+            {% endautoescape %}
+            {% if sub_menu_item.url%}
+                <a href="{% url sub_menu_item.url %}">
+            {% else %}
+                <a href="#">
+            {% endif %}
+            {{ sub_menu_item.name }}
+            {% if sub_menu_item.active %}
+                <span class="sr-only">(current)</span>
+            {% endif %}
+            </a></li>
+            {% endfor %}
           </ul>
         </div>
        </div>
     </div>
+
+    {% include 'taskgraph/alerts.html' %}
+
+    {% block content_block %}
+    {% endblock %}
+
 {% endblock %}

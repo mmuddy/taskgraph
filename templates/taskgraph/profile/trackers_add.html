@@ -1,36 +1,18 @@
-{% extends 'taskgraph/base.html' %}
+{% extends 'taskgraph/profile/trackers.html' %}
 
 {% load staticfiles %}
 
-{% block title_block %}
-    Trackers
-{% endblock %}
+{% block content_block %}
 
-{% block navbar_list_block %}
-    <ul class="nav navbar-nav">
-        <li class="nav-item active"><a href="{% url 'trackers'%}">Trackers</a>
-        </li>
-    </ul>
-{% endblock %}
-
-{% block body_block %}
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-3 col-md-2 sidebar">
-                <ul class="nav nav-sidebar">
-                    <li ><a href="{% url 'trackers-list' %}">All</a></li> <!-- <span class="sr-only">(current)</span> -->
-                    <li class="active"><a href="{% url 'trackers-add' %}">New <span class="sr-only">(current)</span></a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        <form class="form-signin" role="form">
-            <h2 class="form-signin-heading">Please sign in</h2>
-            <input type="url" class="form-control" placeholder="Server address" required autofocus>
-            <input type="email" class="form-control" placeholder="Login" required autofocus>
-            <input type="password" class="form-control" placeholder="Password" required>
-            <a href="{%  url 'trackers-list' %}" class="btn btn-lg btn-default">Add</a>
+        <form action="{% url 'trackers-add' %}" method="post" class="form-signin" role="form">
+            {% csrf_token %}
+            <h2 class="form-signin-heading">Add new task tracker</h2>
+            <input name="url" type="url" class="form-control" placeholder="Server address" required autofocus>
+            <input name="login" type="email" class="form-control" placeholder="Login" required autofocus>
+            <input name="password" type="password" class="form-control" placeholder="Password" required>
+            <input type="submit" class="btn btn-lg btn-default" value="Add">
         </form>
     </div>
+
 {% endblock %}
