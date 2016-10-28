@@ -19,9 +19,6 @@ def projects_page(request):
     context = {'is_user_active': True,
                'contains_menu': True}
 
-    for tracker in Tracker.objects.all():
-        tracker.restore_project_list(get_interface(tracker.type))
-
     Project.objects.all()
 
     return render(request, 'taskgraph/graph/projects.html', context)
