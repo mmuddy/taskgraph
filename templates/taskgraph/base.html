@@ -20,6 +20,10 @@
     <!-- Custom styles for this template -->
     <link href="{% static "css/base.css" %}" rel="stylesheet">
 
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://cpettitt.github.io/project/dagre/latest/dagre.min.js"></script>
+    <script src="http://cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
+
     <style>
         .vertex{
             position: absolute;
@@ -101,6 +105,23 @@
             height: 2px;
             background-color: #8a62c8;
         }
+
+
+
+        .node rect {
+		  stroke: #333;
+		  fill: #fff;
+		}
+
+		.edgePath path {
+		  stroke: #333;
+		  fill: #333;
+		  stroke-width: 1.5px;
+		}
+
+
+
+
     </style>
 
 </head>
