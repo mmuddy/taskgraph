@@ -1,4 +1,4 @@
-from taskgraph.tasktracker.abstract import TrackerInterface, Action, Project
+from taskgraph.tasktracker.abstract import TrackerInterface, Project
 from redmine import Redmine, ForbiddenError
 
 
@@ -57,12 +57,19 @@ class IRedmine(TrackerInterface):
 
             if hasattr(project, 'parent_id') and project.parent_id != -1:
                 parent_id_by_child[project.identifier] = project.parent_id
-            """self.categories_by_project[project.identifier] = {}
-            category = self.categories_by_project[project.identifier]
-            for issue_status in self.redmine.issue_category.filter(project_id=project.identifier):
-                category[issue_status.id] = issue_status.name"""
 
-            meta = Project.Meta(assignee, None, self.relation_args, task_states=self.states_args)
+            self.categories_by_project[project.identifier] = {}
+            category = self.categories_by_project[project.identifier]
+            categories = []
+
+            try:
+                for issue_status in self.redmine.issue_category.filter(project_id=project.identifier):
+                    category[issue_status.id] = issue_status.name
+                    categories.append({'name': issue_status.name})
+            except ForbiddenError:
+                categories = None
+
+            meta = Project.Meta(assignee, categories, self.relation_args, task_states=self.states_args)
 
             project_list.append(Project(name=project.name, identifier=project.identifier,
                                         description=project.description, meta=meta, child_id_list=[]))
@@ -106,18 +113,16 @@ class IRedmine(TrackerInterface):
                 additional_fields.append({'name': 'due_date', 'type': 'DateField', 'date': task.due_date})
 
             related_tasks = []
+            task_list.append((new_task, additional_fields, related_tasks))
 
             if not member:
-                task_list.append((new_task, additional_fields, related_tasks))
                 continue
 
             try:
                 for relation in self.redmine.issue_relation.filter(issue_id=task.id):
                     related_tasks.append((relation.issue_to_id, relation.relation_type))
             except ForbiddenError:
-                related_tasks = None
-
-            task_list.append((new_task, additional_fields, related_tasks))
+                pass
 
         return task_list
 
