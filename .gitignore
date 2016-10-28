@@ -92,3 +92,4 @@ ENV/
 
 taskgraph/migrations/
 taskgraph/migrations/*
+db.*
