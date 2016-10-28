@@ -112,7 +112,7 @@ class Project(models.Model):
             rel.delete()
 
         for task, _, task_children in tasks:
-            for child_id, rel_type in task_children:
+            for child_id, rel_type in task_children or []:
                 self._create_relation(task['identifier'], child_id, rel_type)
 
     def _restore_meta(self, cls_model, new_model_data, old_model_set):
@@ -134,43 +134,30 @@ class Project(models.Model):
 
     def _create_task(self, regular_fields, additional_fields):
 
-        if regular_fields.get('milestone'):
-            regular_fields['milestone'] = self.milestone_set.get(name__exact=regular_fields['milestone'])
-        else:
-            regular_fields['milestone'] = Milestone.objects.get_or_create(project=self, name='__NONE')[0]
-
-        if regular_fields.get('assignee'):
-            requested = self.assignee_set.filter(name__exact=regular_fields['assignee'])
-            if requested.count():
-                regular_fields['assignee'] = requested[0]
-            else:
-                blocked = Assignee.objects.create(project=self, name=regular_fields['assignee'], active=False)
-                regular_fields['assignee'] = blocked
-        else:
-            regular_fields['assignee'] = Assignee.objects.get_or_create(project=self, name='__NONE')[0]
-
-        if regular_fields.get('category'):
-            requested = self.taskcategory_set.filter(name__exact=regular_fields['category'])
-            if requested.count():
-                regular_fields['category'] = requested[0]
-            else:
-                regular_fields['category'] = TaskCategory.objects.get_or_create(project=self, name='__NONE')[0]
-        else:
-            regular_fields['category'] = TaskCategory.objects.get_or_create(project=self, name='__NONE')[0]
-
-        if regular_fields.get('state'):
-            regular_fields['state'] = self.taskstate_set.get(name__exact=regular_fields['state'])
-        else:
-            regular_fields['state'] = TaskState.objects.get_or_create(project=self, name='__NONE')[0]
+        regular_fields['milestone'] = self._register_regular(regular_fields.get('milestone'), Milestone)
+        regular_fields['assignee'] = self._register_regular(regular_fields.get('assignee'), Assignee)
+        regular_fields['category'] = self._register_regular(regular_fields.get('category'), TaskCategory)
+        regular_fields['state'] = self._register_regular(regular_fields.get('state'), TaskState)
+        regular_fields['milestone'] = self._register_regular(regular_fields.get('milestone'), Milestone)
 
         new_task = Task.objects.create(project=self, **regular_fields)
 
         additional_fields = additional_fields or [{}]
         for kwargs in additional_fields:
             if kwargs:
-                TaskAdditionalField(project=self, task=new_task, **kwargs).save()
+                TaskAdditionalField.objects.create(project=self, task=new_task, **kwargs)
 
         return new_task
+
+    def _register_regular(self, value, field_type):
+        if value:
+            requested = field_type.objects.filter(project=self, name__exact=value)
+            if requested.count() == 1:
+                return requested[0]
+            else:
+                return field_type.objects.create(project=self, name=value, active=False)
+        else:
+            return field_type.objects.get_or_create(project=self, name='__NONE')[0]
 
 
 class ProjectRelation(models.Model):
@@ -190,7 +177,8 @@ class Milestone(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
-    date = models.DateField(default=date(year=1968, month=1, day=1))
+    date = models.DateField(default=date(year=1, month=1, day=1))
+    active = models.BooleanField(default=True)
 
 
 class Assignee(models.Model):
@@ -210,6 +198,7 @@ class TaskCategory(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
+    active = models.BooleanField(default=True)
 
 
 class TaskState(models.Model):
@@ -219,6 +208,7 @@ class TaskState(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
+    active = models.BooleanField(default=True)
 
 
 class TaskRelationType(models.Model):
@@ -228,6 +218,7 @@ class TaskRelationType(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
+    active = models.BooleanField(default=True)
 
 
 class Task(models.Model):
@@ -241,6 +232,10 @@ class Task(models.Model):
     milestone = models.ForeignKey(Milestone)
     category = models.ForeignKey(TaskCategory)
     state = models.ForeignKey(TaskState)
+
+    def __str__(self):
+        return 'pid:{} id:{} {} {} {} {}'.format(self.project.identifier, self.identifier, self.assignee,
+                                                 self.milestone, self.category, self.state)
 
 
 class TaskAdditionalField(models.Model):
