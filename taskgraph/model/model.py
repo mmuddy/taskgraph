@@ -248,7 +248,7 @@ class TaskAdditionalField(models.Model):
     type = models.CharField(max_length=255, choices=type_choices)
     char = models.CharField(max_length=255, default='')
     text = models.TextField(default='')
-    date = models.DateField(default=date(year=1968, month=1, day=1))
+    date = models.DateField(default=date(year=1, month=1, day=1))
 
 
 class TaskRelation(models.Model):
