@@ -28,3 +28,9 @@ def graph_view_page(request):
     context = {'is_user_active': True,
                'contains_menu': True}
     return render(request, 'taskgraph/graph/view.html', context)
+
+
+def task_edit_page(request):
+    context = {'is_user_active': True,
+               'contains_menu': True}
+    return render(request, 'taskgraph/graph/task_edit.html', context)
