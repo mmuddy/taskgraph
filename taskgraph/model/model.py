@@ -104,7 +104,6 @@ class Project(models.Model):
     def restore_project_tasks(self, i_tracker):
         for task in self.task_set.all():
             task.delete()
-
         tasks = i_tracker.get_tasks(self.identifier)
         for task, additional, task_children in tasks:
             self._create_task(task, additional).save()
@@ -124,7 +123,8 @@ class Project(models.Model):
             deprecated_model.delete()
 
         for new_model in new_model_data:
-            cls_model.objects.get_or_create(**new_model, project=self)
+            if new_model:
+                cls_model.objects.get_or_create(**new_model, project=self)
 
     def _create_relation(self, parent_id, child_id, rel_type_name):
         rel_type = self.taskrelationtype_set.get(name__exact=rel_type_name)
@@ -133,30 +133,39 @@ class Project(models.Model):
         TaskRelation.objects.create(project=self, from_task=parent, to_task=child, type=rel_type)
 
     def _create_task(self, regular_fields, additional_fields):
+
         if regular_fields.get('milestone'):
             regular_fields['milestone'] = self.milestone_set.get(name__exact=regular_fields['milestone'])
         else:
-            regular_fields['milestone'] = Milestone.objects.get_or_create(project=self)
+            regular_fields['milestone'] = Milestone.objects.get_or_create(project=self, name='__NONE')[0]
 
         if regular_fields.get('assignee'):
-            print(regular_fields['assignee'])
-            regular_fields['assignee'] = self.assignee_set.get(name__exact=regular_fields['assignee'])
+            requested = self.assignee_set.filter(name__exact=regular_fields['assignee'])
+            if requested.count():
+                regular_fields['assignee'] = requested[0]
+            else:
+                blocked = Assignee.objects.create(project=self, name=regular_fields['assignee'], active=False)
+                regular_fields['assignee'] = blocked
         else:
-            regular_fields['assignee'] = Assignee.objects.get_or_create(project=self)
+            regular_fields['assignee'] = Assignee.objects.get_or_create(project=self, name='__NONE')[0]
 
         if regular_fields.get('category'):
-            regular_fields['category'] = self.taskcategory_set.get(name__exact=regular_fields['category'])
+            requested = self.taskcategory_set.filter(name__exact=regular_fields['category'])
+            if requested.count():
+                regular_fields['category'] = requested[0]
+            else:
+                regular_fields['category'] = TaskCategory.objects.get_or_create(project=self, name='__NONE')[0]
         else:
-            regular_fields['category'] = TaskCategory.objects.get_or_create(project=self)
+            regular_fields['category'] = TaskCategory.objects.get_or_create(project=self, name='__NONE')[0]
 
         if regular_fields.get('state'):
             regular_fields['state'] = self.taskstate_set.get(name__exact=regular_fields['state'])
         else:
-            regular_fields['state'] = TaskState.objects.get_or_create(project=self)
+            regular_fields['state'] = TaskState.objects.get_or_create(project=self, name='__NONE')[0]
 
         new_task = Task.objects.create(project=self, **regular_fields)
 
-        additional_fields = additional_fields or []
+        additional_fields = additional_fields or [{}]
         for kwargs in additional_fields:
             if kwargs:
                 TaskAdditionalField(project=self, task=new_task, **kwargs).save()
@@ -191,6 +200,7 @@ class Assignee(models.Model):
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
+    active = models.BooleanField(default=True)
 
 
 class TaskCategory(models.Model):
