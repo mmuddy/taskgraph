@@ -24,264 +24,96 @@
 
 {% block body_block %}
 
-    <svg width=960 height=600><g/></svg>
-
-    <script id="js">
-
-        var svg = d3.select("svg"), inner = svg.select("g");
-        var zoom = d3.behavior.zoom().on("zoom", function() {
-	      inner.attr("transform", "translate(" + d3.event.translate + ")" +
-	                                  "scale(" + d3.event.scale + ")");
-	    });
-        svg.call(zoom);
-
-        var g = new dagre.graphlib.Graph();
-
-        g.setGraph({
-            nodesep: 70,
-            ranksep: 50,
-            rankdir: "LR",
-            marginx: 20,
-            marginy: 100,
-        });
-
-         g.setDefaultEdgeLabel(function() { return {
-          lineInterpolate: 'basis'
-        }; });
-
-        {% for i in info %}
-            g.setNode({{ i.0 }}, { label : " {{ i.1 }} " });
-        {% endfor %}
-
-        {% for i in all_edges %}
-           g.setEdge({{ i.0 }}, {{ i.1 }});
-        {% endfor %}
-
-        g.nodes().forEach(function(v) {
-          var node = g.node(v);
-          node.rx = node.ry = 5;
-        });
-
-        var render = new dagreD3.render();
-        render(inner, g);
-    </script>
-
-<!--
-    <div class='vertex solved' style="margin-left: 50px;margin-top: 183px"
-         onmouseover="document.getElementById('Task1').style.display = 'block'"
-         onmouseout="document.getElementById('Task1').style.display = 'none'">Task1</div>
-
-    <div class='vertex solved' style="margin-left: 176px;margin-top: 83px"
-         onmouseover="document.getElementById('Task2').style.display = 'block'"
-         onmouseout="document.getElementById('Task2').style.display = 'none'">Task2</div>
-    <div class='vertex solved' style="margin-left: 176px;margin-top: 183px"
-         onmouseover="document.getElementById('Task3').style.display = 'block'"
-         onmouseout="document.getElementById('Task3').style.display = 'none'">Task3</div>
-    <div class='vertex solved' style="margin-left: 176px;margin-top: 283px"
-         onmouseover="document.getElementById('Task4').style.display = 'block'"
-         onmouseout="document.getElementById('Task4').style.display = 'none'">Task4</div>
-
-    <div class='vertex' style="margin-left: 306px;margin-top: 83px"
-         onmouseover="document.getElementById('Task5').style.display = 'block'"
-         onmouseout="document.getElementById('Task5').style.display = 'none'">Task5</div>
-    <div class='vertex solved' style="margin-left: 306px;margin-top: 183px"
-         onmouseover="document.getElementById('Task6').style.display = 'block'"
-         onmouseout="document.getElementById('Task6').style.display = 'none'">Task6</div>
-
-    <div class='vertex' style="margin-left: 428px;margin-top: 83px"
-         onmouseover="document.getElementById('Task7').style.display = 'block'"
-         onmouseout="document.getElementById('Task7').style.display = 'none'">Task7</div>
-    <div class='vertex' style="margin-left: 428px;margin-top: 183px"
-         onmouseover="document.getElementById('Task8').style.display = 'block'"
-         onmouseout="document.getElementById('Task8').style.display = 'none'">Task8</div>
-
-    <div class='vertex' style="margin-left: 554px;margin-top: 83px"
-         onmouseover="document.getElementById('Task9').style.display = 'block'"
-         onmouseout="document.getElementById('Task9').style.display = 'none'">Task9</div>
-    <div class='vertex' style="margin-left: 554px;margin-top: 183px"
-         onmouseover="document.getElementById('Task10').style.display = 'block'"
-         onmouseout="document.getElementById('Task10').style.display = 'none'">Task10</div>
-    <div class='vertex' style="margin-left: 554px;margin-top: 283px"
-         onmouseover="document.getElementById('Task11').style.display = 'block'"
-         onmouseout="document.getElementById('Task11').style.display = 'none'">Task11</div>
-
-    <div class='vertex' style="margin-left: 680px;margin-top: 183px"
-         onmouseover="document.getElementById('Task12').style.display = 'block'"
-         onmouseout="document.getElementById('Task12').style.display = 'none'">Task12</div>
-
-
-
-
-
-    <div class='line_horizontal' style="margin-left: 124px;margin-top: 190px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 150px;margin-top: 100px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 152px;margin-top: 100px;width: 10px"></div>
-
-    <div class='arrow' style="margin-left: 124px;margin-top: 200px;width: 38px"></div>
-
-    <div class='line_horizontal' style="margin-left: 124px;margin-top: 210px;width: 32px;"></div>
-    <div class='line_vertical' style="margin-left: 154px;margin-top: 212px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 156px;margin-top: 300px;width: 6px"></div>
-
-
-
-
-    <div class='arrow' style="margin-left: 250px;margin-top: 90px;width: 42px"></div>
-
-    <div class='line_horizontal' style="margin-left: 250px;margin-top: 100px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 276px;margin-top: 102px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 278px;margin-top: 190px;width: 14px"></div>
-
-    <div class='line_horizontal' style="margin-left: 250px;margin-top: 200px;width: 32px;"></div>
-    <div class='line_vertical' style="margin-left: 280px;margin-top: 100px;height: 100px;"></div>
-    <div class='arrow' style="margin-left: 282px;margin-top: 100px;width: 10px"></div>
-
-    <div class='arrow' style="margin-left: 250px;margin-top: 210px;width: 42px"></div>
-
-    <div class='line_horizontal' style="margin-left: 250px;margin-top: 300px;width: 36px;"></div>
-    <div class='line_vertical' style="margin-left: 284px;margin-top: 200px;height: 100px;"></div>
-    <div class='arrow' style="margin-left: 286px;margin-top: 200px;width: 6px"></div>
-
-
-
-
-    <div class='arrow' style="margin-left: 380px;margin-top: 100px;width: 34px"></div>
-
-    <div class='line_horizontal' style="margin-left: 380px;margin-top: 200px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 406px;margin-top: 110px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 408px;margin-top: 110px;width: 6px"></div>
-
-    <div class='arrow' style="margin-left: 380px;margin-top: 210px;width: 34px"></div>
-
-
-
-
-
-    <div class='arrow' style="margin-left: 502px;margin-top: 100px;width: 38px"></div>
-
-    <div class='line_horizontal' style="margin-left: 502px;margin-top: 110px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 528px;margin-top: 112px;height: 80px;"></div>
-    <div class='arrow' style="margin-left: 530px;margin-top: 190px;width: 10px"></div>
-
-    <div class='arrow' style="margin-left: 502px;margin-top: 200px;width: 38px"></div>
-
-    <div class='line_horizontal' style="margin-left: 502px;margin-top: 210px;width: 32px;"></div>
-    <div class='line_vertical' style="margin-left: 532px;margin-top: 212px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 534px;margin-top: 300px;width: 6px"></div>
-
-
-
-
-
-    <div class='line_horizontal' style="margin-left: 628px;margin-top: 100px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 654px;margin-top: 102px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 656px;margin-top: 190px;width: 10px"></div>
-
-    <div class='arrow' style="margin-left: 628px;margin-top: 200px;width: 38px"></div>
-
-    <div class='line_horizontal' style="margin-left: 628px;margin-top: 300px;width: 32px;"></div>
-    <div class='line_vertical' style="margin-left: 658px;margin-top: 210px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 660px;margin-top: 210px;width: 6px"></div>
-
-
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task1'>
-        Name: Task1<br>
-        Category: Task1 category<br>
-        Assign: Task1 performer<br>
-        Critical rank: 1<br>
-        Status: Solved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task2'>
-        Name: Task2<br>
-        Category: Task2 category<br>
-        Assign: Task2 performer<br>
-        Critical rank: 1<br>
-        Status: Solved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task3'>
-        Name: Task3<br>
-        Category: Task3 category<br>
-        Assign: Task3 performer<br>
-        Critical rank: 1<br>
-        Status: Solved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task4'>
-        Name: Task4<br>
-        Category: Task4 category<br>
-        Assign: Task4 performer<br>
-        Critical rank: 0.66<br>
-        Status: Solved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task5'>
-        Name: Task5<br>
-        Category: Task5 category<br>
-        Assign: Task5 performer<br>
-        Critical rank: 1<br>
-        Status: Unsolved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task6'>
-        Name: Task6<br>
-        Category: Task6 category<br>
-        Assign: Task6 performer<br>
-        Critical rank: 1.66<br>
-        Status: Solved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task7'>
-        Name: Task7<br>
-        Category: Task7 category<br>
-        Assign: Task7 performer<br>
-        Critical rank: 1.33<br>
-        Status: Unsolved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task8'>
-        Name: Task8<br>
-        Category: Task8 category<br>
-        Assign: Task8 performer<br>
-        Critical rank: 1<br>
-        Status: Unsolved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task9'>
-        Name: Task9<br>
-        Category: Task9 category<br>
-        Assign: Task9 performer<br>
-        Critical rank: 0.66<br>
-        Status: Unsolved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task10'>
-        Name: Task10<br>
-        Category: Task10 category<br>
-        Assign: Task10 performer<br>
-        Critical rank: 1<br>
-        Status: Unsolved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task11'>
-        Name: Task11<br>
-        Category: Task11 category<br>
-        Assign: Task11 performer<br>
-        Critical rank: 0.66<br>
-        Status: Unsolved<br>
-    </div>
-
-    <div style="height:380px;margin-left:800px;padding:20px;display:none;position:absolute;" id='Task12'>
-        Name: Task12<br>
-        Category: Task12 category<br>
-        Assign: Task12 performer<br>
-        Critical rank: 1<br>
-        Status: Unsolved<br>
-    </div>
-
-    <div style="height:420px"></div>
--->
+		<script>
+			$(function(){
+
+				var cy = window.cy = cytoscape({
+					container: document.getElementById('cy'),
+
+					style: [
+						{
+							selector: 'node',
+							style: {
+								'shape': 'rectangle',
+								'width': '74px',
+								'height': '34px',
+								'content': 'data(name)',
+								'text-outline-width': 4,
+								'text-outline-color': 'data(color1)',
+								'text-valign': 'center',
+								'background-color': 'data(color1)',
+								'border-width': '3px',
+								'border-color': 'data(color2)'
+							}
+						},
+
+						{
+							selector: 'edge',
+							style: {
+								'width': 3,
+								'target-arrow-shape': 'triangle',
+								'line-color': '#9dbaea',
+								'target-arrow-color': '#9dbaea',
+								'curve-style': 'bezier'
+							}
+						},
+
+						{
+							selector: 'node:selected',
+							style: {
+						        'border-color': '#8a62c8',
+						        'background-color': '#b89fdd',
+						        'text-outline-color': '#b89fdd',
+							}
+
+						}
+					],
+
+					elements: {
+						nodes: [
+
+						{% for i in all_nodes %}
+						    { data: { id: '{{i.0}}', name: '{{i.1}}', category: '{{i.2}}', assign: '{{i.3}}', critrank: {{i.4}}, status: '{{i.5}}',
+						         {% if i.5 == 'Solved' %} color1: '#82d467', color2: '#269900' {% else %} color1: '#ffcea9', color2: '#ff717f' {% endif %} } },
+						{% endfor %}
+
+						],
+						edges: [
+
+						    {% for i in all_edges %}
+						        { data: { source: '{{i.0}}', target: '{{i.1}}' } },
+						    {% endfor %}
+						]
+					},
+
+					layout: {
+						name: 'preset',
+
+						positions: {
+
+						    {% for i in all_nodes %}
+
+						        '{{i.0}}': {x: {{i.6}}, y: {{i.7}} },
+
+						    {% endfor %}
+						}
+					},
+
+
+				});
+
+				{% for i in all_nodes %}
+				    cy.$('#'+'{{i.0}}').qtip({
+			         content: '<b>Name:</b> '+cy.$('#'+'{{i.0}}').attr('name')+'<br><b>Category:</b> '+cy.$('#'+'{{i.0}}').attr('category')+'<br><b>Assign:</b> '+cy.$('#'+'{{i.0}}').attr('assign')+'<br><b>Critical rank:</b> '+cy.$('#'+'{{i.0}}').attr('critrank')+'<br><b>Status:</b> '+cy.$('#'+'{{i.0}}').attr('status')+'<br>',
+			         style: { classes: 'qtip-bootstrap' }
+			     	});
+				{% endfor %}
+
+			});
+
+
+		</script>
+
+		<div id="cy"></div>
 
 {% endblock %}
