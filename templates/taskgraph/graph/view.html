@@ -103,6 +103,7 @@
 
 				cy.on('mouseover', 'node', function(event) {
 					    var node = event.cyTarget;
+					    $(".qtip").remove();
 					    node.qtip({
 					         content: '<b>Name:</b> '+node.attr('name')+'<br><b>Category:</b> '+node.attr('category')+'<br><b>Assign:</b> '+node.attr('assign')+'<br><b>Critical rank:</b> '+node.attr('critrank')+'<br><b>Status:</b> '+node.attr('status')+'<br>',
 			         		 style: { classes: 'qtip-bootstrap' },
