@@ -69,7 +69,14 @@ def graph_view_page(request):
         for j in graph[i]:
             tgraph.addEdge(info[i][-1], info[j][-1])
 
-    tgraph.applyLayoutAlgorithm('Upward Planarization (OGDF)', tgraph.getLayoutProperty("viewLayout"))
+    viewSize = tgraph.getSizeProperty("viewSize")
+    viewShape = tgraph.getIntegerProperty("viewShape")
+
+    for n in tgraph.getNodes():
+        viewSize[n] = tlp.Size(40, 80, 1)
+        viewShape[n] = tlp.NodeShape.Square
+
+    tgraph.applyLayoutAlgorithm('Hierarchical Graph', tgraph.getLayoutProperty("viewLayout"))
 
     min_x = min(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] for node in tgraph.getNodes())
     max_x = max(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] for node in tgraph.getNodes())
