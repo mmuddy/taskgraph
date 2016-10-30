@@ -102,12 +102,20 @@
 
 				});
 
-				{% for i in all_nodes %}
-				    cy.$('#'+'{{i.0}}').qtip({
-			         content: '<b>Name:</b> '+cy.$('#'+'{{i.0}}').attr('name')+'<br><b>Category:</b> '+cy.$('#'+'{{i.0}}').attr('category')+'<br><b>Assign:</b> '+cy.$('#'+'{{i.0}}').attr('assign')+'<br><b>Critical rank:</b> '+cy.$('#'+'{{i.0}}').attr('critrank')+'<br><b>Status:</b> '+cy.$('#'+'{{i.0}}').attr('status')+'<br>',
-			         style: { classes: 'qtip-bootstrap' }
-			     	});
-				{% endfor %}
+				cy.on('mouseover', 'node', function(event) {
+					    var node = event.cyTarget;
+					    node.qtip({
+					         content: '<b>Name:</b> '+node.attr('name')+'<br><b>Category:</b> '+node.attr('category')+'<br><b>Assign:</b> '+node.attr('assign')+'<br><b>Critical rank:</b> '+node.attr('critrank')+'<br><b>Status:</b> '+node.attr('status')+'<br>',
+			         		 style: { classes: 'qtip-bootstrap' },
+					         show: {
+					            event: event.type,
+					            ready: true
+					         },
+					         hide: {
+					            event: 'mouseout unfocus'
+					         }
+					    }, event);
+					});
 
 			});
 
