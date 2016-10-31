@@ -1,4 +1,4 @@
-from taskgraph.tasktracker.redmine import IRedmine, Action
+from taskgraph.tasktracker.redmine import IRedmine
 from .settings import tracker_redmine
 from django.test import TestCase
 
