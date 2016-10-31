@@ -34,10 +34,13 @@ class Tracker(models.Model):
     type = ChoicesHelper.char_field_with_choices(Supported)
 
     def __str__(self):
-        return 'user_name:{} password:{} url:{} type:{}'.format(self.user_name, self.password, self.url, self.type)
+        return '{} {} {}'.format(self.user_name, self.password, self.url, self.type)
 
     def __hash__(self):
         return hash('{}{}{}'.format(self.url, self.user_name, self.type))
+
+    def has_projet_list(self):
+        return self.project_set.all().count() > 0
 
     def restore_project_list(self, i_tracker):
         with i_tracker.connect(self):
@@ -71,11 +74,17 @@ class Tracker(models.Model):
 
 class Project(models.Model):
 
+    class Meta:
+        unique_together = (('tracker', 'identifier'),)
+
     tracker = models.ForeignKey(Tracker, on_delete=models.CASCADE)
     identifier = models.CharField(primary_key=True, max_length=255)
     name = models.CharField(max_length=255)
     description = models.TextField()
     is_active = models.BooleanField(default=False)
+
+    def is_member(self, name):
+        return self.assignee_set.filter(name__exact=name).count() == 1
 
     def restore_meta(self, project_from_tracker):
         self._restore_meta(Milestone, project_from_tracker.meta.milestones, self.milestone_set.all())
