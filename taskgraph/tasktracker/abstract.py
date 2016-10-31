@@ -65,5 +65,9 @@ class TrackerInterface:
     def update_relation(self, action):
         pass
 
+    @abc.abstractmethod
+    def my_name(self):
+        pass
+
 
 

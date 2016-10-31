@@ -16,15 +16,6 @@ def edit_page(request):
     return render(request, 'taskgraph/graph/edit.html', context)
 
 
-def projects_page(request):
-    context = {'is_user_active': True,
-               'contains_menu': True}
-
-    Project.objects.all()
-
-    return render(request, 'taskgraph/graph/projects.html', context)
-
-
 def graph_view_page(request):
     info = {
         '1': ['Task1', 'Task1 category', 'Task1 performer', 0.66, 'Solved'],

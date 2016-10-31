@@ -6,6 +6,48 @@
 Projects
 {% endblock %}
 
+{% block additional_head_block %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-treeview/1.2.0/bootstrap-treeview.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-treeview/1.2.0/bootstrap-treeview.min.js"></script>
+
+    <script type="text/javascript">
+        function get_active_list() {
+            var tree = $('#tree');
+            var selected = tree.treeview('getSelected');
+            var nodes = [];
+
+            var node_arr_ind;
+            for (node_arr_ind = 0;  node_arr_ind < selected.length; ++node_arr_ind) {
+                var node = selected[node_arr_ind];
+                var hierarchy = [{'name': node.text}];
+                while (node.nodeId !== undefined) {
+                    node = tree.treeview('getParent', node.nodeId);
+                    hierarchy.push({'name': node.text});
+                }
+                nodes.push(hierarchy);
+            }
+
+            return nodes;
+        }
+
+        function post_active() {
+            setupAjaxForCsrf();
+            $.ajax({
+                url: "{% url 'post-active-projects' %}",
+                type: "POST",
+                data: JSON.stringify(get_active_list()),
+
+                success : function(json) { $('#post-text').val(''); // remove the value from the input
+                    $('#alert_placeholder').html('<div class="alert alert-success"><a class="close" data-dismiss="alert">×</a><span>Active list has been updated</span></div>')
+                    }
+
+
+            });
+        }
+    </script>
+
+{% endblock %}
+
 {% block navbar_list_block %}
     <ul class="nav navbar-nav">
         <li class="nav-item active"><a href="{% url 'projects'%}">Projects</a>
@@ -24,66 +66,14 @@ Projects
 
 {% block body_block %}
 
-        <div class="col-sm-3 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-        <h2>Choose projects, to work with</h2>
-            <div class="table-responsive">
-                <table class="table table-striped" style="margin-top:0px">
-                    <tbody>
+    <div id = "alert_placeholder"></div>
+    <div id="tree"></div>
+    <input class="btn btn-lg btn-default" data-toggle="dropdown"
+           type="button" value="Update active" onclick="post_active();"/>
 
-                    <tr>
-                        <td>Redmine</td>
-                        <td>https://some.super.address/</td>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                    </tr>
-
-                    <tr>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                        <td>Project1</td>
-                        <td><input type="checkbox" /></td>
-                    </tr>
-
-                    <tr>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                        <td>Project2</td>
-                        <td><input type="checkbox" /></td>
-                    </tr>
-
-                    <tr>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                        <td>Project3</td>
-                        <td><input type="checkbox" /></td>
-                    </tr>
-
-                    <tr>
-                        <td>Redmine</td>
-                        <td>https://some.super.address2/</td>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                    </tr>
-
-                    <tr>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                        <td>Project1</td>
-                        <td><input type="checkbox" /></td>
-                    </tr>
-                    <tr>
-                        <td>Redmine</td>
-                        <td>https://some.super.address3/</td>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                        <td>Project1</td>
-                        <td><input type="checkbox" /></td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
-                        <td>Project2</td>
-                        <td><input type="checkbox" /></td>
-                    </tr>
-
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <script>
+        var tree_view_data = {{ tree_json|safe }};
+        $('#tree').treeview({data: tree_view_data}); // multiSelect: true
+    </script>
 
 {% endblock %}
