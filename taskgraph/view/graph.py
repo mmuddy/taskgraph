@@ -1,13 +1,9 @@
 from django.shortcuts import render
 from taskgraph.tasktracker.getinterface import get_interface
-<<<<<<< HEAD
 from taskgraph.model.model import *
-
-=======
-from taskgraph.model.model import Tracker, Project
 from tulip import *
 from pprint import pprint
->>>>>>> refs/remotes/origin/master
+
 
 def analysis_page(request):
     context = {'is_user_active': True,
@@ -106,17 +102,34 @@ def task_edit_page(request):
     except Tracker.DoesNotExist:
         tracker = Tracker(type='Dummy')
         tracker.save()
+        tracker.restore_project_list()
+        tracker.restore_project_tasks()
 
-    tracker.restore_project_list(get_interface(tracker.type))
-    project = tracker.project_set.all()[0]
-    project.restore_project_tasks(get_interface(tracker.type))
-    task = project.task_set.all()[0]
+    request_task_id = request.GET.get('task');
+    if request_task_id is None:
+        return render(request, 'taskgraph/alerts.html', {'alerts' : [{
+            'css_container_class' : '',
+            'css_class' : '',
+            'name' : 'Error',
+            'message' : 'Incorrect URL'
+        }]})
 
+    try:
+        task = Task.objects.get(identifier=request_task_id)
+    except Task.DoesNotExist:
+        return render(request, 'taskgraph/alerts.html', {'alerts': [{
+            'css_container_class': '',
+            'css_class': '',
+            'name': 'Error',
+            'message': 'Task not found'
+        }]})
+
+    project = Project.objects.get(task=task)
     add_fields = []
     tags = ('<input value="{}" class="form-control">',
             '<textarea style="margin: 5px; width: 93%" rows="5" class="form-control">{}</textarea>',
             '<input type="date" value="{}" class="form-control"')
-    for field in TaskAdditionalField.objects.filter(project=project, task=task):
+    for field in TaskAdditionalField.objects.filter(task=task):
         if int(field.type) == 0:
             add_fields += [[field.name, tags[int(field.type)].format(field.char)]]
         if int(field.type) == 1:
