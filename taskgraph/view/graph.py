@@ -47,8 +47,13 @@ def task_edit_page(request):
     tags = ('<input value="{}" class="form-control">',
             '<textarea style="margin: 5px; width: 93%" rows="5" class="form-control">{}</textarea>',
             '<input type="date" value="{}" class="form-control"')
-    for field in task.taskadditionalfield_set.filter(project = project, task = task):
-        add_fields += [[field.name, tags[int(field.type)].format(field.char)]]
+    for field in TaskAdditionalField.objects.filter(project=project, task=task):
+        if int(field.type) == 0:
+            add_fields += [[field.name, tags[int(field.type)].format(field.char)]]
+        if int(field.type) == 1:
+            add_fields += [[field.name, tags[int(field.type)].format(field.text)]]
+        if int(field.type) == 2:
+            add_fields += [[field.name, tags[int(field.type)].format(field.date)]]
 
     to_relations = [('Task id: ' + str(i.from_task.identifier) + ', relation: ' + i.type.name)
                       for i in project.taskrelation_set.filter(project = project, to_task = task)]
