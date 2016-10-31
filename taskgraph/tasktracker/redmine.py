@@ -17,6 +17,8 @@ class IRedmine(TrackerInterface):
                                'precedes', 'follows', 'copied_to', 'copied_from', 'parent')
         self.relation_args = [{'name': rel_type} for rel_type in self.relation_types]
 
+        self.current_name = ''
+
     def __enter__(self):
         self.refresh()
         return self
@@ -29,9 +31,15 @@ class IRedmine(TrackerInterface):
         return self
 
     def refresh(self):
+        self.user_by_project.clear()
+        self.status_by_id.clear()
+        self.states_args.clear()
+        self.categories_by_project.clear()
+
         self.redmine = Redmine(self.tracker_inf.url, username=self.tracker_inf.user_name,
                                password=self.tracker_inf.password)
-        self.states_args.clear()
+
+        self.current_name = self.redmine.user.get('current').name
 
         for issue_status in self.redmine.issue_status.all():
             self.status_by_id[issue_status.id] = issue_status.name
@@ -131,3 +139,6 @@ class IRedmine(TrackerInterface):
 
     def update_relation(self, action):
         pass
+
+    def my_name(self):
+        return self.current_name
