@@ -28,27 +28,24 @@ Task edit
 
     <div class="col-md-10 col-md-offset-1 main">
 
-        <h3>Test latest features</h3>
-        Task ID: 2131290<br>
-        Project: Taskgraph<br><br>
+        <h3>Task name must be here</h3>
+        Project: {{project}}<br><br>
 
         <form class="form-horizontal">
             <div class="row">
                 <div class="col-md-6">
 
                     <div class="form-group">
-                        <label class="col-md-4 control-label">Name</label>
-                        <div class="col-md-8">
-                            <input class="form-control" placeholder="Task name" value="Test latest features">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
                         <label class="col-md-4 control-label">Category</label>
                         <div class="col-md-8">
                             <select class="form-control">
-                                <option>Testing</option>
-                                <option>Developing</option>
+                                {% for c in category_list %}
+                                    <option
+                                    {% if c == category %}
+                                        selected = "selected"
+                                    {% endif %}
+                                    >{{c}}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
@@ -57,9 +54,13 @@ Task edit
                         <label class="col-md-4 control-label">Milestone</label>
                         <div class="col-md-8">
                             <select class="form-control">
-                                <option>Design</option>
-                                <option>Developing</option>
-                                <option>Release</option>
+                                {% for m in milestone_list %}
+                                    <option
+                                    {% if m == milestone %}
+                                        selected = "selected"
+                                    {% endif %}
+                                    >{{m}}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
@@ -68,22 +69,13 @@ Task edit
                         <label class="col-md-4 control-label">Assignee</label>
                         <div class="col-md-8">
                             <select class="form-control">
-                                <option>mmuddy</option>
-                                <option>aaaaaa2493</option>
-                                <option>ids17</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-4 control-label">Priority</label>
-                        <div class="col-md-8">
-                            <select class="form-control">
-                                <option>Low</option>
-                                <option>Normal</option>
-                                <option>High</option>
-                                <option>Urgent</option>
-                                <option>Immediate</option>
+                                {% for a in assignee_list %}
+                                    <option
+                                    {% if a == assignee %}
+                                        selected = "selected"
+                                    {% endif %}
+                                    >{{a}}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
@@ -91,127 +83,72 @@ Task edit
                     <div class="form-group">
                         <label class="col-md-4 control-label">State</label>
                         <div class="col-md-8">
-                            <input class="form-control" placeholder="Task state" value="New">
+                            <select class="form-control">
+                                {% for s in state_list %}
+                                    <option
+                                    {% if s == state %}
+                                        selected = "selected"
+                                    {% endif %}
+                                    >{{s}}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
 
                 </div>
 
                 <div class="form-group col-md-6">
-
-                    <div class="form-group">
-                        <label class="col-md-6 control-label">Start date</label>
-                        <div class="col-md-6">
-                            <input type="date" class="form-control" value="2016-10-28">
+                    {% for field in add_fields %}
+                        <div class="form-group">
+                            <label class="col-md-4 control-label">{{field.0}}</label>
+                            <div class="col-md-8">
+                                {{ field.1 |safe }}
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-6 control-label">Completion date</label>
-                        <div class="col-md-6">
-                            <input type="date" class="form-control" value="2016-11-07">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-6 control-label">Time emistate (hours)</label>
-                        <div class="col-md-6">
-                            <input type="number" min="0" class="form-control" value="10" placeholder="Time emistate">
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-6 control-label">Completed (%)</label>
-                        <div class="col-md-6">
-                            <input type="number" min="0" max="100" class="form-control" value="10" placeholder="Completed">
-                        </div>
-                    </div>
+                    {% endfor %}
 
                 </div>
             </div>
             <br>
-
 
             <div class="row">
 
                 <div class="col-md-5 col-md-offset-1 ">
                     <label>Depends on:</label>
                     <table class="table table-striped">
-                        <tr>
-                            <td><a href="/taskgraph/task-edit/?task=4">task4</a></td>
-                            <td align="right">
-                                <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
-                            </td>
-                        </tr>
-                            <td><a href="/taskgraph/task-edit/?task=9">task9gfdsgs</a></td>
-                            <td align="right">
-                                <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
-                            </td>
-                        </tr>
-                            <td><a href="/taskgraph/task-edit/?task=100">ASDtask100</a></td>
-                            <td align="right">
-                                <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
-                            </td>
-                        </tr>
-                        </tr>
-                            <td><a href="/taskgraph/task-edit/?task=120">sdtask120</a></td>
-                            <td align="right">
-                                <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
-                            </td>
-                        </tr>
-                        </tr>
-                            <td>
-                                <select class="form-control">
-                                    <option>task33</option>
-                                    <option>task41</option>
-                                </select>
-                            </td>
-                            <td align="right">
-                                <span class="btn btn-default">Add task</span>
-                            </td>
-                        </tr>
+                        {% if not to_relations %}
+                            <br>No tasks
+                        {% endif %}
+                        {% for relation in to_relations %}
+                            <tr>
+                                <td><a href="/taskgraph/task-edit/?task=1">{{relation}}</a></td>
+                                <td align="right">
+                                    <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
+                                </td>
+                            </tr>
+                        {% endfor %}
                     </table>
                 </div>
 
                 <div class="col-md-5 ">
                     <label>Dependent tasks:</label>
                     <table class="table table-striped">
-                        <tr>
-                            <td><a href="/taskgraph/task-edit/?task=1">task1</a></td>
-                            <td align="right">
-                                <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
-                            </td>
-                        </tr>
-                            <td><a href="/taskgraph/task-edit/?task=2">task2</a></td>
-                            <td align="right">
-                                <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
-                            </td>
-                        </tr>
-                            <td><a href="/taskgraph/task-edit/?task=10">task10</a></td>
-                            <td align="right">
-                                <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
-                            </td>
-                        </tr>
-                        </tr>
-                            <td>
-                                <select class="form-control">
-                                    <option>task33</option>
-                                    <option>task41</option>
-                                </select>
-                            </td>
-                            <td align="right">
-                                <span class="btn btn-default">Add task</span>
-                            </td>
-                        </tr>
+                        {% if not from_relations %}
+                            <br>No tasks
+                        {% endif %}
+                        {% for relation in from_relations %}
+                            <tr>
+                                <td><a href="/taskgraph/task-edit/?task=1">{{relation}}</a></td>
+                                <td align="right">
+                                    <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
+                                </td>
+                            </tr>
+                        {% endfor %}
                     </table>
                 </div>
 
             </div>
 
-            <label>Description</label>
-            <br>
-            <textarea class="form-control" rows="10" placeholder="Task description">Default description</textarea>
-            <br>
            <input type="submit" class="btn btn-default" value="Confirm changes">
         </form>
 

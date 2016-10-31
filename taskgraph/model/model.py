@@ -138,7 +138,6 @@ class Project(models.Model):
         regular_fields['assignee'] = self._register_regular(regular_fields.get('assignee'), Assignee)
         regular_fields['category'] = self._register_regular(regular_fields.get('category'), TaskCategory)
         regular_fields['state'] = self._register_regular(regular_fields.get('state'), TaskState)
-        regular_fields['milestone'] = self._register_regular(regular_fields.get('milestone'), Milestone)
 
         new_task = Task.objects.create(project=self, **regular_fields)
 
