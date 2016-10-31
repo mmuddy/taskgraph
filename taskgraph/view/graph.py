@@ -31,11 +31,12 @@ def graph_view_page(request):
 
 
 def task_edit_page(request):
-
-    tracker = Tracker.objects.all().get(type = 'Dummy')
-    if tracker is None :
-        tracker = Tracker(type = 'Dummy')
+    try:
+        tracker = Tracker.objects.all().get(type='Dummy')
+    except Tracker.DoesNotExist:
+        tracker = Tracker(type='Dummy')
         tracker.save()
+
     tracker.restore_project_list(get_interface(tracker.type))
     project = list(Project.objects.all())[0]
     project.restore_project_tasks(get_interface(tracker.type))
