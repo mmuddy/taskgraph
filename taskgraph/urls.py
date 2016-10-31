@@ -1,6 +1,6 @@
 """taskgraph URL Configuration"""
 
-from taskgraph.view import base, profile, graph
+from taskgraph.view import base, profile, graph, projects
 
 from django.conf.urls import url
 
@@ -12,7 +12,8 @@ urlpatterns = [
     url(r'signup/', base.signup_page, name='signup'),
 
     url(r'graph-edit/', graph.edit_page, name='edit'),
-    url(r'projects/', graph.projects_page, name='projects'),
+    url(r'projects/', projects.projects_page, name='projects'),
+    url(r'post-active-projects', projects.post_projects, name='post-active-projects'),
     url(r'view/', graph.graph_view_page, name='view'),
     url(r'analysis/', graph.analysis_page, name='analysis'),
     url(r'task-edit/', graph.task_edit_page, name='task-edit'),
