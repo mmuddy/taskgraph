@@ -1,8 +1,6 @@
 from django.shortcuts import render
-from taskgraph.tasktracker.getinterface import get_interface
-from taskgraph.model.model import Tracker, Project
 from tulip import *
-from pprint import pprint
+
 
 def analysis_page(request):
     context = {'is_user_active': True,
@@ -62,12 +60,12 @@ def graph_view_page(request):
         for j in graph[i]:
             tgraph.addEdge(info[i][-1], info[j][-1])
 
-    viewSize = tgraph.getSizeProperty("viewSize")
-    viewShape = tgraph.getIntegerProperty("viewShape")
+    view_size = tgraph.getSizeProperty("viewSize")
+    view_shape = tgraph.getIntegerProperty("viewShape")
 
     for n in tgraph.getNodes():
-        viewSize[n] = tlp.Size(40, 80, 1)
-        viewShape[n] = tlp.NodeShape.Square
+        view_size[n] = tlp.Size(40, 80, 1)
+        view_shape[n] = tlp.NodeShape.Square
 
     tgraph.applyLayoutAlgorithm('Hierarchical Graph', tgraph.getLayoutProperty("viewLayout"))
 
