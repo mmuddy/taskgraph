@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from taskgraph.tasktracker.getinterface import get_interface
+from django.shortcuts import redirect
 from taskgraph.model.model import *
 from tulip import *
 from pprint import pprint
@@ -125,17 +126,37 @@ def task_edit_page(request):
         }]})
 
     project = Project.objects.get(task=task)
+
+    if request.method == 'POST':
+        task.category = project.taskcategory_set.get(name=request.POST.get('category'))
+        task.milestone = project.milestone_set.get(name=request.POST.get('milestone'))
+        task.assignee = project.assignee_set.get(name=request.POST.get('assignee'))
+        task.state = project.taskstate_set.get(name=request.POST.get('state'))
+        for field in TaskAdditionalField.objects.filter(task=task):
+            if int(field.type) == 0 :
+                field.type = 'CharField'
+                field.char = request.POST.get(field.name)
+            if int(field.type) == 1 :
+                field.type = 'TextField'
+                field.text = request.POST.get(field.name)
+            if int(field.type == 2) :
+                field.type = 'DateField'
+                field.date = request.POST.get(field.name)
+            field.save()
+        task.save()
+        return redirect('taskgraph/graph/task-edit/?task=' + str(task.identifier))
+
     add_fields = []
-    tags = ('<input value="{}" class="form-control">',
-            '<textarea style="margin: 5px; width: 93%" rows="5" class="form-control">{}</textarea>',
-            '<input type="date" value="{}" class="form-control"')
+    tags = ('<input name="{}" value="{}" class="form-control">',
+            '<textarea name="{}" style="margin: 5px; width: 93%" rows="5" class="form-control">{}</textarea>',
+            '<input name="{}" type="date" value="{}" class="form-control"')
     for field in TaskAdditionalField.objects.filter(task=task):
         if int(field.type) == 0:
-            add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.char)}]
+            add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.name, field.char)}]
         if int(field.type) == 1:
-            add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.text)}]
+            add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.name, field.text)}]
         if int(field.type) == 2:
-            add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.date)}]
+            add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.name, field.date)}]
 
     to_relations = [{'id': i.from_task.identifier, 'type': i.type.name}
                       for i in project.taskrelation_set.filter(project = project, to_task = task)]
@@ -145,6 +166,7 @@ def task_edit_page(request):
     context = {'is_user_active': True,
                 'contains_menu': True,
                 'project' : task.project.name,
+                'task_id': task.identifier,
                 'assignee' : task.assignee.name,
                 'milestone' : task.milestone.name,
                 'category' : task.category.name,
