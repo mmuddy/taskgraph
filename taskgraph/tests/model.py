@@ -72,13 +72,13 @@ def test_create_and_clean_up_tasks(test_case, tracker):
     rel_count = TaskRelation.objects.all().count()
 
     list_before.append((Task, task_count))
-    #list_before.append((TaskRelation, rel_count))
+    # list_before.append((TaskRelation, rel_count))
 
     for project in tracker.project_set.all():
         project.is_active = True
         project.save()
 
-    tracker.restore_project_tasks(get_interface(tracker.type))
+    tracker.restore_project_tasks(get_interface(tracker.type), only_active=False)
 
     for model_type, before_count in list_before:
         test_case.assertTrue(model_type.objects.all().count() - before_count > 0)
