@@ -121,9 +121,7 @@ def trackers_add_page_post(request, context):
         context['alerts'] = [trackers_alert(alertfactory.error, 'Posted data isn\'t unique')]
         return render(request, 'taskgraph/profile/trackers_add.html', context)
 
-    return HttpResponseRedirect(reverse('trackers-list', args=('success','Changes in tracker list was applied')))
-    """return trackers_list_page(request, alerts=[trackers_alert(alertfactory.success,
-                                                              'Changes in tracker list was applied')])"""
+    return HttpResponseRedirect(reverse('trackers-list', args=('success', 'Changes in tracker list was applied')))
 
 
 def trackers_edit_page(request, tracker_id):
@@ -161,12 +159,9 @@ def trackers_edit_page_post(request, context, tracker):
         return render(request, 'taskgraph/profile/trackers_edit.html', context)
 
     return HttpResponseRedirect(reverse('trackers-list', args=('success', 'Changes in tracker list was applied')))
-    """return trackers_list_page(request, alerts=[trackers_alert(alertfactory.success,
-                                                              'Changes in tracker list was applied')])"""
 
 
-def trackers_delete(request, tracker_id):
+def trackers_delete(_, tracker_id):
     tracker = get_object_or_404(model.Tracker, id=tracker_id)
     tracker.delete()
     return HttpResponseRedirect(reverse('trackers-list', args=('success', 'Tracker has been deleted')))
-    """return trackers_list_page(request, alerts=[trackers_alert(alertfactory.success, 'Tracker has been deleted')])"""
