@@ -61,6 +61,17 @@ class Tracker(models.Model):
                 model.restore_children(project)
                 model.save()
 
+    def update_projects_if_not_created(self, i_tracker):
+        if not self.has_projet_list():
+            self.restore_project_list(i_tracker)
+
+    def has_tasks(self):
+        active = self.project_set.filter(is_active__exact=True)
+        for project in active:
+            if project.task_set.all().count() == 0:
+                return False
+        return True
+
     def restore_project_tasks(self, i_tracker):
         active_project_list = self.project_set.filter(is_active__exact=True)
 
@@ -70,6 +81,11 @@ class Tracker(models.Model):
         with i_tracker.connect(self):
             for project in active_project_list:
                 project.restore_project_tasks(i_tracker)
+
+    def update_task_if_not_created(self, i_tracker):
+        if not self.has_tasks():
+            self.restore_project_tasks(i_tracker)
+
 
 
 class Project(models.Model):
