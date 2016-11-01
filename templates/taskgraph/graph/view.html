@@ -6,6 +6,22 @@
     View
 {% endblock %}
 
+{% block additional_head_block %}
+
+    <style>
+
+        #cy {
+            float: left;
+            width: 100%;
+            height: 520px;
+            margin-top: -20px;
+            color: #337ab7;
+        }
+
+    </style>
+
+{% endblock %}
+
 {% block navbar_list_block %}
     <ul class="nav navbar-nav">
         <li class="nav-item"><a href="{% url 'projects'%}">Projects</a>
@@ -33,10 +49,11 @@
 						{
 							selector: 'node',
 							style: {
-								'shape': 'rectangle',
-								'width': '74px',
-								'height': '34px',
+								'shape': 'roundrect',
+								'width': '70px',
+								'height': '55px',
 								'content': 'data(name)',
+                                'color': '#666',
 								'text-outline-width': 4,
 								'text-outline-color': 'data(color1)',
 								'text-valign': 'center',
@@ -49,10 +66,11 @@
 						{
 							selector: 'edge',
 							style: {
+
 								'width': 3,
 								'target-arrow-shape': 'triangle',
-								'line-color': '#9dbaea',
-								'target-arrow-color': '#9dbaea',
+								'line-color': '#BBB',
+								'target-arrow-color': '#BBB',
 								'curve-style': 'bezier'
 							}
 						},
@@ -60,9 +78,11 @@
 						{
 							selector: 'node:selected',
 							style: {
-						        'border-color': '#8a62c8',
-						        'background-color': '#b89fdd',
-						        'text-outline-color': '#b89fdd',
+						        'border-color': '#999',
+						        'background-color': '#CCC',
+                                'text-outline-color': '#CCC',
+                                'color' : '#444'
+						        //'text-outline-color': '#b89fdd'
 							}
 
 						}
@@ -72,8 +92,15 @@
 						nodes: [
 
 						{% for i in all_nodes %}
-						    { data: { id: '{{i.0}}', name: '{{i.1}}', category: '{{i.2}}', assign: '{{i.3}}', critrank: {{i.4}}, status: '{{i.5}}',
-						         {% if i.5 == 'Solved' %} color1: '#82d467', color2: '#269900' {% else %} color1: '#ffcea9', color2: '#ff717f' {% endif %} } },
+						    { data:
+                            { id: '{{i.0}}', name: '{{i.1}}', category: '{{i.2}}',
+                                assign: '{{i.3}}', critrank: {{i.4}}, status: '{{i.5}}',
+						         {% if i.5 == 'Solved' %}
+                                     color1: '#f8f8f8', color2: '#BBB'
+                                 {% else %}
+                                     color1: '#f8f8f8', color2: '#BBB'
+                                 {% endif %}
+						    } },
 						{% endfor %}
 
 						],
