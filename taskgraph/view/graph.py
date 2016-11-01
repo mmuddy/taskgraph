@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from tulip import *
-
+from math import radians, sqrt, pow
+from statistics import median
 
 def analysis_page(request):
     context = {'is_user_active': True,
@@ -15,6 +16,8 @@ def edit_page(request):
 
 
 def graph_view_page(request):
+    print(tlp.getLayoutAlgorithmPluginsList())
+
     info = {
         '1': ['Task1', 'Task1 category', 'Task1 performer', 0.66, 'Solved'],
         '2': ['Task2', 'Task2 category', 'Task2 performer', 0.66, 'Solved'],
@@ -63,23 +66,39 @@ def graph_view_page(request):
     view_size = tgraph.getSizeProperty("viewSize")
     view_shape = tgraph.getIntegerProperty("viewShape")
 
+    vertex_block_width = 40
+    vertex_block_height = 80
+
     for n in tgraph.getNodes():
-        view_size[n] = tlp.Size(40, 80, 1)
+        view_size[n] = tlp.Size(vertex_block_width, vertex_block_height, 1)
         view_shape[n] = tlp.NodeShape.Square
 
-    tgraph.applyLayoutAlgorithm('Hierarchical Graph', tgraph.getLayoutProperty("viewLayout"))
+    tgraph.applyLayoutAlgorithm('Upward Planarization (OGDF)', tgraph.getLayoutProperty("viewLayout"))
 
-    min_x = min(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] for node in tgraph.getNodes())
+    """min_x = min(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] for node in tgraph.getNodes())
     max_x = max(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] for node in tgraph.getNodes())
     min_y = min(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] for node in tgraph.getNodes())
     max_y = max(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] for node in tgraph.getNodes())
 
     diff_y = max_y - min_y or 1
-    diff_x = max_x - min_x or 1
+    diff_x = max_x - min_x or 1"""
+
+    edge_lengths = []
+    for edge in tgraph.getEdges():
+        node_from = tgraph.source(edge)
+        node_to = tgraph.target(edge)
+        node_from_value = tgraph.getLayoutProperty("viewLayout").getNodeValue(node_from)
+        node_to_value = tgraph.getLayoutProperty("viewLayout").getNodeValue(node_to)
+        edge_lengths.append(sqrt(pow(node_from_value[0] - node_to_value[0], 2) +
+                                 pow(node_from_value[1] - node_to_value[1], 2)))
+
+    edge_median = median(edge_lengths)
+    ideal_edge = vertex_block_height * 3
+    proportion = ideal_edge / edge_median
 
     for node in tgraph.getNodes():
-        tulip_graph[node] += (tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] - min_x) / diff_x * 1200, \
-                             (tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] - min_y) / diff_y * 500
+        tulip_graph[node] += tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] * proportion, \
+                             tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] * proportion
 
     all_nodes = [tulip_graph[node] for node in tgraph.getNodes()]
     all_edges = [(i, j) for i in graph for j in graph[i]]
