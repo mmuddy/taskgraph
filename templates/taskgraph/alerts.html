@@ -2,7 +2,10 @@
     {% for alert in alerts %}
         <div class="container {{ alert.css_container_class }}">
         <div class="alert {{ alert.css_class }}">
+            <a class="close" data-dismiss="alert">×</a>
+            <span>
             <strong>{{ alert.name }}!</strong> {{ alert.message }}
+            </span>
         </div>
         </div>
     {% endfor %}
