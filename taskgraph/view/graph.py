@@ -144,7 +144,9 @@ def task_edit_page(request):
                 field.date = request.POST.get(field.name)
             field.save()
         task.save()
-        return redirect('taskgraph/graph/task-edit/?task=' + str(task.identifier))
+        response = redirect('task-edit')
+        response['Location'] += '?task=' + str(task.identifier)
+        return response
 
     add_fields = []
     tags = ('<input name="{}" value="{}" class="form-control">',
