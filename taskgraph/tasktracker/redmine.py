@@ -1,4 +1,4 @@
-from taskgraph.tasktracker.abstract import TrackerInterface, Project
+from taskgraph.tasktracker.abstract import TrackerInterface, Project, Action, Task
 from redmine import Redmine, ForbiddenError
 
 
@@ -18,6 +18,7 @@ class IRedmine(TrackerInterface):
         self.relation_args = [{'name': rel_type} for rel_type in self.relation_types]
 
         self.current_name = ''
+        self.current_id = None
 
     def __enter__(self):
         self.refresh()
@@ -40,13 +41,14 @@ class IRedmine(TrackerInterface):
                                password=self.tracker_inf.password)
 
         self.current_name = self.redmine.user.get('current').name
+        self.current_id = self.redmine.user.get('current').id
 
         for issue_status in self.redmine.issue_status.all():
             self.status_by_id[issue_status.id] = issue_status.name
             self.states_args.append({'name': issue_status.name})
 
     def get_projects(self):
-        redmine_projects = self.redmine.project.all()
+        redmine_projects = self.redmine.project.all(include='issue_categories')
 
         project_list = []
         project_identifier_by_id = {}
@@ -61,6 +63,8 @@ class IRedmine(TrackerInterface):
             assignee = []
             for project_membership in self.redmine.project_membership.filter(project_id=project.identifier):
                 user_by_id[project_membership.user.id] = project_membership.user.name
+                if project_membership.user.id == self.current_id:
+                    user_by_id['current'] = self.current_id
                 assignee.append({'name': project_membership.user.name})
 
             if hasattr(project, 'parent_id') and project.parent_id != -1:
@@ -71,9 +75,9 @@ class IRedmine(TrackerInterface):
             categories = []
 
             try:
-                for issue_status in self.redmine.issue_category.filter(project_id=project.identifier):
-                    category[issue_status.id] = issue_status.name
-                    categories.append({'name': issue_status.name})
+                for issue_category in self.redmine.issue_category.filter(project_id=project.identifier):
+                    category[issue_category.id] = issue_category.name
+                    categories.append({'name': issue_category.name})
             except ForbiddenError:
                 categories = None
 
@@ -98,47 +102,121 @@ class IRedmine(TrackerInterface):
         task_list = []
 
         current_id = self.redmine.user.get('current').id
-        member = current_id in self.user_by_project[project_id].keys()
+        user_by_id = self.user_by_project.get(project_id)
+        member = current_id in (user_by_id and user_by_id[project_id].keys() or [])
 
         for task in self.redmine.issue.filter(project_id=project_id):
-            new_task = dict()
-            new_task['identifier'] = task.id
+            new_task = Task()
+            new_task.identifier = task.id
+            new_task.project_identifier = project_id
 
             if hasattr(task, 'assigned_to'):
-                new_task['assignee'] = task.assigned_to.name
+                new_task.assignee = task.assigned_to.name
             if hasattr(task, 'status'):
-                new_task['category'] = task.status.name
-
-            additional_fields = []
+                new_task.status = task.status.name
+            if hasattr(task, 'category'):
+                new_task.category = task.category.name
 
             if hasattr(task, 'subject'):
-                additional_fields.append({'name': 'subject', 'type': 'CharField', 'char': task.subject})
+                new_task.add_char_field('subject', task.subject)
             if hasattr(task, 'description'):
-                additional_fields.append({'name': 'description', 'type': 'TextField', 'text': task.description})
+                new_task.add_text_field('description', task.description)
             if hasattr(task, 'start_date'):
-                additional_fields.append({'name': 'start_date', 'type': 'DateField', 'date': task.start_date})
+                new_task.add_date_field('start_date', task.start_date)
             if hasattr(task, 'due_date'):
-                additional_fields.append({'name': 'due_date', 'type': 'DateField', 'date': task.due_date})
+                new_task.add_date_field('due_date', task.due_date)
 
             related_tasks = []
-            task_list.append((new_task, additional_fields, related_tasks))
+            task_list.append((new_task.regular_fields_as_dict(), new_task.additional_fields, related_tasks))
 
             if not member:
                 continue
 
             try:
                 for relation in self.redmine.issue_relation.filter(issue_id=task.id):
-                    related_tasks.append((relation.issue_to_id, relation.relation_type))
+                    if relation.issue_id == task.id:
+                        related_tasks.append((relation.issue_to_id, relation.relation_type))
             except ForbiddenError:
                 pass
 
         return task_list
 
     def update_task(self, action):
-        pass
+        if action.type == Action.Type.CREATE:
+            self.redmine.issue.create(action.obj.project_identifier, **self._translate_task_object(action.obj))
+        elif action.type == Action.Type.CHANGE:
+            self.redmine.issue.update(action.obj.identifier, **self._translate_task_object(action.obj))
+        elif action.type == Action.Type.DELETE:
+            self.redmine.issue.delete(action.obj.identifie)
 
     def update_relation(self, action):
-        pass
+        to_id = action.obj.to_task.identifier
+        from_id = action.obj.from_task.identifier
+        rel_type = action.obj.type.name
+
+        if action.type == Action.Type.CREATE:
+            relation = self.redmine.issue_relation.new()
+            relation.issue_id = from_id
+            relation.issue_to_id = to_id
+            relation.relation_type = rel_type
+            relation.save()
+        elif action.type == Action.Type.CHANGE:
+            raise NotImplementedError
+        elif action.type == Action.Type.DELETE:
+            issue = self.redmine.issue.get(from_id)
+            requested = None
+            for rel in issue.relations:
+                if rel.issue_to_id == to_id and rel.relation_type == rel_type:
+                    requested = rel
+                    break
+            if not requested:
+                raise KeyError
+            self.redmine.issue_relation.delete(requested.id)
 
     def my_name(self):
         return self.current_name
+
+    def _user_by_project(self, project_id):
+        return self.user_by_project.get(project_id) or {}
+
+    def _user_id_by_name(self, project_id, user_name):
+        for user_id, name in self._user_by_project(project_id).items():
+            if name == user_name:
+                return user_id
+        return None
+
+    def _category_by_project(self, project_id):
+        return self.categories_by_project.get(project_id) or {}
+
+    def _category_id_by_name(self, project_id, name):
+        for category_id, category_name in self._category_by_project(project_id).items():
+            if category_name == name:
+                return category_id
+        return None
+
+    def _status_id_by_name(self, name):
+        for status_id, status_name in self.status_by_id.items():
+            if status_name == name:
+                return status_id
+        return None
+
+    def _translate_task_object(self, obj):
+        d = {}
+
+        if obj.assignee:
+            d['assigned_to'] = self._user_id_by_name(obj.project_identifier, obj.assignee)
+        if obj.milestone:
+            d['milestone'] = obj.milestone
+        if obj.category:
+            d['category'] = self._category_id_by_name(obj.project_identifier, obj.category)
+        if obj.status:
+            d['status'] = self._status_id_by_name(obj.status)
+
+        for add_field in obj.additional_fields:
+            d.update(Task.additional_field_as_arg(add_field))
+
+        for key, val in d.items():
+            if not val:
+                d.pop(key)
+
+        return d
