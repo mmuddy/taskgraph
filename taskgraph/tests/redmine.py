@@ -84,7 +84,7 @@ class TestIRedmine(TestCase):
             self.assertTrue(created and len(created) == 1)
 
             pytiff_id = created[0].identifier
-            old_tasks = [(task,related_tasks) for task, _, related_tasks in redmine.get_tasks(pytiff_id)
+            old_tasks = [(task, related_tasks) for task, _, related_tasks in redmine.get_tasks(pytiff_id)
                          if task.category == 'UnitTest']
 
             rel = None

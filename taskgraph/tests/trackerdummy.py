@@ -1,4 +1,4 @@
-from taskgraph.tasktracker.abstract import TrackerInterface, Project
+from taskgraph.tasktracker.abstract import TrackerInterface, Project, Task
 from datetime import datetime
 from random import shuffle, randint
 
@@ -75,18 +75,18 @@ class TrackerDummy(TrackerInterface):
 
     def get_tasks(self, _):
         task_tmplt = {'identifier': 0, 'assignee': '', 'milestone': '', 'category': '', 'state': ''}
-        ids = [x for x in range(100)]
+        ids = [x for x in range(10, 111)]
         shuffle(ids)
 
         task_lst = []
 
         for ind in range(15):
-            new_task = task_tmplt.copy()
-            new_task['identifier'] = ids[ind]
-            new_task['assignee'] = self.assignees[randint(0, len(self.assignees) - 1)]['name']
-            new_task['milestone'] = self.milestones[randint(0, len(self.milestones) - 1)]['name']
-            new_task['category'] = self.task_categories[randint(0, len(self.task_categories) - 1)]['name']
-            new_task['state'] = self.task_states[randint(0, len(self.task_states) - 1)]['name']
+            new_task = Task()
+            new_task.identifier = ids[ind]
+            new_task.assignee = self.assignees[randint(0, len(self.assignees) - 1)]['name']
+            new_task.milestone = self.milestones[randint(0, len(self.milestones) - 1)]['name']
+            new_task.category = self.task_categories[randint(0, len(self.task_categories) - 1)]['name']
+            new_task.state = self.task_states[randint(0, len(self.task_states) - 1)]['name']
             task_lst.append((new_task, None, []))
 
         for ind, task_tuple in enumerate(task_lst[:-3]):
@@ -99,5 +99,8 @@ class TrackerDummy(TrackerInterface):
     def update_relation(self, action):
         pass
 
-    def update_project(self, action):
+    def update_task(self, action):
         pass
+
+    def my_name(self):
+        return 'dev1'

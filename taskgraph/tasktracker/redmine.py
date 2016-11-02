@@ -1,6 +1,8 @@
 from taskgraph.tasktracker.abstract import TrackerInterface, Project, Action, Task
 from redmine import Redmine, ForbiddenError
 
+from copy import deepcopy
+
 
 class IRedmine(TrackerInterface):
 
@@ -25,29 +27,28 @@ class IRedmine(TrackerInterface):
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.redmine = None
+        pass
 
     def connect(self, tracker_inf):
         self.tracker_inf = tracker_inf
         return self
 
     def refresh(self):
+        self.redmine = Redmine(self.tracker_inf.url, username=self.tracker_inf.user_name,
+                               password=self.tracker_inf.password)
+        self.current_name = self.redmine.user.get('current').name
+        self.current_id = self.redmine.user.get('current').id
+
+    def get_projects(self):
         self.user_by_project.clear()
         self.status_by_id.clear()
         self.states_args.clear()
         self.categories_by_project.clear()
 
-        self.redmine = Redmine(self.tracker_inf.url, username=self.tracker_inf.user_name,
-                               password=self.tracker_inf.password)
-
-        self.current_name = self.redmine.user.get('current').name
-        self.current_id = self.redmine.user.get('current').id
-
         for issue_status in self.redmine.issue_status.all():
             self.status_by_id[issue_status.id] = issue_status.name
             self.states_args.append({'name': issue_status.name})
 
-    def get_projects(self):
         redmine_projects = self.redmine.project.all(include='issue_categories')
 
         project_list = []
@@ -103,7 +104,7 @@ class IRedmine(TrackerInterface):
 
         current_id = self.redmine.user.get('current').id
         user_by_id = self.user_by_project.get(project_id)
-        member = current_id in (user_by_id and user_by_id[project_id].keys() or [])
+        member = current_id in user_by_id or []
 
         for task in self.redmine.issue.filter(project_id=project_id):
             new_task = Task()
@@ -127,7 +128,7 @@ class IRedmine(TrackerInterface):
                 new_task.add_date_field('due_date', task.due_date)
 
             related_tasks = []
-            task_list.append((new_task.regular_fields_as_dict(), new_task.additional_fields, related_tasks))
+            task_list.append((new_task, new_task.additional_fields, related_tasks))
 
             if not member:
                 continue
@@ -205,8 +206,8 @@ class IRedmine(TrackerInterface):
 
         if obj.assignee:
             d['assigned_to'] = self._user_id_by_name(obj.project_identifier, obj.assignee)
-        if obj.milestone:
-            d['milestone'] = obj.milestone
+        """if obj.milestone:
+            d['milestone'] = obj.milestone"""
         if obj.category:
             d['category'] = self._category_id_by_name(obj.project_identifier, obj.category)
         if obj.status:
@@ -215,8 +216,9 @@ class IRedmine(TrackerInterface):
         for add_field in obj.additional_fields:
             d.update(Task.additional_field_as_arg(add_field))
 
+        dc = deepcopy(d)
         for key, val in d.items():
             if not val:
-                d.pop(key)
+                dc.pop(key)
 
-        return d
+        return dc

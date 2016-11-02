@@ -9,5 +9,5 @@ def tracker_dummy():
 
 
 def tracker_redmine():
-    return Tracker.objects.get_or_create(url='https://dev.osll.ru/', user_name='yakovlev.vladislav',
+    return Tracker.objects.get_or_create(url='https://dev.osll.ru/', user_name='yakovlevvladyakovlev@yandex.ru',
                                          password='1q2w3e4r', type='Redmine')[0]
