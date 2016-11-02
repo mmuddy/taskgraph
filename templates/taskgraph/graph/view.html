@@ -93,14 +93,22 @@
 
 						{% for i in all_nodes %}
 						    { data:
-                            { id: '{{i.0}}', name: '{{i.1}}', category: '{{i.2}}',
-                                assign: '{{i.3}}', critrank: {{i.4}}, status: '{{i.5}}',
-						         {% if i.5 == 'Solved' %}
+                            { id: '{{i.0}}', name: '{{i.1}}', status: '{{i.2}}',
+						         {% if i.2 == 'Solved' %}
                                      color1: '#f8f8f8', color2: '#BBB'
                                  {% else %}
                                      color1: '#f8f8f8', color2: '#BBB'
-                                 {% endif %}
-						    } },
+                                 {% endif %},
+
+                                 info: {
+
+                                    {% for j in i.3 %}
+
+                                        '{{j.0}}': '{{j.1}}',
+
+                                    {% endfor %}
+
+                                 } } },
 						{% endfor %}
 
 						],
@@ -117,9 +125,9 @@
 
 						positions: {
 
-						    {% for i in all_nodes %}
+						    {% for i in coords %}
 
-						        '{{i.0}}': {x: {{i.6}}, y: {{i.7}} },
+						        '{{i.0}}': {x: {{i.1}}, y: {{i.2}} },
 
 						    {% endfor %}
 						}
@@ -129,20 +137,26 @@
 				});
 
 				cy.on('mouseover', 'node', function(event) {
-					    var node = event.cyTarget;
-					    $(".qtip").remove();
-					    node.qtip({
-					         content: '<b>Name:</b> '+node.attr('name')+'<br><b>Category:</b> '+node.attr('category')+'<br><b>Assign:</b> '+node.attr('assign')+'<br><b>Critical rank:</b> '+node.attr('critrank')+'<br><b>Status:</b> '+node.attr('status')+'<br>',
-			         		 style: { classes: 'qtip-bootstrap' },
-					         show: {
-					            event: event.type,
-					            ready: true
-					         },
-					         hide: {
-					            event: 'mouseout unfocus'
-					         }
-					    }, event);
-					});
+                    var node = event.cyTarget;
+                    $(".qtip").remove();
+                    var attrs = Object.keys(node.attr('info'));
+                    var s = '';
+                    for (var i = 0; i < attrs.length; i++) {
+                        s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
+                    }
+                    node.qtip({
+                         content: s,
+                         style: { classes: 'qtip-bootstrap' },
+                         show: {
+                            event: event.type,
+                            ready: true
+                         },
+                         hide: {
+                            event: 'mouseout unfocus'
+                         }
+                    }, event);
+
+                });
 
 			});
 
