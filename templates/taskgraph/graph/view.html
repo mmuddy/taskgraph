@@ -93,8 +93,8 @@
 
 						{% for i in all_nodes %}
 						    { data:
-                            { id: '{{i.0}}', name: '{{i.1}}', status: '{{i.2}}',
-						         {% if i.2 == 'Solved' %}
+                            { id: '{{i.0}}', name: '{{i.1}}', type: '{{i.2}}',
+						         {% if i.2 == 'StartNode' %}
                                      color1: '#f8f8f8', color2: '#BBB'
                                  {% else %}
                                      color1: '#f8f8f8', color2: '#BBB'
@@ -115,7 +115,7 @@
 						edges: [
 
 						    {% for i in all_edges %}
-						        { data: { source: '{{i.0}}', target: '{{i.1}}' } },
+						        { data: { source: '{{i.0}}', target: '{{i.1}}', type: '{{i.2}}' } },
 						    {% endfor %}
 						]
 					},
@@ -162,6 +162,8 @@
 
 
 		</script>
+
+        {% include 'taskgraph/alerts.html' %}
 
 		<div id="cy"></div>
 
