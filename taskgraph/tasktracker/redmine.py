@@ -104,7 +104,7 @@ class IRedmine(TrackerInterface):
 
         current_id = self.redmine.user.get('current').id
         user_by_id = self.user_by_project.get(project_id)
-        member = current_id in user_by_id or []
+        member = current_id in (user_by_id or [])
 
         for task in self.redmine.issue.filter(project_id=project_id):
             new_task = Task()
