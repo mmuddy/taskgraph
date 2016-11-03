@@ -52,13 +52,13 @@ class Task:
         if self.identifier:
             d['identifier'] = self.identifier
         if self.assignee:
-            d['assignee'] = self.assignee
+            d['assignee'] = {'name': self.assignee[0], 'identifier': self.assignee[1]}
         if self.milestone:
-            d['milestone'] = self.milestone
+            d['milestone'] = {'name': self.milestone[0]}
         if self.category:
-            d['category'] = self.category
+            d['category'] = {'name': self.category[0], 'identifier': self.category[1]}
         if self.status:
-            d['state'] = self.status
+            d['state'] = {'name': self.status[0], 'identifier': self.status[1]}
 
         return d
 

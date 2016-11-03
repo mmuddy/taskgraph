@@ -52,7 +52,8 @@ class TestIRedmine(TestCase):
             self.assertTrue(created and len(created) == 1)
 
             pytiff_id = created[0].identifier
-            old_tasks = [task for task, _, _ in redmine.get_tasks(pytiff_id) if task.category == 'UnitTest']
+            old_tasks = [task for task, _, _ in redmine.get_tasks(pytiff_id)
+                         if task.category and task.category[0] == 'UnitTest']
             test_task_subject = ''
             test_task = None
             for t in old_tasks:
@@ -64,7 +65,8 @@ class TestIRedmine(TestCase):
             self.assertTrue(test_task)
             redmine.update_task(Action(test_task, Action.Type.CHANGE))
 
-            new_tasks = [task for task, _, _ in redmine.get_tasks(pytiff_id) if task.category == 'UnitTest']
+            new_tasks = [task for task, _, _ in redmine.get_tasks(pytiff_id)
+                         if task.category and task.category[0] == 'UnitTest']
             test_task = None
 
             for t in new_tasks:
@@ -85,7 +87,7 @@ class TestIRedmine(TestCase):
 
             pytiff_id = created[0].identifier
             old_tasks = [(task, related_tasks) for task, _, related_tasks in redmine.get_tasks(pytiff_id)
-                         if task.category == 'UnitTest']
+                         if task.category and task.category[0] == 'UnitTest']
 
             rel = None
             old_rel_type = None
@@ -106,7 +108,7 @@ class TestIRedmine(TestCase):
             self.assertTrue(rel)
 
             new_tasks = [(task, related_tasks) for task, _, related_tasks in redmine.get_tasks(pytiff_id)
-                         if task.category == 'UnitTest']
+                         if task.category and task.category[0] == 'UnitTest']
 
             found = False
             for t, relations in new_tasks:
@@ -117,7 +119,7 @@ class TestIRedmine(TestCase):
             self.assertTrue(found)
 
             new_tasks = [(task, related_tasks) for task, _, related_tasks in redmine.get_tasks(pytiff_id)
-                         if task.category == 'UnitTest']
+                         if task.category and task.category[0] == 'UnitTest']
 
             for _, relations in new_tasks:
                 self.assertFalse(relations)
@@ -125,7 +127,7 @@ class TestIRedmine(TestCase):
             redmine.update_relation(Action(rel, Action.Type.CREATE))
 
             new_tasks = [(task, related_tasks) for task, _, related_tasks in redmine.get_tasks(pytiff_id)
-                         if task.category == 'UnitTest']
+                         if task.category and task.category[0] == 'UnitTest']
 
             found = False
             for t, relations in new_tasks:

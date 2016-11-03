@@ -43,7 +43,7 @@ def graph_view_page(request):
 
     for i in info.keys():
         node = tgraph.addNode()
-        tulip_graph[node] = [i] + info[i]
+        tulip_graph[node] = info[i]
         info[i] += [node]
 
     for i in edge_list:

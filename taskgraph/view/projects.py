@@ -43,10 +43,9 @@ def _tree_view_json():
 
         for tracker in Tracker.objects.filter(type__exact=type_name.name):
             i_tracker = get_interface(tracker.type)
+            tracker.restore_project_list(i_tracker)
+            with i_tracker.connect(tracker) as interface:
 
-            tracker.update_projects_if_not_created(i_tracker)
-
-            with i_tracker.connect(tracker):
                 current_name = i_tracker.my_name()
 
             last_url = {'text': tracker.url, 'selectable': False, 'nodes': []}

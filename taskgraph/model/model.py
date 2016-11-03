@@ -168,7 +168,6 @@ class Project(models.Model):
         regular_fields['assignee'] = self._register_regular(regular_fields.get('assignee'), Assignee)
         regular_fields['category'] = self._register_regular(regular_fields.get('category'), TaskCategory)
         regular_fields['state'] = self._register_regular(regular_fields.get('state'), TaskState)
-        regular_fields['milestone'] = self._register_regular(regular_fields.get('milestone'), Milestone)
 
         new_task = Task.objects.create(project=self, **regular_fields)
 
@@ -181,13 +180,13 @@ class Project(models.Model):
 
     def _register_regular(self, value, field_type):
         if value:
-            requested = field_type.objects.filter(project=self, name__exact=value)
+            requested = field_type.objects.filter(project=self, name__exact=value['name'])
             if requested.count() == 1:
                 return requested[0]
             else:
-                return field_type.objects.create(project=self, name=value, active=False)
+                return field_type.objects.create(project=self, active=False, **value)
         else:
-            return field_type.objects.get_or_create(project=self, name='__NONE')[0]
+            return field_type.objects.get_or_create(project=self, name='__NONE', identifier=1)[0]
 
 
 class ProjectRelation(models.Model):
@@ -205,6 +204,7 @@ class Milestone(models.Model):
     class Meta:
         unique_together = ('project', 'name')
 
+    identifier = models.IntegerField(default=1)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
     date = models.DateField(default=date(year=1, month=1, day=1))
@@ -214,8 +214,9 @@ class Milestone(models.Model):
 class Assignee(models.Model):
 
     class Meta:
-        unique_together = ('project', 'name')
+        unique_together = ('id', 'project', 'name')
 
+    identifier = models.IntegerField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
     active = models.BooleanField(default=True)
@@ -226,6 +227,7 @@ class TaskCategory(models.Model):
     class Meta:
         unique_together = ('project', 'name')
 
+    identifier = models.IntegerField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
     active = models.BooleanField(default=True)
@@ -236,6 +238,7 @@ class TaskState(models.Model):
     class Meta:
         unique_together = ('project', 'name')
 
+    identifier = models.IntegerField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
     active = models.BooleanField(default=True)
@@ -273,13 +276,13 @@ class Task(models.Model):
         abstract_task.project_identifier = self.project.identifier
 
         if self.assignee.name != '__NONE':
-            abstract_task.assignee = self.assignee.name
+            abstract_task.assignee = self.assignee.identifier
         if self.milestone.name != '__NONE':
             abstract_task.milestone = (self.milestone.name, self.milestone.date)
         if self.category.name != '__NONE':
-            abstract_task.category = self.category.name
+            abstract_task.category = self.category.identifier
         if self.state.name != '__NONE':
-            abstract_task.status = self.state.name
+            abstract_task.status = self.state.identifier
 
         for add_field in self.taskadditionalfield_set.all():
             if add_field.type == 'CharField':
