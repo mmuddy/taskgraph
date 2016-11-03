@@ -86,6 +86,10 @@ class TrackerInterface:
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
+    def relation_type(self, rel_type):
+        pass
+
+    @abc.abstractmethod
     def connect(self, tracker_inf):
         pass
 

@@ -50,6 +50,9 @@ class TrackerDummy(TrackerInterface):
         self.tracker_inf = tracker_inf
         return self
 
+    def relation_type(self, rel_type):
+        return True, rel_type
+
     def __enter__(self):
         return self
 

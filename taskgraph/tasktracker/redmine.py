@@ -12,6 +12,13 @@ class IRedmine(TrackerInterface):
 
         self.relation_types = ('relates', 'duplicates', 'duplicated', 'blocks', 'blocked',
                                'precedes', 'follows', 'copied_to', 'copied_from', 'parent')
+
+        self.reversed_relations = {'duplicated', 'blocked', 'follows', 'copied_from'}
+        self.r_relations_replacements = {'duplicated': 'duplicates',
+                                         'blocked': 'blocks',
+                                         'follows': 'precedes',
+                                         'copied_from': 'copied_to'}
+
         self.relation_args = [{'name': rel_type} for rel_type in self.relation_types]
 
         self.current_name = ''
@@ -27,6 +34,11 @@ class IRedmine(TrackerInterface):
     def connect(self, tracker_inf):
         self.tracker_inf = tracker_inf
         return self
+
+    def relation_type(self, relation_type):
+        if relation_type in self.r_relations_replacements.keys():
+            return False, self.r_relations_replacements[relation_type]
+        return True, relation_type
 
     def refresh(self):
         self.redmine = Redmine(self.tracker_inf.url, username=self.tracker_inf.user_name,
