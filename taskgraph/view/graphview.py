@@ -40,7 +40,7 @@ def get_graph_info(task_set, node_by_task_id, start_points, end_points):
                 return add_field.text[:250] + '...'
             return add_field.text
         elif add_field.type == 'DateField':
-            return repr(add_field.date)
+            return add_field.date.strftime("%Y-%m-%d")
         return ''
 
     for task in task_set:
@@ -49,16 +49,17 @@ def get_graph_info(task_set, node_by_task_id, start_points, end_points):
         node_view_type = node_id in start_points and 'StartNode' or node_id in end_points and 'EndNode' or 'MiddlePoint'
         current_node_info = [node_id, str(task.identifier), node_view_type]
 
-        if task.assignee.name != '__NONE':
-            current_node_info.append(('assignee', task.assignee.name))
-        if task.category.name != '__NONE':
-            current_node_info.append(('category', task.category.name))
-        if task.state.name != '__NONE':
-            current_node_info.append(('status', task.state.name))
-
         additional = []
+
+        if task.assignee.name != '__NONE':
+            additional.append(('assignee', task.assignee.name))
+        if task.category.name != '__NONE':
+            additional.append(('category', task.category.name))
+        if task.state.name != '__NONE':
+            additional.append(('status', task.state.name))
+
         for field in task.taskadditionalfield_set.all():
-            additional.append((field.name, add_field_val(field)))
+            additional.append((field.name.replace ("_", " "), add_field_val(field)))
         current_node_info.append(additional)
 
         info[node_id] = current_node_info

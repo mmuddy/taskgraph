@@ -41,8 +41,10 @@ def graph_view_page(request):
 
     tulip_graph = {}
 
+    node_ind = {}
     for i in info.keys():
         node = tgraph.addNode()
+        node_ind[node] = i
         tulip_graph[node] = info[i]
         info[i] += [node]
 
@@ -89,17 +91,27 @@ def graph_view_page(request):
     min_dist = min(node_dists)
     proportion = ideal_dist / min_dist
 
-    for node in tgraph.getNodes():
+    """for node in tgraph.getNodes():
         tulip_graph[node] += tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] * proportion, \
-                             tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] * proportion
+                             tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] * proportion"""
+
+    coords = []
+    for node in tgraph.getNodes():
+        coords.append((node_ind[node],
+                       tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] * proportion,
+                       tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] * proportion))
 
     all_nodes = [tulip_graph[node] for node in tgraph.getNodes()]
     all_edges = [(i, j) for i in edge_list for j in edge_list[i]]
-
+    print('all_edges[0]', all_edges[0])
+    print('all_nodes[0]', all_nodes[0])
+    print('info[0]', info['0'])
+    print('coords[0]', coords[0])
     context = {'is_user_active': True,
                'contains_menu': True,
                'all_edges': all_edges,
                'all_nodes': all_nodes,
+               'coords': coords,
                'info': info}
 
     return render(request, 'taskgraph/graph/view.html', context)
