@@ -59,6 +59,8 @@ Edit
             return cookieValue;
         }
 
+        var changes = [];
+
         var csrftoken = getCookie('csrftoken');
 
         function csrfSafeMethod(method) {
@@ -233,11 +235,7 @@ Edit
 					});
 
 
-					var history = [];
-
-					var cxt = cy.contextMenus({
-                        menuItems: [
-                            {
+					var remove = {
                                 id: 'remove',
                                 title: 'Remove',
                                 selector: 'node, edge',
@@ -246,35 +244,37 @@ Edit
                                   var target = event.cyTarget;
                                   if(target.isEdge()){
                                   	target.remove();
-									history.push({
+										changes.push({
 	                                  	'type': 'relation',
 	                                  	'source': target.attr('source'),
 	                                  	'target': target.attr('target'),
 	                                  	'action': 'delete'
 	                                  });
-	                                  console.log(history);
+                                	console.log(changes);
                                   }
 
                                 },
                                 hasTrailingDivider: true,
                                 disabled: false,
                                 coreAsWell: false
-                             },
-                             {
+                    }
+
+					var newEdge = {
                                 id: 'newEdge',
                                 title: 'New edge',
                                 selector: 'node',
                                 onClickFunction: function (event) {
-                                	cxt.disableMenuItem('newEdge');
-                                	cxt.enableMenuItem('createEdge');
-                                	cxt.enableMenuItem('finish');
+                                	cxt.removeMenuItem('newEdge');
+                                	cxt.appendMenuItem(createEdge);
+                                	cxt.appendMenuItem(finish);
                                 	cxt.firstEdge = event.cyTarget;
                                 },
                                 hasTrailingDivider: true,
                                 disabled: false,
                                 coreAsWell: false
-                             },
-                             {
+                    }
+
+					var createEdge = {
                                 id: 'createEdge',
                                 title: 'Create edge',
                                 selector: 'node',
@@ -285,31 +285,37 @@ Edit
                                 				target: event.cyTarget.attr('id'),
                                 				type: 'relation' }
                                 	});
-                                	history.push({
+                                	changes.push({
                                 		'type': 'relation',
                                 		'source': cxt.firstEdge.attr('id'),
 	                                  	'target': event.cyTarget.attr('id'),
 	                                  	'action': 'add'
                                 	});
-                                	console.log(history);
+                                	console.log(changes);
                                 },
                                 hasTrailingDivider: true,
-                                disabled: true,
+                                disabled: false,
                                 coreAsWell: false
-                             },
-                             {
+                    }
+
+                    var finish = {
                                 id: 'finish',
                                 title: 'Finish',
                                 selector: '*',
                                 onClickFunction: function (event) {
-                                	cxt.enableMenuItem('newEdge');
-                                	cxt.disableMenuItem('createEdge');
-                                	cxt.disableMenuItem('finish');
+                                	cxt.removeMenuItem('createEdge');
+                                	cxt.removeMenuItem('finish');
+                                	cxt.appendMenuItem(newEdge);
                                 },
                                 hasTrailingDivider: true,
-                                disabled: true,
+                                disabled: false,
                                 coreAsWell: true
-                             },
+                    }
+
+					var cxt = cy.contextMenus({
+                        menuItems: [
+                             remove,
+                             newEdge,
                         ],
                         menuItemClasses: ['custom-menu-item'],
                         contextMenuClasses: ['custom-context-menu']
