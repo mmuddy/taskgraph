@@ -13,8 +13,7 @@
         #cy {
             float: left;
             width: 100%;
-            height: 520px;
-            margin-top: -20px;
+            height: 480px;
             color: #337ab7;
         }
 
@@ -165,8 +164,8 @@
 					    var edge = event.cyTarget;
 				    	$(".qtip").remove();
 
-				 		document.styleSheets[3].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
-				 		document.styleSheets[3].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
+				 		document.styleSheets[4].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
+				 		document.styleSheets[4].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
 
 					    edge.qtip({
 					         content: "<b>Type</b>: "+edge.attr('type'),

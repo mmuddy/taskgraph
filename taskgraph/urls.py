@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'view/', graph.graph_view_page, name='view'),
     url(r'analysis/', graph.analysis_page, name='analysis'),
     url(r'task-edit/', graph.task_edit_page, name='task-edit'),
+    url(r'change-graph/', graph.change_graph, name='change-graph'),
 
     url(r'trackers/', profile.trackers_page, name='trackers'),
     url(r'trackers-list/$', profile.trackers_list_page, name='trackers-list'),

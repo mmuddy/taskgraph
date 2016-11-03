@@ -6,6 +6,23 @@
 Edit
 {% endblock %}
 
+{% block additional_head_block %}
+
+    <style>
+
+        #cy {
+            float: left;
+            width: 100%;
+            height: 480px;
+            color: #337ab7;
+        }
+
+        .qtip_margin {}
+
+    </style>
+
+{% endblock %}
+
 {% block navbar_list_block %}
     <ul class="nav navbar-nav">
         <li class="nav-item"><a href="{% url 'projects'%}">Projects</a>
@@ -23,125 +40,306 @@ Edit
 {% endblock %}
 
 {% block body_block %}
-    <div class='vertex solved' style="margin-left: 50px;margin-top: 183px">Task1</div>
+{% csrf_token %}
+    <script>
 
-    <div class='vertex solved' style="margin-left: 176px;margin-top: 83px">Task2</div>
-    <div class='vertex solved' style="margin-left: 176px;margin-top: 183px">Task3</div>
-    <div class='vertex solved' style="margin-left: 176px;margin-top: 283px">Task4</div>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
-    <div class='vertex active_vertex' style="margin-left: 306px;margin-top: 83px">Task5</div>
-    <div class='vertex solved' style="margin-left: 306px;margin-top: 183px">Task6</div>
+        var changes = [];
 
-    <div class='vertex' style="margin-left: 428px;margin-top: 83px">Task7</div>
-    <div class='vertex' style="margin-left: 428px;margin-top: 183px">Task8</div>
+        var csrftoken = getCookie('csrftoken');
 
-    <div class='vertex' style="margin-left: 554px;margin-top: 83px">Task9</div>
-    <div class='vertex' style="margin-left: 554px;margin-top: 183px">Task10</div>
-    <div class='vertex' style="margin-left: 554px;margin-top: 283px">Task11</div>
+        function csrfSafeMethod(method) {
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
 
-    <div class='vertex' style="margin-left: 680px;margin-top: 183px">Task12</div>
+        function sameOrigin(url) {
+            var host = document.location.host;
+            var protocol = document.location.protocol;
+            var sr_origin = '//' + host;
+            var origin = protocol + sr_origin;
+            return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+                (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+                // or any other URL that isn't scheme relative or absolute i.e relative.
+                !(/^(\/\/|http:|https:).*/.test(url));
+        }
 
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
 
-
-
-
-    <div class='line_horizontal' style="margin-left: 124px;margin-top: 190px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 150px;margin-top: 100px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 152px;margin-top: 100px;width: 10px"></div>
-
-    <div class='arrow' style="margin-left: 124px;margin-top: 200px;width: 38px"></div>
-
-    <div class='line_horizontal' style="margin-left: 124px;margin-top: 210px;width: 32px;"></div>
-    <div class='line_vertical' style="margin-left: 154px;margin-top: 212px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 156px;margin-top: 300px;width: 6px"></div>
-
-
-
-
-    <div class='arrow' style="margin-left: 250px;margin-top: 90px;width: 42px"></div>
-
-    <div class='line_horizontal' style="margin-left: 250px;margin-top: 100px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 276px;margin-top: 102px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 278px;margin-top: 190px;width: 14px"></div>
-
-    <div class='line_horizontal' style="margin-left: 250px;margin-top: 200px;width: 32px;"></div>
-    <div class='line_vertical' style="margin-left: 280px;margin-top: 100px;height: 100px;"></div>
-    <div class='arrow' style="margin-left: 282px;margin-top: 100px;width: 10px"></div>
-
-    <div class='arrow' style="margin-left: 250px;margin-top: 210px;width: 42px"></div>
-
-    <div class='line_horizontal' style="margin-left: 250px;margin-top: 300px;width: 36px;"></div>
-    <div class='line_vertical' style="margin-left: 284px;margin-top: 200px;height: 100px;"></div>
-    <div class='arrow' style="margin-left: 286px;margin-top: 200px;width: 6px"></div>
-
-
+        function sendpost() {
+			$.post( window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/change-graph/",
+			    JSON.stringify({'ids': [12, 3, 4, 5, 6]}))
+				.done(location.reload());
+		}
 
 
-    <div class='arrow' style="margin-left: 380px;margin-top: 100px;width: 34px"></div>
+		$(function(){
 
-    <div class='line_horizontal' style="margin-left: 380px;margin-top: 200px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 406px;margin-top: 110px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 408px;margin-top: 110px;width: 6px"></div>
+				var cy = window.cy = cytoscape({
+					container: document.getElementById('cy'),
 
-    <div class='arrow' style="margin-left: 380px;margin-top: 210px;width: 34px"></div>
+					style: [
+						{
+							selector: 'node',
+							style: {
+								'shape': 'roundrect',
+								'width': '70px',
+								'height': '55px',
+								'content': 'data(name)',
+                                'color': '#666',
+								'text-outline-width': 4,
+								'text-outline-color': 'data(color1)',
+								'text-valign': 'center',
+								'background-color': 'data(color1)',
+								'border-width': '3px',
+								'border-color': 'data(color2)'
+							}
+						},
+
+						{
+							selector: 'edge',
+							style: {
+
+								'width': 3,
+								'target-arrow-shape': 'triangle',
+								'line-color': '#BBB',
+								'target-arrow-color': '#BBB',
+								'curve-style': 'bezier'
+							}
+						},
+
+						{
+							selector: 'node:selected',
+							style: {
+						        'border-color': '#999',
+						        'background-color': '#CCC',
+                                'text-outline-color': '#CCC',
+                                'color' : '#444'
+						        //'text-outline-color': '#b89fdd'
+							}
+
+						}
+					],
+
+					elements: {
+						nodes: [
+
+						{% for i in all_nodes %}
+						    { data:
+                            { id: '{{i.0}}', name: '{{i.1}}', type: '{{i.2}}',
+						         {% if i.2 == 'StartNode' %}
+                                     color1: '#f8f8f8', color2: '#BBB'
+                                 {% else %}
+                                     color1: '#f8f8f8', color2: '#BBB'
+                                 {% endif %},
+
+                                 info: {
+
+                                    {% for j in i.3 %}
+
+                                        '{{j.0}}': '{{j.1}}',
+
+                                    {% endfor %}
+
+                                 } } },
+						{% endfor %}
+
+						],
+						edges: [
+
+						    {% for i in all_edges %}
+						        { data: { source: '{{i.0}}', target: '{{i.1}}', type: '{{i.2}}', edge_id: '{{i.3}}' } },
+						    {% endfor %}
+						]
+					},
+
+					layout: {
+						name: 'preset',
+
+						positions: {
+
+						    {% for i in coords %}
+
+						        '{{i.0}}': {x: {{i.1}}, y: {{i.2}} },
+
+						    {% endfor %}
+						}
+					},
 
 
+				});
+
+				cy.on('mouseover', 'node', function(event) {
+                    var node = event.cyTarget;
+                    $(".qtip").remove();
+                    var attrs = Object.keys(node.attr('info'));
+                    var s = '';
+                    for (var i = 0; i < attrs.length; i++) {
+                        s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
+                    }
+                    node.qtip({
+                         content: s,
+                         style: { classes: 'qtip-bootstrap' },
+                         show: {
+                            solo: true,
+                            event: event.type,
+                            ready: true
+                         },
+                         hide: {
+                            event: 'mouseout unfocus'
+                         }
+                    }, event);
+
+                });
+
+                cy.on('mouseover', 'edge', function(event) {
+					    var edge = event.cyTarget;
+				    	$(".qtip").remove();
+
+				 		document.styleSheets[4].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
+				 		document.styleSheets[4].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
+
+					    edge.qtip({
+					         content: "<b>Type</b>: "+edge.attr('type'),
+			         		 style: { classes: 'qtip-bootstrap qtip_margin',},
+					         show: {
+					         	solo: true,
+					            event: event.type,
+					            ready: true
+					         },
+					         hide: {
+					            event: 'mouseout unfocus'
+					         }
+					    }, event);
+
+					});
 
 
+					var remove = {
+                                id: 'remove',
+                                title: 'Remove',
+                                selector: 'node, edge',
+                                onClickFunction: function (event) {
 
-    <div class='arrow' style="margin-left: 502px;margin-top: 100px;width: 38px"></div>
+                                  var target = event.cyTarget;
+                                  if(target.isEdge()){
+                                  	target.remove();
+										changes.push({
+	                                  	'type': 'relation',
+	                                  	'source': target.attr('source'),
+	                                  	'target': target.attr('target'),
+	                                  	'action': 'delete'
+	                                  });
+                                	console.log(changes);
+                                  }
 
-    <div class='line_horizontal' style="margin-left: 502px;margin-top: 110px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 528px;margin-top: 112px;height: 80px;"></div>
-    <div class='arrow' style="margin-left: 530px;margin-top: 190px;width: 10px"></div>
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: false
+                    }
 
-    <div class='arrow' style="margin-left: 502px;margin-top: 200px;width: 38px"></div>
+					var newEdge = {
+                                id: 'newEdge',
+                                title: 'New edge',
+                                selector: 'node',
+                                onClickFunction: function (event) {
+                                	cxt.removeMenuItem('newEdge');
+                                	cxt.appendMenuItem(createEdge);
+                                	cxt.appendMenuItem(finish);
+                                	cxt.firstEdge = event.cyTarget;
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: false
+                    }
 
-    <div class='line_horizontal' style="margin-left: 502px;margin-top: 210px;width: 32px;"></div>
-    <div class='line_vertical' style="margin-left: 532px;margin-top: 212px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 534px;margin-top: 300px;width: 6px"></div>
+					var createEdge = {
+                                id: 'createEdge',
+                                title: 'Create edge',
+                                selector: 'node',
+                                onClickFunction: function (event) {
+                                	cy.add({
+                                		group: 'edges',
+                                		data: { source: cxt.firstEdge.attr('id'),
+                                				target: event.cyTarget.attr('id'),
+                                				type: 'relation' }
+                                	});
+                                	changes.push({
+                                		'type': 'relation',
+                                		'source': cxt.firstEdge.attr('id'),
+	                                  	'target': event.cyTarget.attr('id'),
+	                                  	'action': 'add'
+                                	});
+                                	console.log(changes);
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: false
+                    }
 
+                    var finish = {
+                                id: 'finish',
+                                title: 'Finish',
+                                selector: '*',
+                                onClickFunction: function (event) {
+                                	cxt.removeMenuItem('createEdge');
+                                	cxt.removeMenuItem('finish');
+                                	cxt.appendMenuItem(newEdge);
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: true
+                    }
 
+                    var normalSize = {
+                    			id: 'normalSize',
+                    			title: 'Normal size',
+                    			selector: '*',
+                    			onClickFunction: function (event) {
+                    				cy.fit();
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: true
+                    }
 
+					var cxt = cy.contextMenus({
+                        menuItems: [
+                        	 normalSize,
+                             remove,
+                             newEdge,
+                        ],
+                        menuItemClasses: ['custom-menu-item'],
+                        contextMenuClasses: ['custom-context-menu']
+                    });
 
+			});
 
-    <div class='line_horizontal' style="margin-left: 628px;margin-top: 100px;width: 28px;"></div>
-    <div class='line_vertical' style="margin-left: 654px;margin-top: 102px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 656px;margin-top: 190px;width: 10px"></div>
+		</script>
 
-    <div class='arrow' style="margin-left: 628px;margin-top: 200px;width: 38px"></div>
+        {% include 'taskgraph/alerts.html' %}
 
-    <div class='line_horizontal' style="margin-left: 628px;margin-top: 300px;width: 32px;"></div>
-    <div class='line_vertical' style="margin-left: 658px;margin-top: 210px;height: 90px;"></div>
-    <div class='arrow' style="margin-left: 660px;margin-top: 210px;width: 6px"></div>
+        <input type='button' onclick='sendpost()' value="Save changes"/>
 
-
-    <div style="border: 1px solid;border-color:white;border-left-color:black;margin-left:800px;height:430px;padding:20px">
-        Name: <span style="margin-left:33px"><input value="Task5"></span><br>
-        Description: <input value="About Task5"><br>
-        Categoty: <span style="margin-left:14px"><input value="Category of Task5"></span><br>
-        Assigns: <span style="margin-left:21px"><input value="dev1 dev2"></span><br>
-        <span style="margin-left:78px"><input type="submit" value="Save"></span><br><br>
-        <div style="margin: 10px">
-            <button style="width: 200px">Swap selected</button>
-        </div>
-        <div style="margin: 10px">
-            <button style="width: 200px">Remove selected</button>
-        </div>
-        <div style="margin: 10px">
-            <button style="width: 200px">Create task</button>
-        </div>
-        <div style="margin: 10px">
-            <button style="width: 200px">Create relation</button>
-        </div>
-        <div style="margin: 10px">
-            <button style="width: 200px">Assign perfomer</button>
-        </div>
-        <div style="margin: 10px">
-            <button style="width: 200px">Edit milestone</button>
-        </div>
-        <div style="margin: 10px">
-            <button style="width: 200px">Edit category</button>
-        </div>
-    </div>
+		<div id="cy"></div>
 {% endblock %}
