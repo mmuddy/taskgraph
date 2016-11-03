@@ -22,7 +22,7 @@ def graph_view_page(request):
     if project.count() == 0:
         context = {'is_user_active': True,
                    'contains_menu': True,
-                   'alerts': [alertfactory.warning('No active project!')]}
+                   'alerts': [alertfactory.warning('No active project, please choose one on the Project page!')]}
         return render(request, 'taskgraph/graph/view.html', context)
 
     assert len(project) == 1
