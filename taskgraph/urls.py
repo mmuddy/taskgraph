@@ -7,7 +7,7 @@ from django.conf.urls import url
 
 urlpatterns = [
 
-    url(r'^$', base.overview_page, name='overview'),
+    url(r'^$', profile.trackers_page, name='overview'),
 
     url(r'signup/', base.signup_page, name='signup'),
 
