@@ -1,15 +1,12 @@
 from taskgraph.model.model import Project
 from taskgraph.tasktracker.getinterface import get_interface
-<<<<<<< HEAD
 from django.shortcuts import redirect
 from taskgraph.model.model import *
 from tulip import *
 from pprint import pprint
-=======
 from . import alertfactory, graphview
 from django.shortcuts import render
 
->>>>>>> refs/remotes/origin/master
 
 
 def analysis_page(request):
