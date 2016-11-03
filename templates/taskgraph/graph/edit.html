@@ -246,12 +246,13 @@ Edit
                                   var target = event.cyTarget;
                                   if(target.isEdge()){
                                   	target.remove();
-										history.push({
+									history.push({
 	                                  	'type': 'relation',
 	                                  	'source': target.attr('source'),
 	                                  	'target': target.attr('target'),
 	                                  	'action': 'delete'
 	                                  });
+	                                  console.log(history);
                                   }
 
                                 },
