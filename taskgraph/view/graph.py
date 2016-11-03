@@ -2,6 +2,7 @@ from taskgraph.model.model import Project
 from taskgraph.tasktracker.getinterface import get_interface
 from . import alertfactory, graphview
 from django.shortcuts import render
+from django.shortcuts import redirect
 
 
 def analysis_page(request):
@@ -62,3 +63,9 @@ def task_edit_page(request):
     context = {'is_user_active': True,
                'contains_menu': True}
     return render(request, 'taskgraph/graph/task_edit.html', context)
+
+
+def change_graph(request):
+    #change
+    response = redirect('edit')
+    return response
