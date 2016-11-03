@@ -2,6 +2,7 @@ from taskgraph.model.model import Project
 from taskgraph.tasktracker.getinterface import get_interface
 from . import alertfactory, graphview
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.shortcuts import redirect
 
 
@@ -66,6 +67,15 @@ def task_edit_page(request):
 
 
 def change_graph(request):
-    #change
-    response = redirect('edit')
-    return response
+    data  = id = project_id = ''
+    if request.method == "POST" and request.is_ajax():
+        try:
+            data = request.POST.get('type')
+            id = request.POST.get('id')
+            project_id = request.POST.get('project_id')
+        except:
+            # to do
+            pass
+
+    return HttpResponse(data + id + project_id) #just for debug
+    #return edit_page(request)
