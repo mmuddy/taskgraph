@@ -68,4 +68,5 @@ def task_edit_page(request):
 
 def change_graph(request):
 
-    return graph_view_page(request)
+    
+    return edit_page(request)
