@@ -19,9 +19,11 @@ urlpatterns = [
     url(r'task-edit/', graph.task_edit_page, name='task-edit'),
 
     url(r'trackers/', profile.trackers_page, name='trackers'),
-    url(r'trackers-list/', profile.trackers_list_page, name='trackers-list'),
+    url(r'trackers-list/$', profile.trackers_list_page, name='trackers-list'),
+    url(r'trackers-list/([^/]*)/$', profile.trackers_list_page, name='trackers-list'),
+    url(r'trackers-list/([^/]*)/([^/]*)/$', profile.trackers_list_page, name='trackers-list'),
     url(r'trackers-add/', profile.trackers_add_page, name='trackers-add'),
-    url(r'trackers-edit/(-?\d+)/', profile.trackers_edit_page, name='trackers-edit'),
-    url(r'trackers-delete/(-?\d+)/', profile.trackers_delete, name='trackers-delete'),
+    url(r'trackers-edit/(\d+)/', profile.trackers_edit_page, name='trackers-edit'),
+    url(r'trackers-delete/(\d+)/', profile.trackers_delete, name='trackers-delete'),
 
 ]

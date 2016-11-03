@@ -2,8 +2,9 @@ from taskgraph.model import model
 from . import alertfactory
 
 from django.db import IntegrityError
-from django.http import Http404
-from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
+from django.core.urlresolvers import reverse
 
 from copy import copy
 
@@ -66,12 +67,15 @@ class TrackersSubMenu:
                 TrackersSubMenu.Edit.as_active()]
 
 
-def trackers_list_page(request, alerts=None):
+def trackers_list_page(request, alerts=None, message='Unknown error!'):
     trackers = model.Tracker.objects.order_by('type', 'url', 'user_name')
 
     for tracker in trackers:
-        tracker.hash = hash(tracker)
-        print(tracker.hash)
+        tracker.hash = tracker.id
+
+    if alerts:
+        alert_type = alerts == 'success' and alertfactory.success or alertfactory.error
+        alerts = [trackers_alert(alert_type, message)]
 
     context = {'is_user_active': True,
                'contains_menu': True,
@@ -83,7 +87,6 @@ def trackers_list_page(request, alerts=None):
 
 
 def trackers_add_page(request):
-
     context = {'is_user_active': True,
                'contains_menu': True,
                'sub_menu': TrackersSubMenu.for_add()}
@@ -118,31 +121,21 @@ def trackers_add_page_post(request, context):
         context['alerts'] = [trackers_alert(alertfactory.error, 'Posted data isn\'t unique')]
         return render(request, 'taskgraph/profile/trackers_add.html', context)
 
-    return trackers_list_page(request, alerts=[trackers_alert(alertfactory.success,
-                                                              'Changes in tracker list was applied')])
+    return HttpResponseRedirect(reverse('trackers-list', args=('success', 'Changes in tracker list was applied')))
 
 
-def trackers_edit_page(request, tracker_hash):
-    requested_tracker = None
-    print(tracker_hash)
-    for tracker in model.Tracker.objects.all():
-        print(hash(tracker))
-        print(hash(tracker) == int(tracker_hash))
-        if hash(tracker) == int(tracker_hash):
-            requested_tracker = tracker
-
-    if not requested_tracker:
-        raise Http404('No Tracker matches the given query.')
+def trackers_edit_page(request, tracker_id):
+    tracker = get_object_or_404(model.Tracker, id=tracker_id)
 
     context = {'is_user_active': True,
                'contains_menu': True,
-               'tracker_url': requested_tracker.url,
-               'tracker_login': requested_tracker.user_name,
-               'tracker_hash': hash(requested_tracker),
+               'tracker_url': tracker.url,
+               'tracker_login': tracker.user_name,
+               'tracker_hash': tracker.id,
                'sub_menu': TrackersSubMenu.for_edit()}
 
     if request.method == 'POST':
-        return trackers_edit_page_post(request, context, requested_tracker)
+        return trackers_edit_page_post(request, context, tracker)
 
     return render(request, 'taskgraph/profile/trackers_edit.html', context)
 
@@ -165,21 +158,10 @@ def trackers_edit_page_post(request, context, tracker):
         context['alerts'] = [trackers_alert(alertfactory.error, 'Posted data isn\'t unique')]
         return render(request, 'taskgraph/profile/trackers_edit.html', context)
 
-    return trackers_list_page(request, alerts=[trackers_alert(alertfactory.success,
-                                                              'Changes in tracker list was applied')])
+    return HttpResponseRedirect(reverse('trackers-list', args=('success', 'Changes in tracker list was applied')))
 
 
-def trackers_delete(request, tracker_hash):
-    print(tracker_hash)
-    requested_tracker = None
-    for tracker in model.Tracker.objects.all():
-        print('{} hash:{}'.format(repr(tracker), hash(tracker)))
-        if hash(tracker) == int(tracker_hash):
-            requested_tracker = tracker
-
-    if not requested_tracker:
-        raise Http404('No Tracker matches the given query.')
-
-    requested_tracker.delete()
-
-    return trackers_list_page(request, alerts=[trackers_alert(alertfactory.success, 'Tracker has been deleted')])
+def trackers_delete(_, tracker_id):
+    tracker = get_object_or_404(model.Tracker, id=tracker_id)
+    tracker.delete()
+    return HttpResponseRedirect(reverse('trackers-list', args=('success', 'Tracker has been deleted')))

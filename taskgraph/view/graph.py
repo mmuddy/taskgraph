@@ -1,9 +1,15 @@
-from django.shortcuts import render
+from taskgraph.model.model import Project
 from taskgraph.tasktracker.getinterface import get_interface
+<<<<<<< HEAD
 from django.shortcuts import redirect
 from taskgraph.model.model import *
 from tulip import *
 from pprint import pprint
+=======
+from . import alertfactory, graphview
+from django.shortcuts import render
+
+>>>>>>> refs/remotes/origin/master
 
 
 def analysis_page(request):
@@ -19,80 +25,44 @@ def edit_page(request):
 
 
 def graph_view_page(request):
-    info = {
-        '1': ['Task1', 'Task1 category', 'Task1 performer', 0.66, 'Solved'],
-        '2': ['Task2', 'Task2 category', 'Task2 performer', 0.66, 'Solved'],
-        '3': ['Task3', 'Task3 category', 'Task3 performer', 0.66, 'Solved'],
-        '4': ['Task4', 'Task4 category', 'Task4 performer', 0.66, 'Solved'],
-        '5': ['Task5', 'Task5 category', 'Task5 performer', 0.66, 'Solved'],
-        '6': ['Task6', 'Task6 category', 'Task6 performer', 0.66, 'Unsolved'],
-        '7': ['Task7', 'Task7 category', 'Task7 performer', 0.66, 'Unsolved'],
-        '8': ['Task8', 'Task8 category', 'Task8 performer', 0.66, 'Unsolved'],
-        '9': ['Task9', 'Task9 category', 'Task9 performer', 0.66, 'Unsolved'],
-        '10': ['Task10', 'Task10 category', 'Task10 performer', 0.66, 'Unsolved'],
-        '11': ['Task11', 'Task11 category', 'Task11 performer', 0.66, 'Unsolved'],
-        '12': ['Task12', 'Task12 category', 'Task12 performer', 0.66, 'Unsolved'],
-        '13': ['Task13', 'Task13 category', 'Task13 performer', 0.66, 'Unsolved'],
-    }
+    project = Project.objects.filter(is_active=True)
 
-    graph = {
-        '1': ['2', '3', '4', '13'],
-        '2': ['5', '6'],
-        '3': ['5', '6', '13'],
-        '4': ['6'],
-        '5': ['7', '13'],
-        '6': ['7', '8'],
-        '7': ['9', '10'],
-        '8': ['10', '11'],
-        '9': ['12', '13'],
-        '10': ['12'],
-        '11': ['12', '13'],
-        '12': ['13'],
-        '13': [],
-    }
+    if project.count() == 0:
+        context = {'is_user_active': True,
+                   'contains_menu': True,
+                   'alerts': [alertfactory.warning('No active project, please choose one on the Project page!')]}
+        return render(request, 'taskgraph/graph/view.html', context)
 
-    tgraph = tlp.newGraph()
+    assert len(project) == 1
 
-    tulip_graph = {}
+    project = project[0]
+    i_tracker = get_interface(project.tracker.type)
+    project.tracker.restore_project_tasks(i_tracker=i_tracker)
+    info, edge_list, adjacency_matrix = graphview.prepare_graph(project, i_tracker)
 
-    for i in graph:
-        node = tgraph.addNode()
-        tulip_graph[node] = [i] + info[i]
-        info[i] += [node]
+    vertex_block_width = 40
+    tgraph, node_ind = graphview.prepare_tultip(info, edge_list,
+                                                vertex_block_width=vertex_block_width,
+                                                vertex_block_height=80)
 
-    for i in graph:
-        for j in graph[i]:
-            tgraph.addEdge(info[i][-1], info[j][-1])
+    if edge_list:
+        tgraph.applyLayoutAlgorithm('Upward Planarization (OGDF)', tgraph.getLayoutProperty("viewLayout"))
+    else:
+        tgraph.applyLayoutAlgorithm('Random layout', tgraph.getLayoutProperty("viewLayout"))
 
-    viewSize = tgraph.getSizeProperty("viewSize")
-    viewShape = tgraph.getIntegerProperty("viewShape")
-
-    for n in tgraph.getNodes():
-        viewSize[n] = tlp.Size(40, 80, 1)
-        viewShape[n] = tlp.NodeShape.Square
-
-    tgraph.applyLayoutAlgorithm('Hierarchical Graph', tgraph.getLayoutProperty("viewLayout"))
-
-    min_x = min(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] for node in tgraph.getNodes())
-    max_x = max(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] for node in tgraph.getNodes())
-    min_y = min(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] for node in tgraph.getNodes())
-    max_y = max(tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] for node in tgraph.getNodes())
-
-    diff_y = max_y - min_y or 1
-    diff_x = max_x - min_x or 1
-
-    for node in tgraph.getNodes():
-        tulip_graph[node] += (tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[0] - min_x) / diff_x * 1200, \
-                             (tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] - min_y) / diff_y * 500
-
-    all_nodes = [tulip_graph[node] for node in tgraph.getNodes()]
-    all_edges = [(i, j) for i in graph for j in graph[i]]
+    scale_ind = 3
+    coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
+    all_nodes = [info[node_ind[node]] for node in tgraph.getNodes()]
+    all_edges = [(i, j, adjacency_matrix[int(i)][int(j)][0], adjacency_matrix[int(i)][int(j)][1])
+                 for i in edge_list for j in edge_list[i]]
 
     context = {'is_user_active': True,
                'contains_menu': True,
                'all_edges': all_edges,
                'all_nodes': all_nodes,
+               'coords': coords,
                'info': info}
+
     return render(request, 'taskgraph/graph/view.html', context)
 
 

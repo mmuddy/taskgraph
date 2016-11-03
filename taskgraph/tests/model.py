@@ -48,7 +48,7 @@ def assert_cleanup(test_case, models_before):
 
 
 def test_projects_creation_and_cleanup(test_case, tracker):
-    type_list = [Project, Assignee, TaskState, TaskRelationType]
+    type_list = [Project, Assignee, TaskState, TaskRelationType, TaskCategory]
 
     models_before = []
     for model_type in type_list:
@@ -64,7 +64,10 @@ def test_projects_creation_and_cleanup(test_case, tracker):
 
 
 def test_create_and_clean_up_tasks(test_case, tracker):
-    tracker.restore_project_list(get_interface(tracker.type))
+    i_tracker = get_interface(tracker.type).connect(tracker)
+    i_tracker.refresh()
+
+    tracker.restore_project_list(i_tracker)
 
     list_before = []
 
@@ -72,13 +75,13 @@ def test_create_and_clean_up_tasks(test_case, tracker):
     rel_count = TaskRelation.objects.all().count()
 
     list_before.append((Task, task_count))
-    #list_before.append((TaskRelation, rel_count))
+    list_before.append((TaskRelation, rel_count))
 
     for project in tracker.project_set.all():
         project.is_active = True
         project.save()
 
-    tracker.restore_project_tasks(get_interface(tracker.type))
+    tracker.restore_project_tasks(i_tracker, only_active=False)
 
     for model_type, before_count in list_before:
         test_case.assertTrue(model_type.objects.all().count() - before_count > 0)
@@ -110,3 +113,81 @@ class TestProjectWithRedmine(TestCase):
     def test_projects_creation_and_cleanup(self):
         if tracker_redmine:
             test_create_and_clean_up_tasks(self, tracker_redmine())
+
+
+class TestIntegrationWithRedmine(TestCase):
+
+    def test_task_update(self):
+        tracker = tracker_redmine()
+        tracker.save()
+        tracker.restore_project_list(get_interface(tracker.type))
+
+        pytiff = None
+
+        for project in tracker.project_set.all():
+            if project.name == 'Pytift test':
+                project.is_active = True
+                project.save()
+                pytiff = project
+                break
+
+        tracker.restore_project_tasks(get_interface(tracker.type))
+
+        for task in pytiff.task_set.filter(category__name='UnitTest'):
+            subj_field = task.taskadditionalfield_set.get(name='subject')
+            subj_field.char += '$ test passed'
+            subj_field.save()
+            task.save(save_on_tracker=True)
+
+        tracker.restore_project_tasks(get_interface(tracker.type))
+        pytiff = tracker.project_set.get(name='Pytift test')
+
+        for task in pytiff.task_set.filter(category__name='UnitTest'):
+            subj_field = task.taskadditionalfield_set.get(name='subject')
+            subj_field.char = subj_field.char.split('$')[0]
+            subj_field.save()
+            task.save(save_on_tracker=True)
+
+    def test_relation_update(self):
+        tracker = tracker_redmine()
+        tracker.save()
+        tracker.restore_project_list(get_interface(tracker.type))
+
+        pytiff = None
+
+        for project in tracker.project_set.all():
+            if project.name == 'Pytift test':
+                project.is_active = True
+                project.save()
+                pytiff = project
+                break
+
+        tracker.restore_project_tasks(get_interface(tracker.type))
+
+        t_from = None
+        t_to = None
+        t_type = None
+
+        old_count = pytiff.taskrelation_set.all().count()
+
+        for relation in pytiff.taskrelation_set.all():
+            t_from = relation.from_task
+            t_to = relation.to_task
+            t_type = relation.type
+            relation.delete(delete_on_tracker=True)
+            break
+
+        self.assertEqual(pytiff.taskrelation_set.all().count(), old_count - 1)
+
+        tracker.restore_project_tasks(get_interface(tracker.type))
+
+        pytiff = tracker.project_set.get(name='Pytift test')
+
+        self.assertEqual(pytiff.taskrelation_set.all().count(), old_count - 1)
+
+        old_rel = TaskRelation.objects.create(project=pytiff, type=t_type, from_task=t_from, to_task=t_to)
+        old_rel.save(save_on_tracker=True)
+
+        self.assertEqual(pytiff.taskrelation_set.all().count(), old_count)
+
+
