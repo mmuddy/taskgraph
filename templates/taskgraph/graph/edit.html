@@ -44,7 +44,8 @@ Edit
     <script>
 
         function sendpost(){
-			$.post( "taskgraph/change-graph", JSON.stringify([{a:1,b:2},{a:3,b:4}]))
+			$.post( window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/change-graph",
+			    JSON.stringify([{a:1,b:2},{a:3,b:4}]))
 				.done(function( data ) { $('html').html(data) });
 		}
 
