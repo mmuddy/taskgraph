@@ -67,15 +67,5 @@ def task_edit_page(request):
 
 
 def change_graph(request):
-    data  = id = project_id = ''
-    if request.method == "POST" and request.is_ajax():
-        try:
-            data = request.POST.get('type')
-            id = request.POST.get('id')
-            project_id = request.POST.get('project_id')
-        except:
-            # to do
-            pass
-
-    return HttpResponse(data + id + project_id) #just for debug
-    #return edit_page(request)
+    
+    return edit_page(request)
