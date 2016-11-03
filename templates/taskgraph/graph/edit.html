@@ -90,6 +90,232 @@ Edit
 				.done(location.reload());
 		}
 
+
+		$(function(){
+
+				var cy = window.cy = cytoscape({
+					container: document.getElementById('cy'),
+
+					style: [
+						{
+							selector: 'node',
+							style: {
+								'shape': 'roundrect',
+								'width': '70px',
+								'height': '55px',
+								'content': 'data(name)',
+                                'color': '#666',
+								'text-outline-width': 4,
+								'text-outline-color': 'data(color1)',
+								'text-valign': 'center',
+								'background-color': 'data(color1)',
+								'border-width': '3px',
+								'border-color': 'data(color2)'
+							}
+						},
+
+						{
+							selector: 'edge',
+							style: {
+
+								'width': 3,
+								'target-arrow-shape': 'triangle',
+								'line-color': '#BBB',
+								'target-arrow-color': '#BBB',
+								'curve-style': 'bezier'
+							}
+						},
+
+						{
+							selector: 'node:selected',
+							style: {
+						        'border-color': '#999',
+						        'background-color': '#CCC',
+                                'text-outline-color': '#CCC',
+                                'color' : '#444'
+						        //'text-outline-color': '#b89fdd'
+							}
+
+						}
+					],
+
+					elements: {
+						nodes: [
+
+						{% for i in all_nodes %}
+						    { data:
+                            { id: '{{i.0}}', name: '{{i.1}}', type: '{{i.2}}',
+						         {% if i.2 == 'StartNode' %}
+                                     color1: '#f8f8f8', color2: '#BBB'
+                                 {% else %}
+                                     color1: '#f8f8f8', color2: '#BBB'
+                                 {% endif %},
+
+                                 info: {
+
+                                    {% for j in i.3 %}
+
+                                        '{{j.0}}': '{{j.1}}',
+
+                                    {% endfor %}
+
+                                 } } },
+						{% endfor %}
+
+						],
+						edges: [
+
+						    {% for i in all_edges %}
+						        { data: { source: '{{i.0}}', target: '{{i.1}}', type: '{{i.2}}' } },
+						    {% endfor %}
+						]
+					},
+
+					layout: {
+						name: 'preset',
+
+						positions: {
+
+						    {% for i in coords %}
+
+						        '{{i.0}}': {x: {{i.1}}, y: {{i.2}} },
+
+						    {% endfor %}
+						}
+					},
+
+
+				});
+
+				cy.on('mouseover', 'node', function(event) {
+                    var node = event.cyTarget;
+                    $(".qtip").remove();
+                    var attrs = Object.keys(node.attr('info'));
+                    var s = '';
+                    for (var i = 0; i < attrs.length; i++) {
+                        s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
+                    }
+                    node.qtip({
+                         content: s,
+                         style: { classes: 'qtip-bootstrap' },
+                         show: {
+                            solo: true,
+                            event: event.type,
+                            ready: true
+                         },
+                         hide: {
+                            event: 'mouseout unfocus'
+                         }
+                    }, event);
+
+                });
+
+                cy.on('mouseover', 'edge', function(event) {
+					    var edge = event.cyTarget;
+				    	$(".qtip").remove();
+
+				 		document.styleSheets[4].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
+				 		document.styleSheets[4].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
+
+					    edge.qtip({
+					         content: "<b>Type</b>: "+edge.attr('type'),
+			         		 style: { classes: 'qtip-bootstrap qtip_margin',},
+					         show: {
+					         	solo: true,
+					            event: event.type,
+					            ready: true
+					         },
+					         hide: {
+					            event: 'mouseout unfocus'
+					         }
+					    }, event);
+
+					});
+
+
+					var history = [];
+
+					var cxt = cy.contextMenus({
+                        menuItems: [
+                            {
+                                id: 'remove',
+                                title: 'Remove',
+                                selector: 'node, edge',
+                                onClickFunction: function (event) {
+
+                                  var target = event.cyTarget;
+                                  if(target.isEdge()){
+                                  	target.remove();
+										history.push({
+	                                  	'type': 'relation',
+	                                  	'source': target.attr('source'),
+	                                  	'target': target.attr('target'),
+	                                  	'action': 'delete'
+	                                  });
+                                  }
+
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: false
+                             },
+                             {
+                                id: 'newEdge',
+                                title: 'New edge',
+                                selector: 'node',
+                                onClickFunction: function (event) {
+                                	cxt.disableMenuItem('newEdge');
+                                	cxt.enableMenuItem('createEdge');
+                                	cxt.enableMenuItem('finish');
+                                	cxt.firstEdge = event.cyTarget;
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: false
+                             },
+                             {
+                                id: 'createEdge',
+                                title: 'Create edge',
+                                selector: 'node',
+                                onClickFunction: function (event) {
+                                	cy.add({
+                                		group: 'edges',
+                                		data: { source: cxt.firstEdge.attr('id'),
+                                				target: event.cyTarget.attr('id'),
+                                				type: 'relation' }
+                                	});
+                                	history.push({
+                                		'type': 'relation',
+                                		'source': cxt.firstEdge.attr('id'),
+	                                  	'target': event.cyTarget.attr('id'),
+	                                  	'action': 'add'
+                                	});
+                                	console.log(history);
+                                },
+                                hasTrailingDivider: true,
+                                disabled: true,
+                                coreAsWell: false
+                             },
+                             {
+                                id: 'finish',
+                                title: 'Finish',
+                                selector: '*',
+                                onClickFunction: function (event) {
+                                	cxt.enableMenuItem('newEdge');
+                                	cxt.disableMenuItem('createEdge');
+                                	cxt.disableMenuItem('finish');
+                                },
+                                hasTrailingDivider: true,
+                                disabled: true,
+                                coreAsWell: true
+                             },
+                        ],
+                        menuItemClasses: ['custom-menu-item'],
+                        contextMenuClasses: ['custom-context-menu']
+                    });
+
+			});
+
 		</script>
 
         {% include 'taskgraph/alerts.html' %}
