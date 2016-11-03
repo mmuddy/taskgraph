@@ -4,6 +4,7 @@ from . import alertfactory, graphview
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import redirect
+import json
 
 
 def analysis_page(request):
@@ -67,6 +68,13 @@ def task_edit_page(request):
 
 
 def change_graph(request):
-
-    
-    return edit_page(request)
+    data = 'ops'
+    if request.method == "POST" and request.is_ajax():
+        try:
+            data = request.POST.get('ids')
+        except:
+            # to do
+            pass
+    data = json.loads(request.body.decode("utf-8"))
+    print(data)
+    return HttpResponse('Done')
