@@ -18,6 +18,8 @@
             color: #337ab7;
         }
 
+        .qtip_margin {}
+
     </style>
 
 {% endblock %}
@@ -148,6 +150,7 @@
                          content: s,
                          style: { classes: 'qtip-bootstrap' },
                          show: {
+                            solo: true,
                             event: event.type,
                             ready: true
                          },
@@ -157,6 +160,28 @@
                     }, event);
 
                 });
+
+                cy.on('mouseover', 'edge', function(event) {
+					    var edge = event.cyTarget;
+				    	$(".qtip").remove();
+
+				 		//document.styleSheets[2].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
+				 		//document.styleSheets[2].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
+
+					    edge.qtip({
+					         content: "<b>Type</b>: "+edge.attr('type'),
+			         		 style: { classes: 'qtip-bootstrap qtip_margin',},
+					         show: {
+					         	solo: true,
+					            event: event.type,
+					            ready: true
+					         },
+					         hide: {
+					            event: 'mouseout unfocus'
+					         }
+					    }, event);
+
+					});
 
 			});
 
