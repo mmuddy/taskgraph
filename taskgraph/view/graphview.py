@@ -85,6 +85,8 @@ def get_graph_info(task_set, node_by_task_id, start_points, end_points):
             additional.append((field.name.replace("_", " "), add_field_val(field)))
         current_node_info.append(additional)
 
+        current_node_info.append(task.id)
+
         info[node_id] = current_node_info
 
     return info
