@@ -29,6 +29,7 @@ Task edit
     <div class="col-md-10 col-md-offset-1 main">
 
         <h3>Task name must be here</h3>
+        Task ID: {{task_id}}<br>
         Project: {{project}}<br><br>
         {{post}}
         <form class="form-horizontal" method="post">
@@ -122,7 +123,7 @@ Task edit
                         {% endif %}
                         {% for relation in to_relations %}
                             <tr>
-                                <td><a href="/taskgraph/task-edit/?task={{relation.id}}">Task id: {{relation.id}}, relation: {{relation.type}}</a></td>
+                                <td><a href="/taskgraph/task-edit/?task={{relation.id}}&project={{project_id}}">Task id: {{relation.id}}, relation: {{relation.type}}</a></td>
                                 <td align="right">
                                     <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
                                 </td>
@@ -139,7 +140,7 @@ Task edit
                         {% endif %}
                         {% for relation in from_relations %}
                             <tr>
-                                <td><a href="/taskgraph/task-edit/?task={{relation.id}}">Task id: {{relation.id}}, relation: {{relation.type}}</a></td>
+                                <td><a href="/taskgraph/task-edit/?task={{relation.id}}&project={{project_id}}">Task id: {{relation.id}}, relation: {{relation.type}}</a></td>
                                 <td align="right">
                                     <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
                                 </td>

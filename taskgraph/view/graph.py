@@ -75,7 +75,8 @@ def task_edit_page(request):
             project.restore_project_tasks(get_interface(tracker.type))
 
     request_task_id = request.GET.get('task');
-    if request_task_id is None:
+    request_project_id = request.GET.get('project');
+    if request_task_id is None or request_project_id is None:
         return render(request, 'taskgraph/alerts.html', {'alerts' : [{
             'css_container_class' : '',
             'css_class' : '',
@@ -84,7 +85,17 @@ def task_edit_page(request):
         }]})
 
     try:
-        task = Task.objects.get(identifier=request_task_id)
+        project = Project.objects.get(identifier=request_project_id)
+    except Project.DoesNotExist:
+        return render(request, 'taskgraph/alerts.html', {'alerts': [{
+            'css_container_class': '',
+            'css_class': '',
+            'name': 'Error',
+            'message': 'Project not found'
+        }]})
+
+    try:
+        task = Task.objects.get(identifier=request_task_id, project=project)
     except Task.DoesNotExist:
         return render(request, 'taskgraph/alerts.html', {'alerts': [{
             'css_container_class': '',
@@ -92,8 +103,6 @@ def task_edit_page(request):
             'name': 'Error',
             'message': 'Task not found'
         }]})
-
-    project = Project.objects.get(task=task)
 
     if request.method == 'POST':
         task.category = project.taskcategory_set.get(name=request.POST.get('category'))
@@ -113,7 +122,7 @@ def task_edit_page(request):
             field.save()
         task.save()
         response = redirect('task-edit')
-        response['Location'] += '?task=' + str(task.identifier)
+        response['Location'] += '?task=' + str(task.identifier) + "&project=" + str(project.identifier)
         return response
 
     add_fields = []
@@ -135,7 +144,8 @@ def task_edit_page(request):
 
     context = {'is_user_active': True,
                 'contains_menu': True,
-                'project' : task.project.name,
+                'project_id' : project.identifier,
+                'project' : project.name,
                 'task_id': task.identifier,
                 'assignee' : task.assignee.name,
                 'milestone' : task.milestone.name,
