@@ -107,6 +107,16 @@ def task_edit_page(request):
 
 
 def change_graph(request):
+
+    for curr in json.loads(request.POST['history']):
+        #curr - словарь с ключами 'type', 'action' и т.д.
+        pass
+        #todo: requests to tracker
+
+    return HttpResponse('Done')
+    '''
+
+
     history = json.loads(request.body.decode("utf-8"))
     type = history['type']
     action = history['action']
@@ -146,4 +156,4 @@ def change_graph(request):
             task.state = TaskState.objects.get(name=history['state'])
             task.save(save_on_tracker=True)
 
-    return HttpResponse('Done')
+    return HttpResponse('Done')'''

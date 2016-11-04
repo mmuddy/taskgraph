@@ -30,10 +30,10 @@ Edit
         <li class="divider-vertical"></li>
         <li class="nav-item"><a href="{% url 'view'%}">View</a>
         </li>
-        <!--<li class="divider-vertical"></li>
+        <li class="divider-vertical"></li>
         <li class="nav-item active"><a href="{% url 'edit'%}">Edit</a>
         </li>
-        <li class="divider-vertical"></li>
+        <!--<li class="divider-vertical"></li>
         <li class="nav-item"><a href="{% url 'analysis'%}">Analysis</a>
         </li>-->
     </ul>
@@ -87,8 +87,7 @@ Edit
 
         function sendpost() {
 			$.post( window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/change-graph/",
-			    JSON.stringify({'ids': [12, 3, 4, 5, 6]}))
-				.done(location.reload());
+			    {history: JSON.stringify(changes)}).done(location.reload());
 		}
 
 
@@ -189,50 +188,111 @@ Edit
 				});
 
 				cy.on('mouseover', 'node', function(event) {
-                    var node = event.cyTarget;
-                    $(".qtip").remove();
-                    var attrs = Object.keys(node.attr('info'));
-                    var s = '';
-                    for (var i = 0; i < attrs.length; i++) {
-                        s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
-                    }
-                    node.qtip({
-                         content: s,
-                         style: { classes: 'qtip-bootstrap' },
-                         show: {
-                            solo: true,
-                            event: event.type,
-                            ready: true
-                         },
-                         hide: {
-                            event: 'mouseout unfocus'
-                         }
-                    }, event);
-
-                });
-
-                cy.on('mouseover', 'edge', function(event) {
-					    var edge = event.cyTarget;
+					    var node = event.cyTarget;
 				    	$(".qtip").remove();
 
-				 		document.styleSheets[4].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
-				 		document.styleSheets[4].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
-
-					    edge.qtip({
-					         content: "<b>Type</b>: "+edge.attr('type'),
-			         		 style: { classes: 'qtip-bootstrap qtip_margin',},
-					         show: {
-					         	solo: true,
-					            event: event.type,
-					            ready: true
-					         },
-					         hide: {
-					            event: 'mouseout unfocus'
-					         }
-					    }, event);
+				    	if(isTipsEnabled){
+				    		var attrs = Object.keys(node.attr('info'));
+					    	var s = '<b>id</b>: '+node.attr('id')+'<br>';
+					    	for (var i = 0; i < attrs.length; i++) {
+					    		s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
+					    	}
+						    node.qtip({
+						         content: s,
+				         		 style: { classes: 'qtip-bootstrap' },
+						         show: {
+						         	solo: true,
+						            event: event.type,
+						            ready: true
+						         },
+						         hide: {
+						            event: 'mouseout unfocus'
+						         }
+						    }, event);
+				    	}
 
 					});
 
+					cy.on('mouseover', 'edge', function(event) {
+					    var edge = event.cyTarget;
+				    	$(".qtip").remove();
+
+				    	if(isTipsEnabled){
+				    		document.styleSheets[4].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
+					 		document.styleSheets[4].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
+
+						    edge.qtip({
+						         content: "<b>Type</b>: "+edge.attr('type'),
+				         		 style: { classes: 'qtip-bootstrap qtip_margin',},
+						         show: {
+						         	solo: true,
+						            event: event.type,
+						            ready: true
+						         },
+						         hide: {
+						            event: 'mouseout unfocus'
+						         }
+						    }, event);
+				    	}
+
+
+
+					});
+
+					var isTipsEnabled = true;
+
+					var disableTips = {
+								id: 'disableTips',
+                                title: 'Disable tips',
+                                selector: '',
+                                onClickFunction: function (event) {
+                                	cxt.insertBeforeMenuItem(enableTips, 'disableTips');
+                                  	cxt.removeMenuItem('disableTips');
+                                  	isTipsEnabled = false;
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: true
+					}
+
+					var enableTips = {
+								id: 'enableTips',
+                                title: 'Enable tips',
+                                selector: '',
+                                onClickFunction: function (event) {
+                                	cxt.insertBeforeMenuItem(disableTips, 'enableTips');
+                                  	cxt.removeMenuItem('enableTips');
+                                  	isTipsEnabled = true;
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: true
+					}
+
+					var createNode = {
+								id: 'createNode',
+                                title: 'Create node',
+                                selector: '',
+                                onClickFunction: function (event) {
+                                	var node = cy.add({
+                                		group: 'nodes',
+                                		data: { id: '_'+(Math.random()*1000000000|0),
+                                				name: 'New', type: '',
+                                				color1: '#f8f8f8', color2: '#BBB',
+                                				info: {}}
+                                	});
+                                	node.renderedPosition({x:event.originalEvent.clientX - 50, y: event.originalEvent.clientY - 90});
+                                	changes.push({
+                                		'type': 'task',
+                                		'task_id': node.attr('id'),
+	                                  	'action': 'add'
+                                	});
+                                	console.log(changes);
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: true
+					}
 
 					var remove = {
                                 id: 'remove',
@@ -243,13 +303,17 @@ Edit
                                   var target = event.cyTarget;
                                   if(target.isEdge()){
                                   	target.remove();
-										changes.push({
+									changes.push({
 	                                  	'type': 'relation',
-	                                  	'source': target.attr('source'),
-	                                  	'target': target.attr('target'),
-	                                  	'action': 'delete'
+	                                  	'from': target.attr('source'),
+	                                  	'to': target.attr('target'),
+	                                  	'action': 'delete',
+	                                  	'id': target.attr('edge_id'),
 	                                  });
                                 	console.log(changes);
+                                  }
+                                  else if(target.isNode()){
+                                  	alert('You do not have permission to remove the task');
                                   }
 
                                 },
@@ -278,17 +342,19 @@ Edit
                                 title: 'Create edge',
                                 selector: 'node',
                                 onClickFunction: function (event) {
-                                	cy.add({
+                                	var edge = cy.add({
                                 		group: 'edges',
                                 		data: { source: cxt.firstEdge.attr('id'),
                                 				target: event.cyTarget.attr('id'),
-                                				type: 'relation' }
+                                				type: 'relation',
+                                				edge_id:  '_'+(Math.random()*1000000000|0),}
                                 	});
                                 	changes.push({
                                 		'type': 'relation',
-                                		'source': cxt.firstEdge.attr('id'),
-	                                  	'target': event.cyTarget.attr('id'),
-	                                  	'action': 'add'
+                                		'from': cxt.firstEdge.attr('id'),
+	                                  	'to': event.cyTarget.attr('id'),
+	                                  	'action': 'add',
+	                                  	'id': edge.attr('edge_id'),
                                 	});
                                 	console.log(changes);
                                 },
@@ -311,10 +377,22 @@ Edit
                                 coreAsWell: true
                     }
 
+                    var editTask = {
+                    			id: 'editTask',
+                    			title: 'Edit task',
+                    			selector: 'node',
+                    			onClickFunction: function (event) {
+                    				// todo : redirect to task_edit with id parameter
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: false
+                    }
+
                     var normalSize = {
                     			id: 'normalSize',
                     			title: 'Normal size',
-                    			selector: '*',
+                    			selector: '',
                     			onClickFunction: function (event) {
                     				cy.fit();
                                 },
@@ -326,8 +404,10 @@ Edit
 					var cxt = cy.contextMenus({
                         menuItems: [
                         	 normalSize,
+                        	 disableTips,
                              remove,
                              newEdge,
+                             createNode
                         ],
                         menuItemClasses: ['custom-menu-item'],
                         contextMenuClasses: ['custom-context-menu']
