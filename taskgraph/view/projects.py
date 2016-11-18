@@ -1,4 +1,5 @@
 from taskgraph.tasktracker.getinterface import get_interface
+from taskgraph.tasktracker.abstract import ConnectionError
 from taskgraph.model.model import Tracker, Project
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -43,10 +44,12 @@ def _tree_view_json():
 
         for tracker in Tracker.objects.filter(type__exact=type_name.name):
             i_tracker = get_interface(tracker.type)
-            tracker.restore_project_list(i_tracker)
-            with i_tracker.connect(tracker) as interface:
-
-                current_name = i_tracker.my_name()
+            try:
+                tracker.restore_project_list(i_tracker)
+                with i_tracker.connect(tracker) as interface:
+                    current_name = i_tracker.my_name()
+            except ConnectionError:
+                continue
 
             last_url = {'text': tracker.url, 'selectable': False, 'nodes': []}
             last_tracker['nodes'].append(last_url)
