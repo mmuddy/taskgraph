@@ -1,3 +1,4 @@
 django==1.9
 python-redmine
 tulip-python
+mod_wsgi

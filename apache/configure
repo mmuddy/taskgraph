@@ -1,0 +1,42 @@
+#! /bin/bash
+
+CURRENT_PATH=$PWD
+
+APACHE_SCRPTS_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $APACHE_SCRPTS_PATH
+
+APACHE_CONF_PATH=${1:-/etc/apache2}
+APACHE_SITE_CONF_PATH=$APACHE_CONF_PATH/sites-enabled
+APACHE_HTTP_CONF=${2:-apache2.conf}
+APACHE_HTTP_CONF_PATH=$APACHE_CONF_PATH/$APACHE_HTTP_CONF
+
+P_NAME=taskgraphproject
+APACHE_SITE_CONF=$P_NAME.conf
+
+echo 'Project name: '$P_NAME
+echo 'Site path: '$CURRENT_PATH
+echo 'Configuration path: '$APACHE_CONF_PATH
+echo 'Server name: '$P_NAME.com
+
+if [ ! -d .tmp ]; then
+  mkdir .tmp
+fi
+
+cp site.conf.tmplt .tmp/APACHE_SITE_CONF &&
+cp httpd.conf.tmplt .tmp/httpd.additions.conf &&
+sed -i -- 's|path-to-site|'$CURRENT_PATH'|g' .tmp/*.conf &&
+sed -i -- 's|project-name|'$P_NAME'|g' .tmp/*.conf &&
+
+if [ ! -f .tmp/cp/$APACHE_HTTP_CONF ]; then
+    mkdir .tmp/cp/
+    cp $APACHE_HTTP_CONF_PATH .tmp/cp/$APACHE_HTTP_CONF
+fi
+
+cat .tmp/cp/$APACHE_HTTP_CONF > .tmp/$APACHE_HTTP_CONF &&
+cat .tmp/httpd.additions.conf >> .tmp/$APACHE_HTTP_CONF &&
+cat .tmp/$APACHE_HTTP_CONF > $APACHE_HTTP_CONF_PATH &&
+
+mv .tmp/APACHE_SITE_CONF $APACHE_SITE_CONF_PATH &&
+echo 'Apache configured successfully!'
+
+cd $CURRENT_PATH

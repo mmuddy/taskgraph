@@ -1,0 +1,21 @@
+<VirtualHost *:80>
+
+    ServerName project-name.com
+    ServerAlias www.project-name.com
+
+    Alias /static path-to-site/static
+    <Directory path-to-site/static>
+        Require all granted
+    </Directory>
+
+    <Directory path-to-site/project-name>
+        <Files wsgi.py>
+            Require all granted
+        </Files>
+    </Directory>
+
+#    WSGIDaemonProcess project-name python-path=/home/user/myproject:/home/user/myproject/myprojectenv/lib/python2.7/site-packages
+    WSGIProcessGroup project-name
+    WSGIScriptAlias / path-to-site/project-name/wsgi.py
+
+</VirtualHost>
