@@ -37,7 +37,7 @@ def edit_page(request):
                                                 vertex_block_width=vertex_block_width,
                                                 vertex_block_height=80)
 
-    if edge_list:
+    if len(edge_list) > len(adjacency_matrix) / 2:
         tgraph.applyLayoutAlgorithm('Upward Planarization (OGDF)', tgraph.getLayoutProperty("viewLayout"))
     else:
         tgraph.applyLayoutAlgorithm('Random layout', tgraph.getLayoutProperty("viewLayout"))
@@ -79,7 +79,7 @@ def graph_view_page(request):
                                                 vertex_block_width=vertex_block_width,
                                                 vertex_block_height=80)
 
-    if edge_list:
+    if len(edge_list) > len(adjacency_matrix) / 2:
         tgraph.applyLayoutAlgorithm('Upward Planarization (OGDF)', tgraph.getLayoutProperty("viewLayout"))
     else:
         tgraph.applyLayoutAlgorithm('Random layout', tgraph.getLayoutProperty("viewLayout"))
@@ -109,7 +109,7 @@ def task_edit_page(request):
 def change_graph(request):
 
     for curr in json.loads(request.POST['history']):
-        #curr - словарь с ключами 'type', 'action' и т.д.
+        #curr - dict with keys 'type', 'action' etc.
         pass
         #todo: requests to tracker
 
