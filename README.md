@@ -13,7 +13,7 @@ git clone https://github.com/mmuddy/taskgraph # Получить репозит�
 
 cd taskgraph/
 
-chmod 777 install apache/configure run # опционально
+chmod 777 install apache/configure # опционально
 
 # sudo ./install - Установить зависимости
 # sudo ./apache/configure - сгенерировать настройки для apache, 
