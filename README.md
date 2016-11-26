@@ -17,8 +17,8 @@ chmod 777 install apache/configure # опционально
 
 # sudo ./install - Установить зависимости
 # sudo ./apache/configure - сгенерировать настройки для apache, 
-                            первый параметр - путь к настройкам apache, по умолчанию: /etc/apache2
-                            второй параметр - имя конфигурационного файла, по умолчанию apache2.conf
+#                           первый параметр - путь к настройкам apache, по умолчанию: /etc/apache2
+#                           второй параметр - имя конфигурационного файла, по умолчанию apache2.conf
 # sudo service apache2 restart - перезапустить apache
 sudo ./install && sudo ./apache/configure && sudo service apache2 restart
 ```
