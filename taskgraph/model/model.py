@@ -1,8 +1,8 @@
-from taskgraph.tasktracker.getinterface import get_interface
 from taskgraph.tasktracker.abstract import Action
 from taskgraph.tasktracker.abstract import Task as AbstractTask
 
 from django.db import models
+from djangotoolbox.fields import ListField, EmbeddedModelField
 
 from enum import Enum
 from datetime import date
@@ -30,26 +30,29 @@ class Tracker(models.Model):
         Redmine = 0
 
     class Meta:
-        unique_together = (('user_name', 'url', 'type'),)
+        unique_together = ('url', 'type',)
 
-    user_name = models.CharField(max_length=255)
-    password = models.CharField(max_length=255)
     url = models.CharField(max_length=255)
     type = ChoicesHelper.char_field_with_choices(Supported)
+    user_name = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+    is_active = models.BooleanField(default=False)
+
+    projects = ListField(EmbeddedModelField('Project'))
+    projects_relations = ListField(EmbeddedModelField('ProjectRelation'))
 
     def __str__(self):
-        return '{} {} {}'.format(self.user_name, self.password, self.url, self.type)
-
-    def __hash__(self):
-        return hash('{}{}{}'.format(self.url, self.user_name, self.type))
+        return '{} {}'.format(self.url, self.type)
 
     def has_project_list(self):
-        return self.project_set.all().count() > 0
+        return len(self.projects) > 0
 
     def restore_project_list(self, i_tracker):
         with i_tracker.connect(self) as interface:
-            for deprecated_project in self.project_set.all():
+            for deprecated_project in self.projects:
                 deprecated_project.delete()
+
+            while len(self.projects): self.projects.pop()
 
             project_list = interface.get_projects()
 
@@ -57,13 +60,17 @@ class Tracker(models.Model):
             for new_project in project_list:
                 project_model = Project(tracker=self, identifier=new_project.identifier,
                                         name=new_project.name, description=new_project.description)
-                project_model.save()
+                self.projects.append(project_model)
                 project_model.restore_meta(new_project)
                 new_projects_lst.append((project_model, new_project))
 
             for model, project in new_projects_lst:
-                model.restore_children(project)
+                model.restore_children(project, self)
                 model.save()
+
+            while len(self.projects_relations): self.projects_relations.pop()
+
+            self.save()
 
     def update_projects_if_not_created(self, i_tracker):
         if not self.has_project_list():
@@ -78,11 +85,11 @@ class Tracker(models.Model):
 
     def restore_project_tasks(self, i_tracker, only_active=True):
         if only_active:
-            active_project_list = self.project_set.filter(is_active__exact=True)
+            active_project_list = filter(lambda p: p.is_active, self.projects)
             if not active_project_list:
                 return
         else:
-            active_project_list = self.project_set.all()
+            active_project_list = self.projects
 
         with i_tracker.connect(self) as interface:
             for project in active_project_list:
@@ -96,26 +103,36 @@ class Tracker(models.Model):
 class Project(models.Model):
 
     class Meta:
-        unique_together = (('tracker', 'identifier'),)
+        unique_together = ('identifier',)
 
-    tracker = models.ForeignKey(Tracker, on_delete=models.CASCADE)
+    tracker = models.ForeignKey(Tracker)
     identifier = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
     description = models.TextField()
     is_active = models.BooleanField(default=False)
 
+    tasks = ListField(EmbeddedModelField('Task'))
+    tasks_relations = ListField(EmbeddedModelField('TaskRelation'))
+    task_relation_types = ListField(EmbeddedModelField('TaskRelationType'))
+
+    assignees = ListField(EmbeddedModelField('Assignee'))
+    milestones = ListField(EmbeddedModelField('Milestone'))
+    task_categories = ListField(EmbeddedModelField('TaskCategory'))
+    task_states = ListField(EmbeddedModelField('TaskState'))
+
     def is_member(self, name):
-        return self.assignee_set.filter(name__exact=name).count() == 1
+        return len(filter(lambda a: a.name == name, self.assignees)) == 1
 
     def restore_meta(self, project_from_tracker):
-        self._restore_meta(Milestone, project_from_tracker.meta.milestones, self.milestone_set.all())
-        self._restore_meta(Assignee, project_from_tracker.meta.assignees, self.assignee_set.all())
-        self._restore_meta(TaskCategory, project_from_tracker.meta.task_categories, self.taskcategory_set.all())
-        self._restore_meta(TaskState, project_from_tracker.meta.task_states, self.taskstate_set.all())
-        self._restore_meta(TaskRelationType, project_from_tracker.meta.relation_types, self.taskrelationtype_set.all())
+        self._restore_meta(Milestone, project_from_tracker.meta.milestones, self.milestones)
+        self._restore_meta(Assignee, project_from_tracker.meta.assignees, self.assignees)
+        self._restore_meta(TaskCategory, project_from_tracker.meta.task_categories, self.task_categories)
+        self._restore_meta(TaskState, project_from_tracker.meta.task_states, self.task_states)
+        self._restore_meta(TaskRelationType, project_from_tracker.meta.relation_types, self.task_relation_types)
+        self.save()
 
-    def restore_children(self, project_from_tracker):
-        current_children = self.get_child_list()
+    def restore_children(self, project_from_tracker, tracker):
+        current_children = self.get_child_list(tracker)
 
         for deprecated in current_children:
             deprecated.delete()
@@ -124,88 +141,100 @@ class Project(models.Model):
             return
 
         for child_id in project_from_tracker.child_id_list:
-            child_model = self.tracker.project_set.all().get(identifier__exact=child_id)
-            ProjectRelation.objects.create(tracker=self.tracker, parent=self, child=child_model)
+            child_model = filter(lambda p: p.identifier == child_id, tracker.projects)[0]
+            tracker.projects_relations.append(ProjectRelation(parent=self, child=child_model))
 
-    def get_child_list(self):
+    def get_child_list(self, tracker):
         return [relation.child for relation in
-                self.tracker.projectrelation_set.filter(parent__identifier__exact=self.identifier)]
+                filter(lambda p: p.parent.identifier == self.identifier, tracker.projects_relations)]
 
     def restore_project_tasks(self, i_tracker):
-        for task in self.task_set.all():
+        for task in self.tasks:
             task.delete()
+
+        while len(self.tasks) > 0: self.tasks.pop()
+
         tasks = i_tracker.get_tasks(self.identifier)
         for task, additional, task_children in tasks:
             self._create_task(task.regular_fields_as_dict(), additional).save()
 
-        for rel in self.taskrelation_set.all():
+        for rel in self.tasks_relations:
             rel.delete()
 
         for task, _, task_children in tasks:
             for child_id, rel_type in task_children or []:
-                self._create_relation(task.identifier, child_id, rel_type)
+                self._create_relation(task.identifier, child_id, rel_type).save()
 
-    def _restore_meta(self, cls_model, new_model_data, old_model_set):
+        self.save()
+
+    @staticmethod
+    def _restore_meta(cls_model, new_model_data, old_model_set):
         if not new_model_data:
             return
 
         for deprecated_model in old_model_set:
             deprecated_model.delete()
 
+        while len(old_model_set) > 0: old_model_set.pop()
+
         for new_model in new_model_data:
             if new_model:
-                cls_model.objects.get_or_create(**new_model, project=self)
+                old_model_set.append(cls_model.objects.create(**new_model))
 
     def _create_relation(self, parent_id, child_id, rel_type_name):
-        rel_type = self.taskrelationtype_set.get(name__exact=rel_type_name)
-        parent = self.task_set.get(identifier__exact=parent_id)
-        child = self.task_set.get(identifier__exact=child_id)
-        TaskRelation.objects.create(project=self, from_task=parent, to_task=child, type=rel_type)
+        rel_type = filter(lambda rt: rt.name == rel_type_name, self.task_relation_types)[0]
+        parent = filter(lambda t: t.identifier == parent_id, self.tasks)[0]
+        child = filter(lambda t: t.identifier == child_id, self.tasks)[0]
+        tr = TaskRelation(project=self, from_task=parent, to_task=child, type=rel_type)
+        return tr
 
-    def _create_task(self, regular_fields, additional_fields):
+    def _create_task(self, reg_fields, additional_fields):
 
-        regular_fields['milestone'] = self._register_regular(regular_fields.get('milestone'), Milestone)
-        regular_fields['assignee'] = self._register_regular(regular_fields.get('assignee'), Assignee)
-        regular_fields['category'] = self._register_regular(regular_fields.get('category'), TaskCategory)
-        regular_fields['state'] = self._register_regular(regular_fields.get('state'), TaskState)
+        reg_fields['project'] = self
+        reg_fields['milestone'] = self._register_regular(reg_fields.get('milestone'), Milestone, self.milestones)
+        reg_fields['assignee'] = self._register_regular(reg_fields.get('assignee'), Assignee, self.assignees)
+        reg_fields['category'] = self._register_regular(reg_fields.get('category'), TaskCategory, self.task_categories)
+        reg_fields['state'] = self._register_regular(reg_fields.get('state'), TaskState, self.task_states)
 
-        new_task = Task.objects.create(project=self, **regular_fields)
+        new_task = Task(**reg_fields)
 
         additional_fields = additional_fields or [{}]
         for kwargs in additional_fields:
             if kwargs:
-                TaskAdditionalField.objects.create(project=self, task=new_task, **kwargs)
+                new_task.additional_field.append(TaskAdditionalField.objects.create(**kwargs))
 
         return new_task
 
-    def _register_regular(self, value, field_type):
+    @staticmethod
+    def _register_regular(value, field_type, field_set):
         if value:
-            requested = field_type.objects.filter(project=self, name__exact=value['name'])
-            if requested.count() == 1:
+            requested = filter(lambda f: f.name == value['name'], field_set)
+            if len(requested) == 1:
                 return requested[0]
             else:
-                return field_type.objects.create(project=self, active=False, **value)
+                value['active'] = False
+                new_f = field_type.objects.create(**value)
+                field_set.append(new_f)
+                return new_f
         else:
-            return field_type.objects.get_or_create(project=self, name='__NONE', identifier=1)[0]
+            requested = filter(lambda f: f.name == '__NONE', field_set)
+            if len(requested) == 1:
+                return requested[0]
+            else:
+                new_f = field_type.objects.create(name='__NONE', identifier=1, active=False)
+                field_set.append(new_f)
+                return new_f
 
 
 class ProjectRelation(models.Model):
 
-    class Meta:
-        unique_together = ('parent', 'child')
-
-    tracker = models.ForeignKey(Tracker, on_delete=models.CASCADE)
-    parent = models.ForeignKey(Project, related_name='parent', on_delete=models.CASCADE)
-    child = models.ForeignKey(Project, related_name='child', on_delete=models.CASCADE)
+    parent = models.ForeignKey(Project, related_name='parent')
+    child = models.ForeignKey(Project, related_name='child')
 
 
 class Milestone(models.Model):
 
-    class Meta:
-        unique_together = ('project', 'name')
-
     identifier = models.IntegerField(default=1)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
     date = models.DateField(default=date(year=1, month=1, day=1))
     active = models.BooleanField(default=True)
@@ -214,66 +243,52 @@ class Milestone(models.Model):
 class Assignee(models.Model):
 
     class Meta:
-        unique_together = ('id', 'project', 'name')
+        unique_together = ('identifier',)
 
     identifier = models.IntegerField()
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
     active = models.BooleanField(default=True)
 
 
 class TaskCategory(models.Model):
 
-    class Meta:
-        unique_together = ('project', 'name')
-
     identifier = models.IntegerField()
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
     active = models.BooleanField(default=True)
 
 
 class TaskState(models.Model):
 
-    class Meta:
-        unique_together = ('project', 'name')
-
     identifier = models.IntegerField()
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
     active = models.BooleanField(default=True)
 
 
 class TaskRelationType(models.Model):
 
-    class Meta:
-        unique_together = ('project', 'name')
-
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, default='__NONE')
     active = models.BooleanField(default=True)
 
 
 class Task(models.Model):
 
-    class Meta:
-        unique_together = ('project', 'identifier')
-
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project)
     identifier = models.IntegerField()
     assignee = models.ForeignKey(Assignee)
     milestone = models.ForeignKey(Milestone)
     category = models.ForeignKey(TaskCategory)
     state = models.ForeignKey(TaskState)
 
-    def __str__(self):
-        return 'pid:{} id:{} {} {} {} {}'.format(self.project.identifier, self.identifier, self.assignee,
-                                                 self.milestone, self.category, self.state)
+    additional_field = ListField(EmbeddedModelField('TaskAdditionalField'))
 
-    def to_abstract(self):
+    def __str__(self):
+        return 'id:{} {} {} {} {}'.format(self.identifier, self.assignee,
+                                          self.milestone, self.category, self.state)
+
+    def to_abstract(self, project_id):
         abstract_task = AbstractTask()
         abstract_task.identifier = self.identifier
-        abstract_task.project_identifier = self.project.identifier
+        abstract_task.project_identifier = project_id
 
         if self.assignee.name != '__NONE':
             abstract_task.assignee = self.assignee.identifier
@@ -284,7 +299,7 @@ class Task(models.Model):
         if self.state.name != '__NONE':
             abstract_task.status = self.state.identifier
 
-        for add_field in self.taskadditionalfield_set.all():
+        for add_field in self.additional_field:
             if add_field.type == 'CharField':
                 abstract_task.add_char_field(add_field.name, add_field.char)
             elif add_field.type == 'TextField':
@@ -294,18 +309,20 @@ class Task(models.Model):
 
         return abstract_task
 
-    def delete(self, delete_on_tracker=False, using=None, keep_parents=False):
-        if delete_on_tracker:
-            i_tracker = get_interface(self.project.tracker.type)
-            if self.project.is_member(i_tracker.my_name()):
-                i_tracker.update_task(Action(self.to_abstract(), Action.Type.DELETE))
+    def delete(self, i_tracker=None, using=None):
+        if i_tracker:
+            i_tracker.update_task(Action(self.to_abstract(self.project.identifier), Action.Type.DELETE))
+        self.project.tasks.remove(self)
+        models.Model.delete(self, using=using)
 
-        models.Model.delete(self, using=using, keep_parents=keep_parents)
-
-    def save(self, save_on_tracker=False, create_on_tracker=False, force_insert=False,
-             force_update=False, using=None, update_fields=None):
+    def save(self, save_on_tracker=False, create_on_tracker=False, i_tracker=None,
+             force_insert=False, force_update=False, using=None, update_fields=None):
         assert not save_on_tracker or not create_on_tracker
-
+        try:
+            self.project.tasks.remove(self)
+        except ValueError:
+            pass
+        self.project.tasks.append(self)
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using,
                           update_fields=update_fields)
 
@@ -314,17 +331,14 @@ class Task(models.Model):
 
         act_type = save_on_tracker and Action.Type.CHANGE or create_on_tracker and Action.Type.CREATE
 
-        i_tracker = get_interface(self.project.tracker.type)
-        if self.project.is_member(i_tracker.my_name()):
-            i_tracker.update_task(Action(self.to_abstract(), act_type))
+        assert i_tracker
+        i_tracker.update_task(Action(self.to_abstract(self.project.identifier), act_type))
 
 
 class TaskAdditionalField(models.Model):
 
     type_choices = ((0, 'CharField'), (1, 'TextField'), (2, 'DateField'))
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=255, choices=type_choices)
     char = models.CharField(max_length=255, default='')
@@ -337,25 +351,25 @@ class TaskRelation(models.Model):
     class Meta:
         unique_together = ('from_task', 'to_task', 'type')
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project)
     from_task = models.ForeignKey(Task)
     to_task = models.ForeignKey(Task)
     type = models.ForeignKey(TaskRelationType)
 
-    def delete(self, delete_on_tracker=False, using=None, keep_parents=False):
-        if delete_on_tracker:
-            i_tracker = get_interface(self.project.tracker.type)
-            if self.project.is_member(i_tracker.my_name()):
-                i_tracker.update_relation(Action(self, Action.Type.DELETE))
+    def delete(self, i_tracker=None, using=None):
+        if i_tracker:
+            i_tracker.update_relation(Action(self, Action.Type.DELETE))
+        self.project.tasks_relations.remove(self)
+        models.Model.delete(self, using=using)
 
-        models.Model.delete(self, using=using, keep_parents=keep_parents)
-
-    def save(self, save_on_tracker=False, force_insert=False, force_update=False, using=None,
-             update_fields=None):
-        if save_on_tracker:
-            i_tracker = get_interface(self.project.tracker.type)
-            if self.project.is_member(i_tracker.my_name()):
-                i_tracker.update_relation(Action(self, Action.Type.CREATE))
-
+    def save(self, i_tracker=None, force_insert=False, force_update=False, using=None, update_fields=None):
+        if i_tracker:
+            i_tracker.update_relation(Action(self, Action.Type.CREATE))
+        try:
+            self.project.tasks_relations.remove(self)
+        except ValueError:
+            pass
+        self.project.tasks_relations.append(self)
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using,
                           update_fields=update_fields)
+

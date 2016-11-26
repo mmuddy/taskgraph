@@ -16,19 +16,21 @@ def get_edge_list(task_set, node_by_task_id, i_tracker):
 
     for task in task_set:
         node_id = node_by_task_id[task.identifier]
-        out_relations = TaskRelation.objects.filter(project__identifier=task.project.identifier,
+        out_relations = filter(lambda r: r.from_task.identifier == task.identifier, task.project.tasks_relations)
+        in_relations = filter(lambda r: r.to_task.identifier == task.identifier, task.project.tasks_relations)
+        """out_relations = TaskRelation.objects.filter(project__identifier=task.project.identifier,
                                                     from_task__identifier=task.identifier)
         in_relations = TaskRelation.objects.filter(project__identifier=task.project.identifier,
-                                                   to_task__identifier=task.identifier)
+                                                   to_task__identifier=task.identifier)"""
 
-        if len(in_relations) == 0 and len(out_relations) != 0:
+        if in_relations and not out_relations:
             end_points.add(node_id)
-        elif len(in_relations) != 0 and len(out_relations) == 0:
+        elif not in_relations and out_relations:
             start_points.add(node_id)
-        if len(in_relations) == 0 and len(out_relations) == 0:
+        if not in_relations and not out_relations:
             pass
 
-        if len(out_relations) == 0:
+        if not out_relations:
             continue
 
         edge_list[node_id] = []
@@ -81,7 +83,7 @@ def get_graph_info(task_set, node_by_task_id, start_points, end_points):
         if task.state.name != '__NONE':
             additional.append(('status', task.state.name))
 
-        for field in task.taskadditionalfield_set.all():
+        for field in task.additional_field:
             additional.append((field.name.replace("_", " "), add_field_val(field)))
         current_node_info.append(additional)
 
@@ -95,7 +97,7 @@ def get_graph_info(task_set, node_by_task_id, start_points, end_points):
 def prepare_graph(project, i_tracker):
 
     node_index_by_task = {}
-    tasks = project.task_set.all()
+    tasks = project.tasks
 
     for ind, task in enumerate(tasks):
         node_index_by_task[task.identifier] = str(ind)

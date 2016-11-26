@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'trackers-list/([^/]*)/$', profile.trackers_list_page, name='trackers-list'),
     url(r'trackers-list/([^/]*)/([^/]*)/$', profile.trackers_list_page, name='trackers-list'),
     url(r'trackers-add/', profile.trackers_add_page, name='trackers-add'),
-    url(r'trackers-edit/(\d+)/', profile.trackers_edit_page, name='trackers-edit'),
-    url(r'trackers-delete/(\d+)/', profile.trackers_delete, name='trackers-delete'),
+    url(r'trackers-edit/(.+)/', profile.trackers_edit_page, name='trackers-edit'),
+    url(r'trackers-delete/(.+)/', profile.trackers_delete, name='trackers-delete'),
 
 ]

@@ -73,7 +73,7 @@ Projects
 
     <script>
         var tree_view_data = {{ tree_json|safe }};
-        $('#tree').treeview({data: tree_view_data}); // multiSelect: true
+        $('#tree').treeview({data: tree_view_data, showTags: true}); // multiSelect: true
     </script>
 
 {% endblock %}
