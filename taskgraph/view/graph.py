@@ -116,62 +116,90 @@ def task_edit_page(request):
         for project in tracker.project_set.all() :
             project.restore_project_tasks(get_interface(tracker.type))
 
+    alerts = []
     request_task_id = request.GET.get('task');
     request_project_id = request.GET.get('project');
     if request_task_id is None or request_project_id is None:
-        return render(request, 'taskgraph/alerts.html', {'alerts' : [{
-            'css_container_class' : '',
-            'css_class' : '',
-            'name' : 'Error',
-            'message' : 'Incorrect URL'
-        }]})
+        context = {
+            'is_user_active': True,
+            'contains_menu': True,
+            'alerts': [alertfactory.error('Incorrect URL')],
+            'no_errors': False
+        }
+        return render(request, 'taskgraph/graph/task_edit.html', context)
 
     try:
         project = Project.objects.get(identifier=request_project_id)
     except Project.DoesNotExist:
-        return render(request, 'taskgraph/alerts.html', {'alerts': [{
-            'css_container_class': '',
-            'css_class': '',
-            'name': 'Error',
-            'message': 'Project not found'
-        }]})
+        context = {
+            'is_user_active': True,
+            'contains_menu': True,
+            'alerts': [alertfactory.error('Project not found')],
+            'no_errors': False
+        }
+        return render(request, 'taskgraph/graph/task_edit.html', context)
 
     try:
         task = Task.objects.get(identifier=request_task_id, project=project)
     except Task.DoesNotExist:
-        return render(request, 'taskgraph/alerts.html', {'alerts': [{
-            'css_container_class': '',
-            'css_class': '',
-            'name': 'Error',
-            'message': 'Task not found'
-        }]})
+        context = {
+            'is_user_active': True,
+            'contains_menu': True,
+            'alerts': [alertfactory.error('Task not found')],
+            'no_errors': False
+        }
+        return render(request, 'taskgraph/graph/task_edit.html', context)
 
     if request.method == 'POST':
-        task.category = project.taskcategory_set.get(name=request.POST.get('category'))
-        task.milestone = project.milestone_set.get(name=request.POST.get('milestone'))
-        task.assignee = project.assignee_set.get(name=request.POST.get('assignee'))
-        task.state = project.taskstate_set.get(name=request.POST.get('state'))
-        for field in TaskAdditionalField.objects.filter(task=task):
-            if int(field.type) == 0 :
-                field.type = 'CharField'
-                field.char = request.POST.get(field.name)
-            if int(field.type) == 1 :
-                field.type = 'TextField'
-                field.text = request.POST.get(field.name)
-            if int(field.type == 2) :
-                field.type = 'DateField'
-                field.date = request.POST.get(field.name)
-            field.save()
-        task.save()
-        response = redirect('task-edit')
-        response['Location'] += '?task=' + str(task.identifier) + "&project=" + str(project.identifier)
-        return response
+        try:
+            category = request.POST.get('category')
+            task.category = filter(lambda c: c.name == category, project.task_categories)[0]
+        except:
+            alerts.append(alertfactory.error('There is no task category "' + category + '" in this project'))
+        try:
+            milestone = request.POST.get('milestone')
+            task.milestone = filter(lambda m: m.name == milestone, project.milestones)[0]
+        except:
+            alerts.append(alertfactory.error('There is no milestone "' + milestone + '" in this project'))
+        try:
+            assignee = request.POST.get('assignee')
+            task.assignee = filter(lambda a: a.name == assignee, project.assignees)[0]
+        except:
+            alerts.append(alertfactory.error('There is no assignee "' + assignee + '" in this project'))
+        try:
+            state = request.POST.get('state')
+            task.state = filter(lambda s: s.name == state, project.task_states)[0]
+        except:
+            alerts.append(alertfactory.error('There is no state "' + state + '" in this project'))
+
+        for field in task.additional_field:
+            try:
+                if int(field.type) == 0 :
+                    field.type = 'CharField'
+                    field.char = request.POST.get(field.name)
+                if int(field.type) == 1 :
+                    field.type = 'TextField'
+                    field.text = request.POST.get(field.name)
+                if int(field.type == 2) :
+                    field.type = 'DateField'
+                    field.date = request.POST.get(field.name)
+                field.save()
+            except:
+                alerts.append(alertfactory.error('Additional field saving error'))
+
+        if len(alerts) == 0:
+            try:
+                task.save()
+            except:
+                alerts.append(alertfactory.error('Task saving error'))
+
+        if len(alerts) == 0: alerts = [alertfactory.success('Task succesfully updated')]
 
     add_fields = []
     tags = ('<input name="{}" value="{}" class="form-control">',
             '<textarea name="{}" style="margin: 5px; width: 93%" rows="5" class="form-control">{}</textarea>',
             '<input name="{}" type="date" value="{}" class="form-control"')
-    for field in TaskAdditionalField.objects.filter(task=task):
+    for field in task.additional_field:
         if int(field.type) == 0:
             add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.name, field.char)}]
         if int(field.type) == 1:
@@ -186,6 +214,7 @@ def task_edit_page(request):
 
     context = {'is_user_active': True,
                 'contains_menu': True,
+                'no_error': True,
                 'project_id' : project.identifier,
                 'project' : project.name,
                 'task_id': task.identifier,
@@ -193,13 +222,14 @@ def task_edit_page(request):
                 'milestone' : task.milestone.name,
                 'category' : task.category.name,
                 'state' : task.state.name,
-                'assignee_list' : [i.name for i in project.assignee_set.all()],
-                'milestone_list': [i.name for i in project.milestone_set.all()],
-                'category_list': [i.name for i in project.taskcategory_set.all()],
-                'state_list': [i.name for i in project.taskstate_set.all()],
+                'assignee_list' : [i.name for i in project.assignees],
+                'milestone_list': [i.name for i in project.milestones],
+                'category_list': [i.name for i in project.task_categories],
+                'state_list': [i.name for i in project.task_states],
                 'add_fields': add_fields,
                 'to_relations' : to_relations,
                 'from_relations': from_relations,
+                'alerts': alerts
     }
     return render(request, 'taskgraph/graph/task_edit.html', context)
 
