@@ -70,9 +70,6 @@ class TrackersSubMenu:
 def trackers_list_page(request, alerts=None, message='Unknown error!'):
     trackers = model.Tracker.objects.order_by('type', 'url', 'user_name')
 
-    for tracker in trackers:
-        tracker.hash = tracker.id
-
     if alerts:
         alert_type = alerts == 'success' and alertfactory.success or alertfactory.error
         alerts = [trackers_alert(alert_type, message)]
@@ -115,11 +112,11 @@ def trackers_add_page_post(request, context):
         context['tracker_login'] = login
         context['tracker_password'] = password
 
-    try:
-        model.Tracker.objects.create(url=url, user_name=login, password=password, type=tracker_type)
-    except IntegrityError:
+    if model.Tracker.objects.filter(url=url, user_name=login, type=tracker_type):
         context['alerts'] = [trackers_alert(alertfactory.error, 'Posted data isn\'t unique')]
         return render(request, 'taskgraph/profile/trackers_add.html', context)
+
+    model.Tracker.objects.create(url=url, user_name=login, password=password, type=tracker_type)
 
     return HttpResponseRedirect(reverse('trackers-list', args=('success', 'Changes in tracker list was applied')))
 

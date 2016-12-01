@@ -1,0 +1,17 @@
+LoadModule wsgi_module /usr/lib/apache2/modules/mod_wsgi.so
+
+Alias /static/ path-to-site/static/
+
+<Directory path-to-site/static>
+Require all granted
+</Directory>
+
+WSGIScriptAlias / path-to-site/project-name/wsgi.py
+WSGIPythonPath path-to-site
+
+<Directory path-to-site>
+<Files wsgi.py>
+Order deny,allow
+Require all granted
+</Files>
+</Directory>

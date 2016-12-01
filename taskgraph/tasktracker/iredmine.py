@@ -1,6 +1,9 @@
 from taskgraph.tasktracker.abstract import TrackerInterface, Project, Action, Task
-from redmine import Redmine, ForbiddenError
+from taskgraph.tasktracker import abstract
 
+from redmine import Redmine, ForbiddenError
+from redmine.packages.requests.exceptions import ConnectionError
+from redmine.exceptions import AuthError
 from copy import deepcopy
 
 
@@ -25,7 +28,10 @@ class IRedmine(TrackerInterface):
         self.current_id = None
 
     def __enter__(self):
-        self.refresh()
+        try:
+            self.refresh()
+        except (ConnectionError, AuthError) as e:
+            raise abstract.ConnectionError(e)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

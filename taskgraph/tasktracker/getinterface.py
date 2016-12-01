@@ -1,5 +1,5 @@
 from taskgraph.tests.trackerdummy import TrackerDummy
-from taskgraph.tasktracker.redmine import IRedmine
+from taskgraph.tasktracker.iredmine import IRedmine
 
 tracker_map = {'Dummy': TrackerDummy(),
                'Redmine': IRedmine()}

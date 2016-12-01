@@ -13,8 +13,7 @@
         #cy {
             float: left;
             width: 100%;
-            height: 520px;
-            margin-top: -20px;
+            height: 480px;
             color: #337ab7;
         }
 
@@ -34,9 +33,9 @@
         <li class="divider-vertical"></li>
         <li class="nav-item"><a href="{% url 'edit'%}">Edit</a>
         </li>
-        <li class="divider-vertical"></li>
+        <!--<li class="divider-vertical"></li>
         <li class="nav-item"><a href="{% url 'analysis'%}">Analysis</a>
-        </li>
+        </li>-->
     </ul>
 {% endblock %}
 
@@ -117,7 +116,7 @@
 						edges: [
 
 						    {% for i in all_edges %}
-						        { data: { source: '{{i.0}}', target: '{{i.1}}', type: '{{i.2}}' } },
+						        { data: { source: '{{i.0}}', target: '{{i.1}}', type: '{{i.2}}', edge_id: '{{i.3}}' } },
 						    {% endfor %}
 						]
 					},
@@ -128,9 +127,7 @@
 						positions: {
 
 						    {% for i in coords %}
-
 						        '{{i.0}}': {x: {{i.1}}, y: {{i.2}} },
-
 						    {% endfor %}
 						}
 					},
@@ -139,49 +136,107 @@
 				});
 
 				cy.on('mouseover', 'node', function(event) {
-                    var node = event.cyTarget;
-                    $(".qtip").remove();
-                    var attrs = Object.keys(node.attr('info'));
-                    var s = '';
-                    for (var i = 0; i < attrs.length; i++) {
-                        s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
-                    }
-                    node.qtip({
-                         content: s,
-                         style: { classes: 'qtip-bootstrap' },
-                         show: {
-                            solo: true,
-                            event: event.type,
-                            ready: true
-                         },
-                         hide: {
-                            event: 'mouseout unfocus'
-                         }
-                    }, event);
+					    var node = event.cyTarget;
+				    	$(".qtip").remove();
 
-                });
+				    	if(isTipsEnabled){
+				    		var attrs = Object.keys(node.attr('info'));
+					    	var s = '<b>id</b>: '+node.attr('id')+'<br>';
+					    	for (var i = 0; i < attrs.length; i++) {
+					    		s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
+					    	}
+						    node.qtip({
+						         content: s,
+				         		 style: { classes: 'qtip-bootstrap' },
+						         show: {
+						         	solo: true,
+						            event: event.type,
+						            ready: true
+						         },
+						         hide: {
+						            event: 'mouseout unfocus'
+						         }
+						    }, event);
+				    	}
 
-                cy.on('mouseover', 'edge', function(event) {
+					});
+
+					cy.on('mouseover', 'edge', function(event) {
 					    var edge = event.cyTarget;
 				    	$(".qtip").remove();
 
-				 		//document.styleSheets[2].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
-				 		//document.styleSheets[2].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
+				    	if(isTipsEnabled){
+				    		document.styleSheets[4].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
+					 		document.styleSheets[4].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
 
-					    edge.qtip({
-					         content: "<b>Type</b>: "+edge.attr('type'),
-			         		 style: { classes: 'qtip-bootstrap qtip_margin',},
-					         show: {
-					         	solo: true,
-					            event: event.type,
-					            ready: true
-					         },
-					         hide: {
-					            event: 'mouseout unfocus'
-					         }
-					    }, event);
+						    edge.qtip({
+						         content: "<b>Type</b>: "+edge.attr('type'),
+				         		 style: { classes: 'qtip-bootstrap qtip_margin',},
+						         show: {
+						         	solo: true,
+						            event: event.type,
+						            ready: true
+						         },
+						         hide: {
+						            event: 'mouseout unfocus'
+						         }
+						    }, event);
+				    	}
+
+
 
 					});
+
+					var isTipsEnabled = true;
+
+					var disableTips = {
+								id: 'disableTips',
+                                title: 'Disable tips',
+                                selector: '*',
+                                onClickFunction: function (event) {
+                                	cxt.insertBeforeMenuItem(enableTips, 'disableTips');
+                                  	cxt.removeMenuItem('disableTips');
+                                  	isTipsEnabled = false;
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: true
+					}
+
+					var enableTips = {
+								id: 'enableTips',
+                                title: 'Enable tips',
+                                selector: '*',
+                                onClickFunction: function (event) {
+                                	cxt.insertBeforeMenuItem(disableTips, 'enableTips');
+                                  	cxt.removeMenuItem('enableTips');
+                                  	isTipsEnabled = true;
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: true
+					}
+
+                    var normalSize = {
+                    			id: 'normalSize',
+                    			title: 'Normal size',
+                    			selector: '*',
+                    			onClickFunction: function (event) {
+                    				cy.fit();
+                                },
+                                hasTrailingDivider: true,
+                                disabled: false,
+                                coreAsWell: true
+                    }
+
+					var cxt = cy.contextMenus({
+                        menuItems: [
+                        	 normalSize,
+                        	 disableTips,
+                        ],
+                        menuItemClasses: ['custom-menu-item'],
+                        contextMenuClasses: ['custom-context-menu']
+                    });
 
 			});
 

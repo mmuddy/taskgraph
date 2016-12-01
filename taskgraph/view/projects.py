@@ -1,4 +1,5 @@
 from taskgraph.tasktracker.getinterface import get_interface
+from taskgraph.tasktracker.abstract import ConnectionError
 from taskgraph.model.model import Tracker, Project
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -26,11 +27,14 @@ def post_projects(request):
         user_name = active_elem[-4]['name']
         url = active_elem[-3]['name']
         tracker_type = active_elem[-2]['name']
-        tracker = Tracker.objects.get(user_name=user_name, url=url, type=tracker_type)
+        tracker = Tracker.objects.get(url=url, type=tracker_type, user_name=user_name)
+
         for project in active_elem[0:-4]:
-            model = tracker.project_set.get(name=project['name'])
+            model = filter(lambda p: p.name == project['name'], tracker.projects)[0]
             model.is_active = True
             model.save()
+
+        tracker.save()
     return HttpResponse('ok')
 
 
@@ -40,24 +44,29 @@ def _tree_view_json():
     for type_name in Tracker.Supported:
         last_tracker = {'text': type_name.name, 'selectable': False, 'nodes': []}
         trackers.append(last_tracker)
-
         for tracker in Tracker.objects.filter(type__exact=type_name.name):
-            i_tracker = get_interface(tracker.type)
-            tracker.restore_project_list(i_tracker)
-            with i_tracker.connect(tracker) as interface:
+            if filter(lambda t: t.url == tracker.url and tracker.type == type_name.name, visited_tracker):
+                continue
 
-                current_name = i_tracker.my_name()
+            i_tracker = get_interface(tracker.type)
 
             last_url = {'text': tracker.url, 'selectable': False, 'nodes': []}
             last_tracker['nodes'].append(last_url)
 
             for user in Tracker.objects.filter(type__exact=type_name.name, url=tracker.url):
-                if user in visited_tracker:
-                    continue
                 visited_tracker.add(user)
 
-                last_user = {'text': tracker.user_name, 'selectable': False, 'nodes': []}
+                last_user = {'text': user.user_name, 'selectable': False, 'nodes': []}
                 last_url['nodes'].append(last_user)
+
+                try:
+                    # user.restore_project_list(i_tracker)
+                    user.update_projects_if_not_created(i_tracker)
+                    with i_tracker.connect(user) as interface:
+                        current_name = interface.my_name()
+                except ConnectionError:
+                    last_user['tags'] = ['Auth failed!']
+                    continue
 
                 p_tree = _project_tree(user, current_name)
                 if p_tree:
@@ -74,16 +83,16 @@ def _project_tree(account, current_name):
     def handle_project(project, parent_json):
         current_json = _project_json(project, current_name)
         parent_json.append(current_json)
-        project_children = account.projectrelation_set.filter(parent=project)
+        project_children = filter(lambda r: r.parent == project, account.projects_relations)
 
-        if project_children.count() != 0:
+        if project_children:
             current_json['nodes'] = []
             for child in project_children:
                 handle_project(child.child, current_json['nodes'])
 
     top_lvl_projects = []
-    for project_model in account.project_set.all():
-        if account.projectrelation_set.filter(child=project_model).count() == 0:
+    for project_model in account.projects:
+        if not filter(lambda r: r.child == project_model, account.projects_relations):
             top_lvl_projects.append(project_model)
 
     for top_project in top_lvl_projects:
@@ -98,9 +107,11 @@ def _project_json(project_model, current_name):
     if project_model.is_member(current_name):
         p_json['icon'] = "glyphicon glyphicon-user"
     else:
+        p_json['color'] = '#BBB'
         p_json['selectable'] = False
 
     if project_model.is_active:
+        p_json['tags'] = ['Active']
         p_json['state'] = {'selected': True}
 
     return p_json

@@ -4,10 +4,22 @@ from taskgraph.model.model import Tracker
 
 
 def tracker_dummy():
-    return Tracker.objects.get_or_create(url='no-validation', user_name='no-validation',
-                                         password='no-validation', type='Dummy')[0]
+    dummies = Tracker.objects.filter(url='no-validation', type='Dummy',
+                                     user_name='yakovlevvladyakovlev@yandex.ru', password='1q2w3e4r')
+    if dummies:
+        return dummies[0]
+    else:
+        dummy = Tracker.objects.create(url='no-validation', type='Dummy',
+                                       user_name='yakovlevvladyakovlev@yandex.ru', password='1q2w3e4r')
+        return dummy
 
 
 def tracker_redmine():
-    return Tracker.objects.get_or_create(url='https://dev.osll.ru/', user_name='yakovlevvladyakovlev@yandex.ru',
-                                         password='1q2w3e4r', type='Redmine')[0]
+    dummies = Tracker.objects.filter(url='https://dev.osll.ru/', type='Redmine',
+                                     user_name='yakovlevvladyakovlev@yandex.ru', password='1q2w3e4r')
+    if dummies:
+        return dummies[0]
+    else:
+        dummy = Tracker.objects.create(url='https://dev.osll.ru/', type='Redmine',
+                                       user_name='yakovlevvladyakovlev@yandex.ru', password='1q2w3e4r')
+        return dummy

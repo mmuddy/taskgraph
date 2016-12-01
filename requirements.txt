@@ -1,3 +1,7 @@
-django
+git+https://github.com/django-nonrel/django@nonrel-1.6
+git+https://github.com/django-nonrel/mongodb-engine
+git+https://github.com/django-nonrel/djangotoolbox
+mod_wsgi
 python-redmine
 tulip-python
+
