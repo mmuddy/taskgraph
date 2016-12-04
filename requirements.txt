@@ -4,4 +4,4 @@ git+https://github.com/django-nonrel/djangotoolbox
 mod_wsgi
 python-redmine
 tulip-python
-
+enum34
