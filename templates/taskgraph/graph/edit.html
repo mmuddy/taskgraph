@@ -448,9 +448,7 @@ Edit
                     			selector: 'node',
                     			onClickFunction: function (event) {
                     				// todo : redirect to task_edit with id parameter
-                    				console.log(window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) +
-                    				"/task-edit/?task=" + event.cyTarget.attr('id') + "&project=" + project_id)
-                    				console.log(project_id.length)
+                    				window.location = window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/task-edit/?task=" + event.cyTarget.attr('name') + "&project=" + project_id
                                 },
                                 hasTrailingDivider: true,
                                 disabled: false,
