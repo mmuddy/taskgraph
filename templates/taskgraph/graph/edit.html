@@ -201,7 +201,6 @@ Edit
 					    	for (var i = 0; i < attrs.length; i++) {
 					    		s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
 					    	}
-					    	console.log(event)
 						    node.qtip({
 						         content: s,
 				         		 style: { classes: 'qtip-bootstrap' },
@@ -267,6 +266,7 @@ Edit
 	                        		cxt.removeMenuItem('cxtEdgeType' + e);
 	                        	})
 	                        	cxt.insertBeforeMenuItem(changeTypeOfEdge, 'newEdge');
+	                        	console.log(changes);
                             },
                             hasTrailingDivider: true,
                             disabled: false,
@@ -448,6 +448,9 @@ Edit
                     			selector: 'node',
                     			onClickFunction: function (event) {
                     				// todo : redirect to task_edit with id parameter
+                    				console.log(window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) +
+                    				"/task-edit/?task=" + event.cyTarget.attr('id') + "&project=" + project_id)
+                    				console.log(project_id.length)
                                 },
                                 hasTrailingDivider: true,
                                 disabled: false,
@@ -470,6 +473,7 @@ Edit
                         menuItems: [
                         	 normalSize,
                         	 disableTips,
+                        	 editTask,
                              remove,
                              newEdge,
                              createNode,
