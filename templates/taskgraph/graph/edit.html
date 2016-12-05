@@ -150,9 +150,13 @@ Edit
 						    { data:
                             { id: '{{i.0}}', name: '{{i.1}}', type: '{{i.2}}',
 						         {% if i.2 == 'StartNode' %}
-                                     color1: '#f8f8f8', color2: '#BBB'
+                                     color1: '#f8f8f8', color2: '#000000'
                                  {% else %}
-                                     color1: '#f8f8f8', color2: '#BBB'
+                                     {% if i.2 == 'EndNode' %}
+                                         color1: '#f8f8f8', color2: '#000000'
+                                     {% else %}
+                                         color1: '#f8f8f8', color2: '#BBB'
+                                     {% endif %}
                                  {% endif %},
 
                                  info: {
@@ -447,7 +451,6 @@ Edit
                     			title: 'Edit task',
                     			selector: 'node',
                     			onClickFunction: function (event) {
-                    				// todo : redirect to task_edit with id parameter
                     				window.location = window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/task-edit/?task=" + event.cyTarget.attr('name') + "&project=" + project_id
                                 },
                                 hasTrailingDivider: true,
@@ -477,8 +480,8 @@ Edit
                              createNode,
                              changeTypeOfEdge
                         ],
-                        menuItemClasses: ['custom-menu-item'],
-                        contextMenuClasses: ['custom-context-menu']
+                        menuItemClasses: ['qtip-bootstrap'],
+                        contextMenuClasses: ['qtip-bootstrap']
                     });
 
 			});
