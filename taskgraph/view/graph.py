@@ -100,7 +100,8 @@ def graph_view_page(request):
                'all_edges': all_edges,
                'all_nodes': all_nodes,
                'coords': coords,
-               'info': info}
+               'info': info,
+               'project_id': project.identifier}
 
     return render(request, 'taskgraph/graph/view.html', context)
 

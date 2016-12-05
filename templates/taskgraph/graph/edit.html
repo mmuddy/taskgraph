@@ -93,6 +93,10 @@ Edit
 
 		$(function(){
 
+                var project_id = '{{project_id}}';
+
+                var listOfEdgeTypes = ['type111111111111111', 'type2', 'type3'];
+
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
 
@@ -197,6 +201,7 @@ Edit
 					    	for (var i = 0; i < attrs.length; i++) {
 					    		s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
 					    	}
+					    	console.log(event)
 						    node.qtip({
 						         content: s,
 				         		 style: { classes: 'qtip-bootstrap' },
@@ -204,6 +209,9 @@ Edit
 						         	solo: true,
 						            event: event.type,
 						            ready: true
+						         },
+						         position: {
+						            at: event.originalEvent.clientY > 380 ? 'top': 'bottom'
 						         },
 						         hide: {
 						            event: 'mouseout unfocus'
@@ -238,6 +246,63 @@ Edit
 
 
 					});
+
+					var cxtEdgeTypes = listOfEdgeTypes.map(function(e){
+						return {
+							id: 'cxtEdgeType' + e,
+							title: 'Type: ' + e,
+							selector: 'edge',
+							onClickFunction: function (event) {
+								event.cyTarget.data('type', e)
+								changes.push({
+                                  	'type': 'relation',
+                                  	'from': event.cyTarget.attr('source'),
+                                  	'to': event.cyTarget.attr('target'),
+                                  	'action': 'change',
+                                  	'id': event.cyTarget.attr('edge_id'),
+                                  	'param': e
+                                  });
+								cxt.removeMenuItem('cancelChangeTypeOfEdge');
+	                        	listOfEdgeTypes.map(function(e){
+	                        		cxt.removeMenuItem('cxtEdgeType' + e);
+	                        	})
+	                        	cxt.insertBeforeMenuItem(changeTypeOfEdge, 'newEdge');
+                            },
+                            hasTrailingDivider: true,
+                            disabled: false,
+                            coreAsWell: false
+						}
+					})
+
+					var cancelChangeTypeOfEdge = {
+						id: 'cancelChangeTypeOfEdge',
+						title: 'Cancel',
+						selector: 'edge',
+						onClickFunction: function (event) {
+                        	cxt.removeMenuItem('cancelChangeTypeOfEdge');
+                        	listOfEdgeTypes.map(function(e){
+                        		cxt.removeMenuItem('cxtEdgeType' + e);
+                        	})
+                        	cxt.insertBeforeMenuItem(changeTypeOfEdge, 'newEdge');
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var changeTypeOfEdge = {
+						id: 'changeTypeOfEdge',
+						title: 'Change type',
+						selector: 'edge',
+						onClickFunction: function (event) {
+							cxt.removeMenuItem('changeTypeOfEdge')
+							cxt.appendMenuItem(cancelChangeTypeOfEdge)
+							cxt.appendMenuItems(cxtEdgeTypes);
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
 
 					var isTipsEnabled = true;
 
@@ -407,7 +472,8 @@ Edit
                         	 disableTips,
                              remove,
                              newEdge,
-                             createNode
+                             createNode,
+                             changeTypeOfEdge
                         ],
                         menuItemClasses: ['custom-menu-item'],
                         contextMenuClasses: ['custom-context-menu']
