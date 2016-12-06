@@ -93,9 +93,10 @@ Edit
 
 		$(function(){
 
-                var project_id = '{{project_id}}';
+                var listOfEdgeTypes = ['type1', 'type2', 'type3'];
 
-                var listOfEdgeTypes = ['type111111111111111', 'type2', 'type3'];
+                var listOfNodeStatuses = ['status1', 'status2', 'status3', 'status4', 'status5', 'status6', 'status7', 'status8', 'status9',
+'status10', 'status11', 'status12','status13', 'status14', 'status15','status16', 'status17', 'status18','status19', 'status20', 'status21'];
 
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
@@ -150,9 +151,13 @@ Edit
 						    { data:
                             { id: '{{i.0}}', name: '{{i.1}}', type: '{{i.2}}',
 						         {% if i.2 == 'StartNode' %}
-                                     color1: '#f8f8f8', color2: '#BBB'
+                                     color1: '#f8f8f8', color2: '#000000'
                                  {% else %}
-                                     color1: '#f8f8f8', color2: '#BBB'
+                                     {% if i.2 == 'EndNode' %}
+                                         color1: '#f8f8f8', color2: '#000000'
+                                     {% else %}
+                                         color1: '#f8f8f8', color2: '#BBB'
+                                     {% endif %}
                                  {% endif %},
 
                                  info: {
@@ -243,8 +248,136 @@ Edit
 				    	}
 
 
-
 					});
+
+
+					var currentStatusIndex;
+
+					var cxtNodeStatuses = listOfNodeStatuses.map(function(e){
+						return {
+							id: 'cxtNodeStatus' + e,
+							title: 'Status: ' + e,
+							selector: 'node',
+							onClickFunction: function (event) {
+								var info = event.cyTarget.attr('info')
+								info['status'] = e
+								event.cyTarget.data('info', info)
+								changes.push({
+                                  	'status': e,
+                                  	'action': 'changeStatus',
+                                  	'id': event.cyTarget.attr('name'),
+									'type': 'node'
+                                  });
+								cxt.removeMenuItem('cancelChangeNodeStatus');
+								cxt.removeMenuItem('cxtNodeStatusesNext')
+								cxt.removeMenuItem('cxtNodeStatusesPred')
+	                        	listOfNodeStatuses.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeStatus' + e);
+	                        	})
+	                        	cxt.appendMenuItem(changeNodeStatus)
+	                        	console.log(changes);
+                            },
+                            hasTrailingDivider: true,
+                            disabled: false,
+                            coreAsWell: false
+						}
+					})
+
+
+					var cancelChangeNodeStatus = {
+						id: 'cancelChangeNodeStatus',
+						title: 'Cancel',
+						selector: 'node',
+						onClickFunction: function (event) {
+                        	cxt.removeMenuItem('cancelChangeNodeStatus');
+							cxt.removeMenuItem('cxtNodeStatusesNext')
+							cxt.removeMenuItem('cxtNodeStatusesPred')
+                        	listOfNodeStatuses.map(function(e){
+                        		cxt.removeMenuItem('cxtNodeStatus' + e);
+                        	})
+                        	cxt.appendMenuItem(changeNodeStatus)
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var changeNodeStatus = {
+						id: 'changeNodeStatus',
+						title: 'Change status',
+						selector: 'node',
+						onClickFunction: function (event) {
+							cxt.removeMenuItem('changeNodeStatus')
+							cxt.appendMenuItem(cancelChangeNodeStatus)
+							if(cxtNodeStatuses.length > 5){
+								for(var i = 0; i < 5; i++){
+									cxt.appendMenuItem(cxtNodeStatuses[i]);
+								}
+								cxt.appendMenuItem(cxtNodeStatusesNext);
+								currentStatusIndex = 0;
+							}
+							else{
+								cxt.appendMenuItems(cxtNodeStatuses);
+							}
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtNodeStatusesNext = {
+						id: 'cxtNodeStatusesNext',
+						title: 'Next 5 statuses',
+						selector: 'node',
+						onClickFunction: function (event) {
+							listOfNodeStatuses.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeStatus' + e);
+	                        })
+							cxt.removeMenuItem('cxtNodeStatusesNext')
+							cxt.removeMenuItem('cxtNodeStatusesPred')
+							currentStatusIndex += 5
+							var next = currentStatusIndex + 5;
+							for(var i = currentStatusIndex; i < next && i < listOfNodeStatuses.length; i++){
+								cxt.appendMenuItem(cxtNodeStatuses[i]);
+							}
+							cxt.appendMenuItem(cxtNodeStatusesPred);
+							if(listOfNodeStatuses.length > next){
+								cxt.appendMenuItem(cxtNodeStatusesNext);
+							}
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtNodeStatusesPred = {
+						id: 'cxtNodeStatusesPred',
+						title: 'Previous 5 statuses',
+						selector: 'node',
+						onClickFunction: function (event) {
+							listOfNodeStatuses.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeStatus' + e);
+	                        })
+							cxt.removeMenuItem('cxtNodeStatusesNext')
+							cxt.removeMenuItem('cxtNodeStatusesPred')
+							var next = currentStatusIndex;
+							currentStatusIndex -= 5;
+							for(var i = currentStatusIndex; i < next; i++){
+								cxt.appendMenuItem(cxtNodeStatuses[i]);
+							}
+							if(currentStatusIndex){
+								cxt.appendMenuItem(cxtNodeStatusesPred);
+							}
+							cxt.appendMenuItem(cxtNodeStatusesNext);
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
 
 					var cxtEdgeTypes = listOfEdgeTypes.map(function(e){
 						return {
@@ -411,7 +544,7 @@ Edit
                                 		group: 'edges',
                                 		data: { source: cxt.firstEdge.attr('id'),
                                 				target: event.cyTarget.attr('id'),
-                                				type: 'relation',
+                                				type: listOfEdgeTypes[0],
                                 				edge_id:  '_'+(Math.random()*1000000000|0),}
                                 	});
                                 	changes.push({
@@ -447,8 +580,7 @@ Edit
                     			title: 'Edit task',
                     			selector: 'node',
                     			onClickFunction: function (event) {
-                    				// todo : redirect to task_edit with id parameter
-                    				window.location = window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/task-edit/?task=" + event.cyTarget.attr('name') + "&project=" + project_id
+                    				window.location = window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/task-edit/?task=" + event.cyTarget.attr('name')
                                 },
                                 hasTrailingDivider: true,
                                 disabled: false,
@@ -475,11 +607,15 @@ Edit
                              remove,
                              newEdge,
                              createNode,
-                             changeTypeOfEdge
+                             changeTypeOfEdge,
+							 changeNodeStatus
                         ],
-                        menuItemClasses: ['custom-menu-item'],
-                        contextMenuClasses: ['custom-context-menu']
+                        menuItemClasses: ['qtip-bootstrap'],
+                        contextMenuClasses: ['qtip-bootstrap']
                     });
+
+
+
 
 			});
 
