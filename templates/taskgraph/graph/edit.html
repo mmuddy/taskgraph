@@ -93,10 +93,12 @@ Edit
 
 		$(function(){
 
-                var listOfEdgeTypes = ['type1', 'type2', 'type3'];
+                var listOfEdgeTypes = ['type1', 'type2', 'type3', 'type4', 'type5',
+                     'type6', 'type7', 'type8', 'type9', 'type10', 'type11', 'type12'];
 
-                var listOfNodeStatuses = ['status1', 'status2', 'status3', 'status4', 'status5', 'status6', 'status7', 'status8', 'status9',
-'status10', 'status11', 'status12','status13', 'status14', 'status15','status16', 'status17', 'status18','status19', 'status20', 'status21'];
+                var listOfNodeStatuses = ['status1', 'status2', 'status3', 'status4', 'status5',
+                    'status6', 'status7', 'status8', 'status9', 'status11', 'status12','status13', 'status14',
+                    'status15','status16', 'status17', 'status18','status19', 'status20', 'status21'];
 
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
@@ -379,6 +381,8 @@ Edit
 					}
 
 
+					var currentTypeIndex;
+
 					var cxtEdgeTypes = listOfEdgeTypes.map(function(e){
 						return {
 							id: 'cxtEdgeType' + e,
@@ -395,11 +399,12 @@ Edit
                                   	'param': e
                                   });
 								cxt.removeMenuItem('cancelChangeTypeOfEdge');
+								cxt.removeMenuItem('cxtEdgeTypesNext')
+								cxt.removeMenuItem('cxtEdgeTypesPred')
 	                        	listOfEdgeTypes.map(function(e){
 	                        		cxt.removeMenuItem('cxtEdgeType' + e);
 	                        	})
 	                        	cxt.insertBeforeMenuItem(changeTypeOfEdge, 'newEdge');
-	                        	console.log(changes);
                             },
                             hasTrailingDivider: true,
                             disabled: false,
@@ -413,6 +418,8 @@ Edit
 						selector: 'edge',
 						onClickFunction: function (event) {
                         	cxt.removeMenuItem('cancelChangeTypeOfEdge');
+							cxt.removeMenuItem('cxtEdgeTypesNext')
+							cxt.removeMenuItem('cxtEdgeTypesPred')
                         	listOfEdgeTypes.map(function(e){
                         		cxt.removeMenuItem('cxtEdgeType' + e);
                         	})
@@ -430,7 +437,68 @@ Edit
 						onClickFunction: function (event) {
 							cxt.removeMenuItem('changeTypeOfEdge')
 							cxt.appendMenuItem(cancelChangeTypeOfEdge)
-							cxt.appendMenuItems(cxtEdgeTypes);
+							if(cxtNodeStatuses.length > 5){
+								for(var i = 0; i < 5; i++){
+									cxt.appendMenuItem(cxtEdgeTypes[i]);
+								}
+								cxt.appendMenuItem(cxtEdgeTypesNext);
+								currentTypeIndex = 0;
+							}
+							else{
+								cxt.appendMenuItems(cxtEdgeTypes);
+							}
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtEdgeTypesNext = {
+						id: 'cxtEdgeTypesNext',
+						title: 'Next 5 types',
+						selector: 'edge',
+						onClickFunction: function (event) {
+							listOfEdgeTypes.map(function(e){
+	                        		cxt.removeMenuItem('cxtEdgeType' + e);
+	                        })
+							cxt.removeMenuItem('cxtEdgeTypesNext')
+							cxt.removeMenuItem('cxtEdgeTypesPred')
+							currentTypeIndex += 5
+							var next = currentTypeIndex + 5;
+							for(var i = currentTypeIndex; i < next && i < listOfEdgeTypes.length; i++){
+								cxt.appendMenuItem(cxtEdgeTypes[i]);
+							}
+							cxt.appendMenuItem(cxtEdgeTypesPred);
+							if(listOfEdgeTypes.length > next){
+								cxt.appendMenuItem(cxtEdgeTypesNext);
+							}
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtEdgeTypesPred = {
+						id: 'cxtEdgeTypesPred',
+						title: 'Previous 5 types',
+						selector: 'edge',
+						onClickFunction: function (event) {
+							listOfEdgeTypes.map(function(e){
+	                        		cxt.removeMenuItem('cxtEdgeType' + e);
+	                        })
+							cxt.removeMenuItem('cxtEdgeTypesNext')
+							cxt.removeMenuItem('cxtEdgeTypesPred')
+							var next = currentTypeIndex;
+							currentTypeIndex -= 5;
+							for(var i = currentTypeIndex; i < next; i++){
+								cxt.appendMenuItem(cxtEdgeTypes[i]);
+							}
+							if(currentTypeIndex){
+								cxt.appendMenuItem(cxtEdgeTypesPred);
+							}
+							cxt.appendMenuItem(cxtEdgeTypesNext);
+
                         },
                         hasTrailingDivider: true,
                         disabled: false,
