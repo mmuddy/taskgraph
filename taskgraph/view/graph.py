@@ -185,15 +185,6 @@ def task_edit_page(request):
 
         if len(alerts) == 0: alerts = [alertfactory.success('Task succesfully updated')]
 
-    '''
-
-    to_relations = [{'id': i.from_task.identifier, 'type': i.type.name}
-                      for i in project.taskrelation_set.filter(project = project, to_task = task)]
-    from_relations = [{'id': i.to_task.identifier, 'type': i.type.name}
-                      for i in project.taskrelation_set.filter(project = project, from_task = task)]
-
-    '''
-
     meta_fields = []
     if task.assignee.name != '__NONE':
         meta_fields.append({'name': 'Assignee', 'value': task.assignee.name,
