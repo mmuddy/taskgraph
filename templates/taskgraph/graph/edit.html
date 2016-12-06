@@ -264,7 +264,7 @@ Edit
 
 					var cxtNodeStatuses = listOfNodeStatuses.map(function(e){
 						return {
-							id: 'cxtNodeStatus' + e,
+							id: 'cxtNodeStatus' + listOfNodeStatuses.indexOf(e),
 							title: 'Status: ' + e,
 							selector: 'node',
 							onClickFunction: function (event) {
@@ -281,7 +281,7 @@ Edit
 								cxt.removeMenuItem('cxtNodeStatusesNext')
 								cxt.removeMenuItem('cxtNodeStatusesPred')
 	                        	listOfNodeStatuses.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeStatus' + e);
+	                        		cxt.removeMenuItem('cxtNodeStatus' + listOfNodeStatuses.indexOf(e));
 	                        	})
 	                        	cxt.appendMenuItem(changeNodeStatus)
 								cxt.appendMenuItem(changeNodeAssignee)
@@ -304,7 +304,7 @@ Edit
 							cxt.removeMenuItem('cxtNodeStatusesNext')
 							cxt.removeMenuItem('cxtNodeStatusesPred')
                         	listOfNodeStatuses.map(function(e){
-                        		cxt.removeMenuItem('cxtNodeStatus' + e);
+                        		cxt.removeMenuItem('cxtNodeStatus' + listOfNodeStatuses.indexOf(e));
                         	})
                         	cxt.appendMenuItem(changeNodeStatus)
 							cxt.appendMenuItem(changeNodeAssignee)
@@ -347,7 +347,7 @@ Edit
 						selector: 'node',
 						onClickFunction: function (event) {
 							listOfNodeStatuses.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeStatus' + e);
+	                        		cxt.removeMenuItem('cxtNodeStatus' + listOfNodeStatuses.indexOf(e));
 	                        })
 							cxt.removeMenuItem('cxtNodeStatusesNext')
 							cxt.removeMenuItem('cxtNodeStatusesPred')
@@ -373,7 +373,7 @@ Edit
 						selector: 'node',
 						onClickFunction: function (event) {
 							listOfNodeStatuses.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeStatus' + e);
+	                        		cxt.removeMenuItem('cxtNodeStatus' + listOfNodeStatuses.indexOf(e));
 	                        })
 							cxt.removeMenuItem('cxtNodeStatusesNext')
 							cxt.removeMenuItem('cxtNodeStatusesPred')
@@ -393,11 +393,12 @@ Edit
                         coreAsWell: false
 					}
 
+
 					var currentAssigneeIndex;
 
 					var cxtNodeAssignees = listOfNodeAssignees.map(function(e){
 						return {
-							id: 'cxtNodeAssignee' + e,
+							id: 'cxtNodeAssignee' + listOfNodeAssignees.indexOf(e),
 							title: 'Assignee: ' + e,
 							selector: 'node',
 							onClickFunction: function (event) {
@@ -414,7 +415,7 @@ Edit
 								cxt.removeMenuItem('cxtNodeAssigneesNext')
 								cxt.removeMenuItem('cxtNodeAssigneesPred')
 	                        	listOfNodeAssignees.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeAssignee' + e);
+	                        		cxt.removeMenuItem('cxtNodeAssignee' + listOfNodeAssignees.indexOf(e));
 	                        	})
 	                        	cxt.appendMenuItem(changeNodeStatus)
 								cxt.appendMenuItem(changeNodeAssignee)
@@ -437,7 +438,7 @@ Edit
 							cxt.removeMenuItem('cxtNodeAssigneesNext')
 							cxt.removeMenuItem('cxtNodeAssigneesPred')
                         	listOfNodeAssignees.map(function(e){
-                        		cxt.removeMenuItem('cxtNodeAssignee' + e);
+                        		cxt.removeMenuItem('cxtNodeAssignee' + listOfNodeAssignees.indexOf(e));
                         	})
                         	cxt.appendMenuItem(changeNodeStatus)
 							cxt.appendMenuItem(changeNodeAssignee)
@@ -480,7 +481,7 @@ Edit
 						selector: 'node',
 						onClickFunction: function (event) {
 							listOfNodeAssignees.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeAssignee' + e);
+	                        		cxt.removeMenuItem('cxtNodeAssignee' + listOfNodeAssignees.indexOf(e));
 	                        })
 							cxt.removeMenuItem('cxtNodeAssigneesNext')
 							cxt.removeMenuItem('cxtNodeAssigneesPred')
@@ -506,7 +507,7 @@ Edit
 						selector: 'node',
 						onClickFunction: function (event) {
 							listOfNodeAssignees.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeAssignee' + e);
+	                        		cxt.removeMenuItem('cxtNodeAssignee' + listOfNodeAssignees.indexOf(e));
 	                        })
 							cxt.removeMenuItem('cxtNodeAssigneesNext')
 							cxt.removeMenuItem('cxtNodeAssigneesPred')
@@ -533,7 +534,7 @@ Edit
 
 					var cxtNodeCategorys = listOfNodeCategorys.map(function(e){
 						return {
-							id: 'cxtNodeCategory' + e,
+							id: 'cxtNodeCategory' + listOfNodeCategorys.indexOf(e),
 							title: 'Category: ' + e,
 							selector: 'node',
 							onClickFunction: function (event) {
@@ -550,7 +551,7 @@ Edit
 								cxt.removeMenuItem('cxtNodeCategorysNext')
 								cxt.removeMenuItem('cxtNodeCategorysPred')
 	                        	listOfNodeCategorys.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeCategory' + e);
+	                        		cxt.removeMenuItem('cxtNodeCategory' + listOfNodeCategorys.indexOf(e));
 	                        	})
 	                        	cxt.appendMenuItem(changeNodeStatus)
 								cxt.appendMenuItem(changeNodeAssignee)
@@ -573,7 +574,7 @@ Edit
 							cxt.removeMenuItem('cxtNodeCategorysNext')
 							cxt.removeMenuItem('cxtNodeCategorysPred')
                         	listOfNodeCategorys.map(function(e){
-                        		cxt.removeMenuItem('cxtNodeCategory' + e);
+                        		cxt.removeMenuItem('cxtNodeCategory' + listOfNodeCategorys.indexOf(e));
                         	})
                         	cxt.appendMenuItem(changeNodeStatus)
 							cxt.appendMenuItem(changeNodeAssignee)
@@ -616,7 +617,7 @@ Edit
 						selector: 'node',
 						onClickFunction: function (event) {
 							listOfNodeCategorys.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeCategory' + e);
+	                        		cxt.removeMenuItem('cxtNodeCategory' + listOfNodeCategorys.indexOf(e));
 	                        })
 							cxt.removeMenuItem('cxtNodeCategorysNext')
 							cxt.removeMenuItem('cxtNodeCategorysPred')
@@ -642,7 +643,7 @@ Edit
 						selector: 'node',
 						onClickFunction: function (event) {
 							listOfNodeCategorys.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeCategory' + e);
+	                        		cxt.removeMenuItem('cxtNodeCategory' + listOfNodeCategorys.indexOf(e));
 	                        })
 							cxt.removeMenuItem('cxtNodeCategorysNext')
 							cxt.removeMenuItem('cxtNodeCategorysPred')
@@ -667,7 +668,7 @@ Edit
 
 					var cxtEdgeTypes = listOfEdgeTypes.map(function(e){
 						return {
-							id: 'cxtEdgeType' + e,
+							id: 'cxtEdgeType' + listOfEdgeTypes.indexOf(e),
 							title: 'Type: ' + e,
 							selector: 'edge',
 							onClickFunction: function (event) {
@@ -684,7 +685,7 @@ Edit
 								cxt.removeMenuItem('cxtEdgeTypesNext')
 								cxt.removeMenuItem('cxtEdgeTypesPred')
 	                        	listOfEdgeTypes.map(function(e){
-	                        		cxt.removeMenuItem('cxtEdgeType' + e);
+	                        		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
 	                        	})
 	                        	cxt.insertBeforeMenuItem(changeTypeOfEdge, 'newEdge');
                             },
@@ -703,7 +704,7 @@ Edit
 							cxt.removeMenuItem('cxtEdgeTypesNext')
 							cxt.removeMenuItem('cxtEdgeTypesPred')
                         	listOfEdgeTypes.map(function(e){
-                        		cxt.removeMenuItem('cxtEdgeType' + e);
+                        		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
                         	})
                         	cxt.insertBeforeMenuItem(changeTypeOfEdge, 'newEdge');
                         },
@@ -741,7 +742,7 @@ Edit
 						selector: 'edge',
 						onClickFunction: function (event) {
 							listOfEdgeTypes.map(function(e){
-	                        		cxt.removeMenuItem('cxtEdgeType' + e);
+	                        		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
 	                        })
 							cxt.removeMenuItem('cxtEdgeTypesNext')
 							cxt.removeMenuItem('cxtEdgeTypesPred')
@@ -767,7 +768,7 @@ Edit
 						selector: 'edge',
 						onClickFunction: function (event) {
 							listOfEdgeTypes.map(function(e){
-	                        		cxt.removeMenuItem('cxtEdgeType' + e);
+	                        		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
 	                        })
 							cxt.removeMenuItem('cxtEdgeTypesNext')
 							cxt.removeMenuItem('cxtEdgeTypesPred')
@@ -930,8 +931,15 @@ Edit
                     			title: 'Edit task',
                     			selector: 'node',
                     			onClickFunction: function (event) {
-                    				window.location = window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/task-edit/?task=" + event.cyTarget.attr('name')
-                                },
+                    			    if(event.cyTarget.attr('id')[0] == '_'){
+                                        alert('You cannot edit an unsaved task')
+                    			    }
+                    			    else{
+                    			        window.location = window.location.toString()
+                    			        .substr(0, window.location.toString().slice(0, -1)
+                    			        .lastIndexOf("/")) + "/task-edit/?task=" + event.cyTarget.attr('name')
+                    			    }
+                    			},
                                 hasTrailingDivider: true,
                                 disabled: false,
                                 coreAsWell: false
