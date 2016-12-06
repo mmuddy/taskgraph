@@ -272,10 +272,10 @@ Edit
 								info['status'] = e
 								event.cyTarget.data('info', info)
 								changes.push({
+								    'type': 'task',
+								    'action': 'changeStatus',
+								    'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
                                   	'status': e,
-                                  	'action': 'changeStatus',
-                                  	'id': event.cyTarget.attr('name'),
-									'type': 'node'
                                   });
 								cxt.removeMenuItem('cancelChangeNodeStatus');
 								cxt.removeMenuItem('cxtNodeStatusesNext')
@@ -406,10 +406,10 @@ Edit
 								info['assignee'] = e
 								event.cyTarget.data('info', info)
 								changes.push({
+								    'type': 'task',
+								    'action': 'changeAssignee',
+								    'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
                                   	'assignee': e,
-                                  	'action': 'changeAssignee',
-                                  	'id': event.cyTarget.attr('name'),
-									'type': 'node'
                                   });
 								cxt.removeMenuItem('cancelChangeNodeAssignee');
 								cxt.removeMenuItem('cxtNodeAssigneesNext')
@@ -542,10 +542,10 @@ Edit
 								info['category'] = e
 								event.cyTarget.data('info', info)
 								changes.push({
+								    'type': 'task',
+								    'action': 'changeCategory',
+								    'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
                                   	'category': e,
-                                  	'action': 'changeCategory',
-                                  	'id': event.cyTarget.attr('name'),
-									'type': 'node'
                                   });
 								cxt.removeMenuItem('cancelChangeNodeCategory');
 								cxt.removeMenuItem('cxtNodeCategorysNext')
@@ -675,11 +675,9 @@ Edit
 								event.cyTarget.data('type', e)
 								changes.push({
                                   	'type': 'relation',
-                                  	'from': event.cyTarget.attr('source'),
-                                  	'to': event.cyTarget.attr('target'),
-                                  	'action': 'change',
+                                  	'action': 'changeType',
                                   	'id': event.cyTarget.attr('edge_id'),
-                                  	'param': e
+                                  	'param': e,
                                   });
 								cxt.removeMenuItem('cancelChangeTypeOfEdge');
 								cxt.removeMenuItem('cxtEdgeTypesNext')
@@ -833,8 +831,8 @@ Edit
                                 	node.renderedPosition({x:event.originalEvent.clientX - 50, y: event.originalEvent.clientY - 90});
                                 	changes.push({
                                 		'type': 'task',
-                                		'task_id': node.attr('id'),
-	                                  	'action': 'add'
+                                		'action': 'add',
+                                		'id': node.attr('id'),
                                 	});
                                 	console.log(changes);
                                 },
@@ -854,8 +852,6 @@ Edit
                                   	target.remove();
 									changes.push({
 	                                  	'type': 'relation',
-	                                  	'from': target.attr('source'),
-	                                  	'to': target.attr('target'),
 	                                  	'action': 'delete',
 	                                  	'id': target.attr('edge_id'),
 	                                  });
@@ -900,10 +896,10 @@ Edit
                                 	});
                                 	changes.push({
                                 		'type': 'relation',
-                                		'from': cxt.firstEdge.attr('id'),
-	                                  	'to': event.cyTarget.attr('id'),
-	                                  	'action': 'add',
-	                                  	'id': edge.attr('edge_id'),
+                                		'action': 'add',
+                                		'id': edge.attr('edge_id'),
+                                		'from': cxt.firstEdge.attr(cxt.firstEdge.attr('id')[0] !='_'? 'name': 'id'),
+	                                  	'to': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
                                 	});
                                 	console.log(changes);
                                 },
