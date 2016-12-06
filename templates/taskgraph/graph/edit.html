@@ -97,7 +97,7 @@ Edit
                      'type6', 'type7', 'type8', 'type9', 'type10', 'type11', 'type12'];
 
                 var listOfNodeStatuses = ['status1', 'status2', 'status3', 'status4', 'status5',
-                    'status6', 'status7', 'status8', 'status9', 'status11', 'status12','status13', 'status14',
+                    'status6', 'status7', 'status8', 'status9', 'status10', 'status11', 'status12','status13', 'status14',
                     'status15','status16', 'status17', 'status18','status19', 'status20', 'status21'];
 
                 var listOfNodeAssignees = ['assignee1', 'assignee2', 'assignee3', 'assignee4', 'assignee5',
@@ -284,6 +284,8 @@ Edit
 	                        		cxt.removeMenuItem('cxtNodeStatus' + e);
 	                        	})
 	                        	cxt.appendMenuItem(changeNodeStatus)
+								cxt.appendMenuItem(changeNodeAssignee)
+								cxt.appendMenuItem(changeNodeCategory)
 	                        	console.log(changes);
                             },
                             hasTrailingDivider: true,
@@ -305,6 +307,8 @@ Edit
                         		cxt.removeMenuItem('cxtNodeStatus' + e);
                         	})
                         	cxt.appendMenuItem(changeNodeStatus)
+							cxt.appendMenuItem(changeNodeAssignee)
+							cxt.appendMenuItem(changeNodeCategory)
                         },
                         hasTrailingDivider: true,
                         disabled: false,
@@ -317,6 +321,8 @@ Edit
 						selector: 'node',
 						onClickFunction: function (event) {
 							cxt.removeMenuItem('changeNodeStatus')
+							cxt.removeMenuItem('changeNodeAssignee')
+							cxt.removeMenuItem('changeNodeCategory')
 							cxt.appendMenuItem(cancelChangeNodeStatus)
 							if(cxtNodeStatuses.length > 5){
 								for(var i = 0; i < 5; i++){
@@ -410,7 +416,9 @@ Edit
 	                        	listOfNodeAssignees.map(function(e){
 	                        		cxt.removeMenuItem('cxtNodeAssignee' + e);
 	                        	})
-	                        	cxt.appendMenuItem(changeNodeAssignee)
+	                        	cxt.appendMenuItem(changeNodeStatus)
+								cxt.appendMenuItem(changeNodeAssignee)
+								cxt.appendMenuItem(changeNodeCategory)
 	                        	console.log(changes);
                             },
                             hasTrailingDivider: true,
@@ -431,7 +439,9 @@ Edit
                         	listOfNodeAssignees.map(function(e){
                         		cxt.removeMenuItem('cxtNodeAssignee' + e);
                         	})
-                        	cxt.appendMenuItem(changeNodeAssignee)
+                        	cxt.appendMenuItem(changeNodeStatus)
+							cxt.appendMenuItem(changeNodeAssignee)
+							cxt.appendMenuItem(changeNodeCategory)
                         },
                         hasTrailingDivider: true,
                         disabled: false,
@@ -443,7 +453,9 @@ Edit
 						title: 'Change assignee',
 						selector: 'node',
 						onClickFunction: function (event) {
+							cxt.removeMenuItem('changeNodeStatus')
 							cxt.removeMenuItem('changeNodeAssignee')
+							cxt.removeMenuItem('changeNodeCategory')
 							cxt.appendMenuItem(cancelChangeNodeAssignee)
 							if(cxtNodeAssignees.length > 5){
 								for(var i = 0; i < 5; i++){
@@ -540,7 +552,9 @@ Edit
 	                        	listOfNodeCategorys.map(function(e){
 	                        		cxt.removeMenuItem('cxtNodeCategory' + e);
 	                        	})
-	                        	cxt.appendMenuItem(changeNodeCategory)
+	                        	cxt.appendMenuItem(changeNodeStatus)
+								cxt.appendMenuItem(changeNodeAssignee)
+								cxt.appendMenuItem(changeNodeCategory)
 	                        	console.log(changes);
                             },
                             hasTrailingDivider: true,
@@ -561,7 +575,9 @@ Edit
                         	listOfNodeCategorys.map(function(e){
                         		cxt.removeMenuItem('cxtNodeCategory' + e);
                         	})
-                        	cxt.appendMenuItem(changeNodeCategory)
+                        	cxt.appendMenuItem(changeNodeStatus)
+							cxt.appendMenuItem(changeNodeAssignee)
+							cxt.appendMenuItem(changeNodeCategory)
                         },
                         hasTrailingDivider: true,
                         disabled: false,
@@ -573,6 +589,8 @@ Edit
 						title: 'Change category',
 						selector: 'node',
 						onClickFunction: function (event) {
+							cxt.removeMenuItem('changeNodeStatus')
+							cxt.removeMenuItem('changeNodeAssignee')
 							cxt.removeMenuItem('changeNodeCategory')
 							cxt.appendMenuItem(cancelChangeNodeCategory)
 							if(cxtNodeCategorys.length > 5){
