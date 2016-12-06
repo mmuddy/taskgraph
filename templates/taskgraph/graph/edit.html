@@ -103,6 +103,10 @@ Edit
                 var listOfNodeAssignees = ['assignee1', 'assignee2', 'assignee3', 'assignee4', 'assignee5',
                     'assignee6', 'assignee7', 'assignee8', 'assignee9', 'assignee10', 'assignee11', 'assignee12'];
 
+                var listOfNodeCategorys = ['category1', 'category2', 'category3', 'category4', 'category5',
+                    'category6', 'category7', 'category8', 'category9', 'category10', 'category11', 'category12'];
+
+
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
 
@@ -511,6 +515,136 @@ Edit
 					}
 
 
+
+
+					var currentCategoryIndex;
+
+					var cxtNodeCategorys = listOfNodeCategorys.map(function(e){
+						return {
+							id: 'cxtNodeCategory' + e,
+							title: 'Category: ' + e,
+							selector: 'node',
+							onClickFunction: function (event) {
+								var info = event.cyTarget.attr('info')
+								info['category'] = e
+								event.cyTarget.data('info', info)
+								changes.push({
+                                  	'category': e,
+                                  	'action': 'changeCategory',
+                                  	'id': event.cyTarget.attr('name'),
+									'type': 'node'
+                                  });
+								cxt.removeMenuItem('cancelChangeNodeCategory');
+								cxt.removeMenuItem('cxtNodeCategorysNext')
+								cxt.removeMenuItem('cxtNodeCategorysPred')
+	                        	listOfNodeCategorys.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeCategory' + e);
+	                        	})
+	                        	cxt.appendMenuItem(changeNodeCategory)
+	                        	console.log(changes);
+                            },
+                            hasTrailingDivider: true,
+                            disabled: false,
+                            coreAsWell: false
+						}
+					})
+
+
+					var cancelChangeNodeCategory = {
+						id: 'cancelChangeNodeCategory',
+						title: 'Cancel',
+						selector: 'node',
+						onClickFunction: function (event) {
+                        	cxt.removeMenuItem('cancelChangeNodeCategory');
+							cxt.removeMenuItem('cxtNodeCategorysNext')
+							cxt.removeMenuItem('cxtNodeCategorysPred')
+                        	listOfNodeCategorys.map(function(e){
+                        		cxt.removeMenuItem('cxtNodeCategory' + e);
+                        	})
+                        	cxt.appendMenuItem(changeNodeCategory)
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var changeNodeCategory = {
+						id: 'changeNodeCategory',
+						title: 'Change category',
+						selector: 'node',
+						onClickFunction: function (event) {
+							cxt.removeMenuItem('changeNodeCategory')
+							cxt.appendMenuItem(cancelChangeNodeCategory)
+							if(cxtNodeCategorys.length > 5){
+								for(var i = 0; i < 5; i++){
+									cxt.appendMenuItem(cxtNodeCategorys[i]);
+								}
+								cxt.appendMenuItem(cxtNodeCategorysNext);
+								currentCategoryIndex = 0;
+							}
+							else{
+								cxt.appendMenuItems(cxtNodeCategorys);
+							}
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtNodeCategorysNext = {
+						id: 'cxtNodeCategorysNext',
+						title: 'Next 5 categories',
+						selector: 'node',
+						onClickFunction: function (event) {
+							listOfNodeCategorys.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeCategory' + e);
+	                        })
+							cxt.removeMenuItem('cxtNodeCategorysNext')
+							cxt.removeMenuItem('cxtNodeCategorysPred')
+							currentCategoryIndex += 5
+							var next = currentCategoryIndex + 5;
+							for(var i = currentCategoryIndex; i < next && i < listOfNodeCategorys.length; i++){
+								cxt.appendMenuItem(cxtNodeCategorys[i]);
+							}
+							cxt.appendMenuItem(cxtNodeCategorysPred);
+							if(listOfNodeCategorys.length > next){
+								cxt.appendMenuItem(cxtNodeCategorysNext);
+							}
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtNodeCategorysPred = {
+						id: 'cxtNodeCategorysPred',
+						title: 'Previous 5 categories',
+						selector: 'node',
+						onClickFunction: function (event) {
+							listOfNodeCategorys.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeCategory' + e);
+	                        })
+							cxt.removeMenuItem('cxtNodeCategorysNext')
+							cxt.removeMenuItem('cxtNodeCategorysPred')
+							var next = currentCategoryIndex;
+							currentCategoryIndex -= 5;
+							for(var i = currentCategoryIndex; i < next; i++){
+								cxt.appendMenuItem(cxtNodeCategorys[i]);
+							}
+							if(currentCategoryIndex){
+								cxt.appendMenuItem(cxtNodeCategorysPred);
+							}
+							cxt.appendMenuItem(cxtNodeCategorysNext);
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+
 					var currentTypeIndex;
 
 					var cxtEdgeTypes = listOfEdgeTypes.map(function(e){
@@ -808,6 +942,7 @@ Edit
                              changeTypeOfEdge,
 							 changeNodeStatus,
 							 changeNodeAssignee,
+							 changeNodeCategory,
                         ],
                         menuItemClasses: ['qtip-bootstrap'],
                         contextMenuClasses: ['qtip-bootstrap']
