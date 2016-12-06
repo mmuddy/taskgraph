@@ -11,6 +11,8 @@ from . import alertfactory, graphview
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.shortcuts import redirect
+
+from django.core.urlresolvers import reverse
 import json
 
 
@@ -109,7 +111,7 @@ def graph_view_page(request):
 def task_edit_page(request):
 
     alerts = []
-    request_task_id = int(request.GET.get('task'));
+    request_task_id = request.GET.get('task');
     if request_task_id is None:
         context = {
             'is_user_active': True,
@@ -129,7 +131,7 @@ def task_edit_page(request):
     assert len(project) == 1
     project = project[0]
 
-    task = filter(lambda t: t.identifier == request_task_id, project.tasks)
+    task = filter(lambda t: t.identifier == int(request_task_id), project.tasks)
     if (len(task) == 0):
         context = {
             'is_user_active': True,
@@ -141,48 +143,34 @@ def task_edit_page(request):
     task = task[0]
 
     if request.method == 'POST':
-        try:
-            category = request.POST.get('category')
-            task.category = filter(lambda c: c.name == category, project.task_categories)[0]
-        except:
-            alerts.append(alertfactory.error('There is no task category "' + category + '" in this project'))
-        try:
-            milestone = request.POST.get('milestone')
-            task.milestone = filter(lambda m: m.name == milestone, project.milestones)[0]
-        except:
-            alerts.append(alertfactory.error('There is no milestone "' + milestone + '" in this project'))
-        try:
-            assignee = request.POST.get('assignee')
-            task.assignee = filter(lambda a: a.name == assignee, project.assignees)[0]
-        except:
-            alerts.append(alertfactory.error('There is no assignee "' + assignee + '" in this project'))
-        try:
-            state = request.POST.get('state')
-            task.state = filter(lambda s: s.name == state, project.task_states)[0]
-        except:
-            alerts.append(alertfactory.error('There is no state "' + state + '" in this project'))
-
+        if task.assignee.name != '__NONE':
+            task.assignee = filter(lambda a: a.name == request.POST.get('Assignee'), project.assignees)[0]
+        if task.milestone.name != '__NONE':
+            task.milestone = filter(lambda m: m.name == request.POST.get('Milestone'), project.milestones)[0]
+        if task.state.name != '__NONE':
+            task.state = filter(lambda s: s.name == request.POST.get('State'), project.task_states)[0]
+        if task.category.name != '__NONE':
+            task.category = filter(lambda c: c.name == request.POST.get('Category'), project.task_categories)[0]
         for field in task.additional_field:
+            value = request.POST.get(field.name.replace('_', ' ').capitalize())
             try:
-                if int(field.type) == 0 :
-                    field.type = 'CharField'
-                    field.char = request.POST.get(field.name)
-                if int(field.type) == 1 :
-                    field.type = 'TextField'
-                    field.text = request.POST.get(field.name)
-                if int(field.type == 2) :
-                    field.type = 'DateField'
-                    field.date = request.POST.get(field.name)
-                field.save()
+                if field.type == 'CharField':
+                    field.char = value
+                elif field.type == 'TextField':
+                    field.text = value
+                elif field.type == 'DateField':
+                    print(field.date)
+                    field.date = value
+                task.save()
             except:
-                alerts.append(alertfactory.error('Additional field saving error'))
+                alerts.append(alertfactory.error('Incorrect value of field ' + field.name.replace('_', ' ').capitalize()
+                                                 + ' (' + field.type + ')'))
 
         if len(alerts) == 0:
             try:
                 task.save()
             except:
                 alerts.append(alertfactory.error('Task saving error'))
-
         if len(alerts) == 0: alerts = [alertfactory.success('Task succesfully updated')]
 
     meta_fields = []
@@ -208,7 +196,7 @@ def task_edit_page(request):
         elif type == 'TextField':
             value = field.text
         elif type == 'DateField':
-            value = field.date
+            value = str(field.date)
         add_fields.append({'name': name, 'type': type, 'value': value})
 
     to_relations = [{'id': i.from_task.identifier, 'type': i.type.name}
@@ -227,6 +215,9 @@ def task_edit_page(request):
                 'from_relations': from_relations,
                 'alerts': alerts
     }
+    return render(request, 'taskgraph/graph/task_edit.html', context)
+
+def task_edit_page_redirect(request, context):
     return render(request, 'taskgraph/graph/task_edit.html', context)
 
 

@@ -48,7 +48,7 @@ Task edit
                             <div class="form-group">
                                 <label class="col-md-4 control-label">{{field.name}}</label>
                                 <div class="col-md-8">
-                                    <select class="form-control" name="category">
+                                    <select class="form-control" name="{{field.name}}">
                                         {% for item in field.list %}
                                             <option
                                             {% if item == field.value %}
@@ -68,7 +68,7 @@ Task edit
                                 <div class="form-group">
                                     <label class="col-md-4 control-label">{{field.name}}</label>
                                     <div class="col-md-8">
-                                        <input name="{{field.name}}" type="date" value="{{field.value}}" class="form-control">
+                                        <input name="{{field.name}}" type="text" value="{{field.value}}" class="form-control">
                                     </div>
                                 </div>
                             {% endif %}
@@ -113,7 +113,7 @@ Task edit
                             {% endif %}
                             {% for relation in to_relations %}
                                 <tr>
-                                    <td><a href="/taskgraph/task-edit/?task={{relation.id}}&project={{project_id}}">Task id: {{relation.id}}, relation: {{relation.type}}</a></td>
+                                    <td><a href="/taskgraph/task-edit/?task={{relation.id}}">Task id: {{relation.id}}, relation: {{relation.type}}</a></td>
                                     <td align="right">
                                         <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
                                     </td>
@@ -130,7 +130,7 @@ Task edit
                             {% endif %}
                             {% for relation in from_relations %}
                                 <tr>
-                                    <td><a href="/taskgraph/task-edit/?task={{relation.id}}&project={{project_id}}">Task id: {{relation.id}}, relation: {{relation.type}}</a></td>
+                                    <td><a href="/taskgraph/task-edit/?task={{relation.id}}">Task id: {{relation.id}}, relation: {{relation.type}}</a></td>
                                     <td align="right">
                                         <span class="btn btn-default btn-xs"><img src="/static/img/remove-icon.png" width="12"></span>
                                     </td>
