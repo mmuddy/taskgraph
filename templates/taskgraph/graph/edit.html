@@ -100,6 +100,9 @@ Edit
                     'status6', 'status7', 'status8', 'status9', 'status11', 'status12','status13', 'status14',
                     'status15','status16', 'status17', 'status18','status19', 'status20', 'status21'];
 
+                var listOfNodeAssignees = ['assignee1', 'assignee2', 'assignee3', 'assignee4', 'assignee5',
+                    'assignee6', 'assignee7', 'assignee8', 'assignee9', 'assignee10', 'assignee11', 'assignee12'];
+
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
 
@@ -373,6 +376,133 @@ Edit
 								cxt.appendMenuItem(cxtNodeStatusesPred);
 							}
 							cxt.appendMenuItem(cxtNodeStatusesNext);
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var currentAssigneeIndex;
+
+					var cxtNodeAssignees = listOfNodeAssignees.map(function(e){
+						return {
+							id: 'cxtNodeAssignee' + e,
+							title: 'Assignee: ' + e,
+							selector: 'node',
+							onClickFunction: function (event) {
+								var info = event.cyTarget.attr('info')
+								info['assignee'] = e
+								event.cyTarget.data('info', info)
+								changes.push({
+                                  	'assignee': e,
+                                  	'action': 'changeAssignee',
+                                  	'id': event.cyTarget.attr('name'),
+									'type': 'node'
+                                  });
+								cxt.removeMenuItem('cancelChangeNodeAssignee');
+								cxt.removeMenuItem('cxtNodeAssigneesNext')
+								cxt.removeMenuItem('cxtNodeAssigneesPred')
+	                        	listOfNodeAssignees.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeAssignee' + e);
+	                        	})
+	                        	cxt.appendMenuItem(changeNodeAssignee)
+	                        	console.log(changes);
+                            },
+                            hasTrailingDivider: true,
+                            disabled: false,
+                            coreAsWell: false
+						}
+					})
+
+
+					var cancelChangeNodeAssignee = {
+						id: 'cancelChangeNodeAssignee',
+						title: 'Cancel',
+						selector: 'node',
+						onClickFunction: function (event) {
+                        	cxt.removeMenuItem('cancelChangeNodeAssignee');
+							cxt.removeMenuItem('cxtNodeAssigneesNext')
+							cxt.removeMenuItem('cxtNodeAssigneesPred')
+                        	listOfNodeAssignees.map(function(e){
+                        		cxt.removeMenuItem('cxtNodeAssignee' + e);
+                        	})
+                        	cxt.appendMenuItem(changeNodeAssignee)
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var changeNodeAssignee = {
+						id: 'changeNodeAssignee',
+						title: 'Change assignee',
+						selector: 'node',
+						onClickFunction: function (event) {
+							cxt.removeMenuItem('changeNodeAssignee')
+							cxt.appendMenuItem(cancelChangeNodeAssignee)
+							if(cxtNodeAssignees.length > 5){
+								for(var i = 0; i < 5; i++){
+									cxt.appendMenuItem(cxtNodeAssignees[i]);
+								}
+								cxt.appendMenuItem(cxtNodeAssigneesNext);
+								currentAssigneeIndex = 0;
+							}
+							else{
+								cxt.appendMenuItems(cxtNodeAssignees);
+							}
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtNodeAssigneesNext = {
+						id: 'cxtNodeAssigneesNext',
+						title: 'Next 5 assignees',
+						selector: 'node',
+						onClickFunction: function (event) {
+							listOfNodeAssignees.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeAssignee' + e);
+	                        })
+							cxt.removeMenuItem('cxtNodeAssigneesNext')
+							cxt.removeMenuItem('cxtNodeAssigneesPred')
+							currentAssigneeIndex += 5
+							var next = currentAssigneeIndex + 5;
+							for(var i = currentAssigneeIndex; i < next && i < listOfNodeAssignees.length; i++){
+								cxt.appendMenuItem(cxtNodeAssignees[i]);
+							}
+							cxt.appendMenuItem(cxtNodeAssigneesPred);
+							if(listOfNodeAssignees.length > next){
+								cxt.appendMenuItem(cxtNodeAssigneesNext);
+							}
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtNodeAssigneesPred = {
+						id: 'cxtNodeAssigneesPred',
+						title: 'Previous 5 assignees',
+						selector: 'node',
+						onClickFunction: function (event) {
+							listOfNodeAssignees.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeAssignee' + e);
+	                        })
+							cxt.removeMenuItem('cxtNodeAssigneesNext')
+							cxt.removeMenuItem('cxtNodeAssigneesPred')
+							var next = currentAssigneeIndex;
+							currentAssigneeIndex -= 5;
+							for(var i = currentAssigneeIndex; i < next; i++){
+								cxt.appendMenuItem(cxtNodeAssignees[i]);
+							}
+							if(currentAssigneeIndex){
+								cxt.appendMenuItem(cxtNodeAssigneesPred);
+							}
+							cxt.appendMenuItem(cxtNodeAssigneesNext);
 
                         },
                         hasTrailingDivider: true,
@@ -676,7 +806,8 @@ Edit
                              newEdge,
                              createNode,
                              changeTypeOfEdge,
-							 changeNodeStatus
+							 changeNodeStatus,
+							 changeNodeAssignee,
                         ],
                         menuItemClasses: ['qtip-bootstrap'],
                         contextMenuClasses: ['qtip-bootstrap']
