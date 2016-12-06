@@ -927,8 +927,8 @@ Edit
                     			title: 'Edit task',
                     			selector: 'node',
                     			onClickFunction: function (event) {
-                    			    if(event.cyTarget.attr('id')[0] == '_'){
-                                        alert('You cannot edit an unsaved task')
+                    			    if(changes.length > 0){
+                                        alert('You should save changes')
                     			    }
                     			    else{
                     			        window.location = window.location.toString()
