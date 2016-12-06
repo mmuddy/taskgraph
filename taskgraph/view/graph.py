@@ -185,19 +185,7 @@ def task_edit_page(request):
 
         if len(alerts) == 0: alerts = [alertfactory.success('Task succesfully updated')]
 
-    add_fields = []
     '''
-
-    tags = ('<input name="{}" value="{}" class="form-control">',
-            '<textarea name="{}" style="margin: 5px; width: 93%" rows="5" class="form-control">{}</textarea>',
-            '<input name="{}" type="date" value="{}" class="form-control"')
-    for field in task.additional_field:
-        if int(field.type) == 0:
-            add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.name, field.char)}]
-        if int(field.type) == 1:
-            add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.name, field.text)}]
-        if int(field.type) == 2:
-            add_fields += [{'name': field.name, 'tags': tags[int(field.type)].format(field.name, field.date)}]
 
     to_relations = [{'id': i.from_task.identifier, 'type': i.type.name}
                       for i in project.taskrelation_set.filter(project = project, to_task = task)]
@@ -209,16 +197,16 @@ def task_edit_page(request):
     meta_fields = []
     if task.assignee.name != '__NONE':
         meta_fields.append({'name': 'Assignee', 'value': task.assignee.name,
-                       'list': [assignee.name for assignee in project.assignees]})
+                       'list': [assignee.name for assignee in project.assignees if assignee.name != '__NONE']})
     if task.milestone.name != '__NONE':
         meta_fields.append({'name': 'Milestone', 'value': task.milestone.name,
-                       'list': [milestone.name for milestone in project.milestones]})
+                       'list': [milestone.name for milestone in project.milestones if milestone.name != '__NONE']})
     if task.category.name != '__NONE':
         meta_fields.append({'name': 'Category', 'value': task.category.name,
-                       'list': [category.name for category in project.task_categories]})
+                       'list': [category.name for category in project.task_categories if category.name != '__NONE']})
     if task.state.name != '__NONE':
         meta_fields.append({'name': 'State', 'value': task.state.name,
-                       'list': [state.name for state in project.task_states]})
+                       'list': [state.name for state in project.task_states if state.name != '__NONE']})
 
     add_fields = []
     for field in task.additional_field:
@@ -232,9 +220,10 @@ def task_edit_page(request):
             value = field.date
         add_fields.append({'name': name, 'type': type, 'value': value})
 
-    to_relations = []
-    from_relations = []
-
+    to_relations = [{'id': i.from_task.identifier, 'type': i.type.name}
+                      for i in filter(lambda r: r.project == project and r.to_task == task, project.tasks_relations)]
+    from_relations = [{'id': i.to_task.identifier, 'type': i.type.name}
+                    for i in filter(lambda r: r.project == project and r.from_task == task, project.tasks_relations)]
 
     context = {'is_user_active': True,
                 'contains_menu': True,
