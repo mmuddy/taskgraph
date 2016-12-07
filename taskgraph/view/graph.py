@@ -243,22 +243,22 @@ def change_graph(request):
                     try:
                         task.state = filter(lambda s: s.name == curr['status'], project.task_states)[0]
                     except:
-                        return 'Error! There is no state ' + curr['status'] + ' at this project'
+                        return HttpResponse('Error! There is no state ' + curr['status'] + ' at this project')
                 elif action == 'changeAssignee':
                     try:
                         task.assignee = filter(lambda a: a.name == curr['assignee'], project.assignees)[0]
                     except:
-                        return 'Error! There is no assignee ' + curr['assignee'] + ' at this project'
+                        return HttpResponse('Error! There is no assignee ' + curr['assignee'] + ' at this project')
                 elif action == 'changeCategory':
                     try:
                         task.category = filter(lambda s: s.name == curr['category'], project.task_categories)[0]
                     except:
-                        return 'Error! There is no category ' + curr['category'] + ' at this project'
+                        return HttpResponse('Error! There is no category ' + curr['category'] + ' at this project')
                 elif action == 'changeMilestone':
                     try:
                         task.state = filter(lambda m: m.name == curr['milestone'], project.milestones)[0]
                     except:
-                        return 'Error! There is no milestone ' + curr['milestone'] + ' at this project'
+                        return HttpResponse('Error! There is no milestone ' + curr['milestone'] + ' at this project')
 
         elif type == 'relation':
 
@@ -271,12 +271,12 @@ def change_graph(request):
             elif action == 'changeType':
                 relation = filter(lambda r: r.identifier == id, project.tasks_relations)
                 if (len(relation) == 0):
-                    return 'Error! There is no relation with id ' + str(id) + ' at this project'
+                    return HttpResponse('Error! There is no relation with id ' + str(id) + ' at this project')
                 relation = relation[0]
                 try:
                     relation.type = filter(lambda t: t.name == curr['param'], project.task_relation_types)[0]
                 except:
-                    return 'Error! There is no relation type ' + curr['param'] + ' at this project'
+                    return HttpResponse('Error! There is no relation type ' + curr['param'] + ' at this project')
 
         #todo: requests to tracker
 
