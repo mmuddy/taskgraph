@@ -285,15 +285,33 @@ Edit
 							title: 'Status: ' + e,
 							selector: 'node',
 							onClickFunction: function (event) {
-								var info = event.cyTarget.attr('info')
-								info['status'] = e
-								event.cyTarget.data('info', info)
-								changes.push({
-								    'type': 'task',
-								    'action': 'changeStatus',
-								    'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                  	'status': e,
-                                  });
+							    if(cy.nodes(':selected').length){
+							        var selectedNodes = cy.nodes(':selected')
+                                    for(var i = 0; i < selectedNodes.length; i++){
+                                        var target = selectedNodes[i]
+                                        var info = target.attr('info')
+                                        info['status'] = e
+                                        target.data('info', info)
+                                        changes.push({
+                                            'type': 'task',
+                                            'action': 'changeStatus',
+                                            'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                                            'status': e,
+                                        });
+                                    }
+							    }
+							    else{
+                                    var info = event.cyTarget.attr('info')
+                                    info['status'] = e
+                                    event.cyTarget.data('info', info)
+                                    changes.push({
+                                        'type': 'task',
+                                        'action': 'changeStatus',
+                                        'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
+                                        'status': e,
+                                      });
+							    }
+
 								cxt.removeMenuItem('cancelChangeNodeStatus');
 								cxt.removeMenuItem('cxtNodeStatusesNext')
 								cxt.removeMenuItem('cxtNodeStatusesPred')
@@ -422,15 +440,33 @@ Edit
 							title: 'Assignee: ' + e,
 							selector: 'node',
 							onClickFunction: function (event) {
-								var info = event.cyTarget.attr('info')
-								info['assignee'] = e
-								event.cyTarget.data('info', info)
-								changes.push({
-								    'type': 'task',
-								    'action': 'changeAssignee',
-								    'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                  	'assignee': e,
-                                  });
+							    if(cy.nodes(':selected').length){
+							        var selectedNodes = cy.nodes(':selected')
+                                    for(var i = 0; i < selectedNodes.length; i++){
+                                        var target = selectedNodes[i]
+                                        var info = target.attr('info')
+                                        info['assignee'] = e
+                                        target.data('info', info)
+                                        changes.push({
+                                            'type': 'task',
+                                            'action': 'changeAssignee',
+                                            'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                                            'assignee': e,
+                                        });
+                                    }
+							    }
+							    else{
+							        var info = event.cyTarget.attr('info')
+                                    info['assignee'] = e
+                                    event.cyTarget.data('info', info)
+                                    changes.push({
+                                        'type': 'task',
+                                        'action': 'changeAssignee',
+                                        'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
+                                        'assignee': e,
+                                      });
+							    }
+
 								cxt.removeMenuItem('cancelChangeNodeAssignee');
 								cxt.removeMenuItem('cxtNodeAssigneesNext')
 								cxt.removeMenuItem('cxtNodeAssigneesPred')
@@ -561,15 +597,33 @@ Edit
 							title: 'Category: ' + e,
 							selector: 'node',
 							onClickFunction: function (event) {
-								var info = event.cyTarget.attr('info')
-								info['category'] = e
-								event.cyTarget.data('info', info)
-								changes.push({
-								    'type': 'task',
-								    'action': 'changeCategory',
-								    'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                  	'category': e,
-                                  });
+							    if(cy.nodes(':selected').length){
+							        var selectedNodes = cy.nodes(':selected')
+                                    for(var i = 0; i < selectedNodes.length; i++){
+                                        var target = selectedNodes[i]
+                                        var info = target.attr('info')
+                                        info['category'] = e
+                                        target.data('info', info)
+                                        changes.push({
+                                            'type': 'task',
+                                            'action': 'changeCategory',
+                                            'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                                            'category': e,
+                                        });
+                                    }
+							    }
+							    else{
+							        var info = event.cyTarget.attr('info')
+                                    info['category'] = e
+                                    event.cyTarget.data('info', info)
+                                    changes.push({
+                                        'type': 'task',
+                                        'action': 'changeCategory',
+                                        'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
+                                        'category': e,
+                                      });
+							    }
+
 								cxt.removeMenuItem('cancelChangeNodeCategory');
 								cxt.removeMenuItem('cxtNodeCategorysNext')
 								cxt.removeMenuItem('cxtNodeCategorysPred')
@@ -698,15 +752,33 @@ Edit
 							title: 'Milestone: ' + e,
 							selector: 'node',
 							onClickFunction: function (event) {
-								var info = event.cyTarget.attr('info')
-								info['milestone'] = e
-								event.cyTarget.data('info', info)
-								changes.push({
-								    'type': 'task',
-								    'action': 'changeMilestone',
-								    'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                  	'milestone': e,
-                                  });
+							    if(cy.nodes(':selected').length){
+							        var selectedNodes = cy.nodes(':selected')
+                                    for(var i = 0; i < selectedNodes.length; i++){
+                                        var target = selectedNodes[i]
+                                        var info = target.attr('info')
+                                        info['milestone'] = e
+                                        target.data('info', info)
+                                        changes.push({
+                                            'type': 'task',
+                                            'action': 'changeMilestone',
+                                            'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                                            'milestone': e,
+                                        });
+                                    }
+							    }
+							    else{
+							        var info = event.cyTarget.attr('info')
+                                    info['milestone'] = e
+                                    event.cyTarget.data('info', info)
+                                    changes.push({
+                                        'type': 'task',
+                                        'action': 'changeMilestone',
+                                        'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
+                                        'milestone': e,
+                                      });
+							    }
+
 								cxt.removeMenuItem('cancelChangeNodeMilestone');
 								cxt.removeMenuItem('cxtNodeMilestonesNext')
 								cxt.removeMenuItem('cxtNodeMilestonesPred')
@@ -835,20 +907,36 @@ Edit
 							title: 'Type: ' + e,
 							selector: 'edge',
 							onClickFunction: function (event) {
-								event.cyTarget.data('type', e)
-								changes.push({
-                                  	'type': 'relation',
-                                  	'action': 'changeType',
-                                  	'id': event.cyTarget.attr('edge_id'),
-                                  	'param': e,
-                                  });
+							    if(cy.edges(':selected').length){
+							        var selectedEdges = cy.edges(':selected')
+                                    for(var i = 0; i < selectedEdges.length; i++){
+                                        var target = selectedEdges[i]
+                                        target.data('type', e)
+                                        changes.push({
+                                            'type': 'relation',
+                                            'action': 'changeType',
+                                            'id': target.attr('edge_id'),
+                                            'param': e,
+                                          });
+                                    }
+							    }
+							    else{
+                                    event.cyTarget.data('type', e)
+                                    changes.push({
+                                        'type': 'relation',
+                                        'action': 'changeType',
+                                        'id': event.cyTarget.attr('edge_id'),
+                                        'param': e,
+                                      });
+							    }
+
 								cxt.removeMenuItem('cancelChangeTypeOfEdge');
 								cxt.removeMenuItem('cxtEdgeTypesNext')
 								cxt.removeMenuItem('cxtEdgeTypesPred')
 	                        	listOfEdgeTypes.map(function(e){
 	                        		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
 	                        	})
-	                        	cxt.insertBeforeMenuItem(changeTypeOfEdge, 'newEdge');
+	                        	cxt.appendMenuItem(changeTypeOfEdge);
                             },
                             hasTrailingDivider: true,
                             disabled: false,
@@ -867,7 +955,7 @@ Edit
                         	listOfEdgeTypes.map(function(e){
                         		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
                         	})
-                        	cxt.insertBeforeMenuItem(changeTypeOfEdge, 'newEdge');
+                        	cxt.appendMenuItem(changeTypeOfEdge);
                         },
                         hasTrailingDivider: true,
                         disabled: false,
@@ -1050,20 +1138,43 @@ Edit
                                 title: 'Create edge',
                                 selector: 'node',
                                 onClickFunction: function (event) {
-                                	var edge = cy.add({
-                                		group: 'edges',
-                                		data: { source: cxt.firstEdge.attr('id'),
-                                				target: event.cyTarget.attr('id'),
-                                				type: listOfEdgeTypes[0],
-                                				edge_id:  '_'+(Math.random()*1000000000|0),}
-                                	});
-                                	changes.push({
-                                		'type': 'relation',
-                                		'action': 'add',
-                                		'id': edge.attr('edge_id'),
-                                		'from': cxt.firstEdge.attr(cxt.firstEdge.attr('id')[0] !='_'? 'name': 'id'),
-	                                  	'to': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                	});
+                                    if(cy.nodes(':selected').length){
+                                        var selectedNodes = cy.nodes(':selected')
+                                        for(var i = 0; i < selectedNodes.length; i++){
+                                            var target = selectedNodes[i]
+                                            var edge = cy.add({
+                                                group: 'edges',
+                                                data: { source: cxt.firstEdge.attr('id'),
+                                                        target: target.attr('id'),
+                                                        type: listOfEdgeTypes[0],
+                                                        edge_id:  '_'+(Math.random()*1000000000|0),}
+                                            });
+                                            changes.push({
+                                                'type': 'relation',
+                                                'action': 'add',
+                                                'id': edge.attr('edge_id'),
+                                                'from': cxt.firstEdge.attr(cxt.firstEdge.attr('id')[0] !='_'? 'name': 'id'),
+                                                'to': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                                            });
+                                        }
+                                    }
+                                    else{
+                                        var edge = cy.add({
+                                            group: 'edges',
+                                            data: { source: cxt.firstEdge.attr('id'),
+                                                    target: event.cyTarget.attr('id'),
+                                                    type: listOfEdgeTypes[0],
+                                                    edge_id:  '_'+(Math.random()*1000000000|0),}
+                                        });
+                                        changes.push({
+                                            'type': 'relation',
+                                            'action': 'add',
+                                            'id': edge.attr('edge_id'),
+                                            'from': cxt.firstEdge.attr(cxt.firstEdge.attr('id')[0] !='_'? 'name': 'id'),
+                                            'to': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
+                                        });
+                                    }
+
                                 	console.log(changes);
                                 },
                                 hasTrailingDivider: true,
