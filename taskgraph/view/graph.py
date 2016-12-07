@@ -10,9 +10,6 @@ from pprint import pprint
 from . import alertfactory, graphview
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.shortcuts import redirect
-
-from django.core.urlresolvers import reverse
 import json
 
 
@@ -217,58 +214,70 @@ def task_edit_page(request):
     }
     return render(request, 'taskgraph/graph/task_edit.html', context)
 
-def task_edit_page_redirect(request, context):
-    return render(request, 'taskgraph/graph/task_edit.html', context)
-
 
 def change_graph(request):
 
+    project = Project.objects.filter(is_active=True)
+    if project.count() == 0:
+        return 'Error! No active project'
+    assert len(project) == 1
+    project = project[0]
+
     for curr in json.loads(request.POST['history']):
-        #curr - dict with keys 'type', 'action' etc.
-        pass
+        type = curr['type']
+        action = curr['action']
+        id = int(['id'])
+
+        if type == 'task':
+
+            if action == 'add':
+                #todo: add task
+                pass
+            else:
+                task = filter(lambda t: t.identifier == id, project.tasks)
+                if (len(task) == 0):
+                    return 'Error! There is no task with id ' + str(id) + ' at this project'
+                task = task[0]
+
+                if action == 'changeStatus':
+                    try:
+                        task.state = filter(lambda s: s.name == curr['status'], project.task_states)[0]
+                    except:
+                        return 'Error! There is no state ' + curr['status'] + ' at this project'
+                elif action == 'changeAssignee':
+                    try:
+                        task.assignee = filter(lambda a: a.name == curr['assignee'], project.assignees)[0]
+                    except:
+                        return 'Error! There is no assignee ' + curr['assignee'] + ' at this project'
+                elif action == 'changeCategory':
+                    try:
+                        task.category = filter(lambda s: s.name == curr['category'], project.task_categories)[0]
+                    except:
+                        return 'Error! There is no category ' + curr['category'] + ' at this project'
+                elif action == 'changeMilestone':
+                    try:
+                        task.state = filter(lambda m: m.name == curr['milestone'], project.milestones)[0]
+                    except:
+                        return 'Error! There is no milestone ' + curr['milestone'] + ' at this project'
+
+        elif type == 'relation':
+
+            if action == 'add':
+                #todo: add relation
+                pass
+            elif action == 'delete':
+                #todo: delete realtion
+                pass
+            elif action == 'changeType':
+                relation = filter(lambda r: r.identifier == id, project.tasks_relations)
+                if (len(relation) == 0):
+                    return 'Error! There is no relation with id ' + str(id) + ' at this project'
+                relation = relation[0]
+                try:
+                    relation.type = filter(lambda t: t.name == curr['param'], project.task_relation_types)[0]
+                except:
+                    return 'Error! There is no relation type ' + curr['param'] + ' at this project'
+
         #todo: requests to tracker
 
-    return HttpResponse('Done')
-    '''
-
-
-    history = json.loads(request.body.decode("utf-8"))
-    type = history['type']
-    action = history['action']
-    project = Project.objects.filter(is_active=True)[0]
-
-    if type == 'relation' :
-        from_task = Task.objects.get(project=project, identifier=history['from'])
-        to_task = Task.objects.get(project=project, identifier=history['to'])
-
-        if action == 'add':
-            relation_type = TaskRelationType.objects.get(project=project, name=history['relation'])
-            relation = TaskRelation(project=project, from_task=from_task, to_task=to_task, type=relation_type)
-            relation.save(save_on_tracker=True)
-
-        if action == 'delete':
-            relation = TaskRelation.objects.get(project=project, from_task=from_task, to_task=to_task)
-            relation.delete(delete_on_tracker=True)
-
-    if type == 'task' :
-
-        if action == 'add':
-            assignee = Assignee.objects.get(name=history['assignee'])
-            milestone = Milestone.objects.get(name=history['milestone'])
-            category = TaskCategory.objects.get(name=history['category'])
-            state = TaskState.objects.get(name=history['state'])
-            task = Task(project=project, assignee=assignee, milestone=milestone, category=category, state=state)
-            task.save(save_on_tracker=True)
-
-        if action == 'delete':
-            task = TaskRelation.objects.get(project=project, identifier=history['task_id'])
-            task.delete(delete_on_tracker=True)
-
-        if action == 'change':
-            task.assignee = Assignee.objects.get(name=history['assignee'])
-            task.milestone = Milestone.objects.get(name=history['milestone'])
-            task.category = TaskCategory.objects.get(name=history['category'])
-            task.state = TaskState.objects.get(name=history['state'])
-            task.save(save_on_tracker=True)
-
-    return HttpResponse('Done')'''
+    return HttpResponse('Graph was successfully updated')
