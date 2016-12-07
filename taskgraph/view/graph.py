@@ -219,7 +219,7 @@ def change_graph(request):
 
     project = Project.objects.filter(is_active=True)
     if project.count() == 0:
-        return 'Error! No active project'
+        return HttpResponse('Error! No active project')
     assert len(project) == 1
     project = project[0]
 
