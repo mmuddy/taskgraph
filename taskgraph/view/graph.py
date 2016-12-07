@@ -57,7 +57,12 @@ def edit_page(request):
                'all_edges': all_edges,
                'all_nodes': all_nodes,
                'coords': coords,
-               'info': info}
+               'info': info,
+               'assignees': [i.name for i in project.assignees if i.name != '__NONE'],
+               'milestones': [i.name for i in project.milestones if i.name != '__NONE'],
+               'states': [i.name for i in project.task_states if i.name != '__NONE'],
+               'categories': [i.name for i in project.task_categories if i.name != '__NONE'],
+               'relation_types': [i.name for i in project.task_relation_types}
 
     return render(request, 'taskgraph/graph/edit.html', context)
 
@@ -222,10 +227,11 @@ def change_graph(request):
         return HttpResponse('Error! No active project')
     assert len(project) == 1
     project = project[0]
+    history = json.loads(request.POST['history'])
     changes_count = 0
-    changes = len(json.loads(request.POST['history']))
+    changes = len(history)
 
-    for curr in json.loads(request.POST['history']):
+    for curr in history:
         type = curr['type']
         action = curr['action']
         id = int(curr['id'])
