@@ -87,7 +87,7 @@ Edit
 
         function sendpost() {
 			$.post( window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/change-graph/",
-			    {history: JSON.stringify(changes)}).done(location.reload());
+			    {history: JSON.stringify(changes)}).done(function(data){alert(data);location.reload()});
 		}
 
 
