@@ -62,7 +62,7 @@ def edit_page(request):
                'milestones': [i.name for i in project.milestones if i.name != '__NONE'],
                'states': [i.name for i in project.task_states if i.name != '__NONE'],
                'categories': [i.name for i in project.task_categories if i.name != '__NONE'],
-               'relation_types': [i.name for i in project.task_relation_types}
+               'relation_types': [i.name for i in project.task_relation_types]}
 
     return render(request, 'taskgraph/graph/edit.html', context)
 
