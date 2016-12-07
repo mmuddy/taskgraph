@@ -222,6 +222,8 @@ def change_graph(request):
         return HttpResponse('Error! No active project')
     assert len(project) == 1
     project = project[0]
+    changes_count = 0
+    changes = len(json.loads(request.POST['history']))
 
     for curr in json.loads(request.POST['history']):
         type = curr['type']
@@ -236,29 +238,38 @@ def change_graph(request):
             else:
                 task = filter(lambda t: t.identifier == id, project.tasks)
                 if (len(task) == 0):
-                    return HttpResponse('Error! There is no task with id ' + str(id) + ' at this project')
+                    return HttpResponse('Error! There is no task with id ' + str(id) + ' at this project ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
                 task = task[0]
 
                 if action == 'changeStatus':
                     try:
                         task.state = filter(lambda s: s.name == curr['status'], project.task_states)[0]
+                        changes_count += 1
                     except:
-                        return HttpResponse('Error! There is no state ' + curr['status'] + ' at this project')
+                        return HttpResponse('Error! There is no state ' + curr['status'] + ' at this project ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
                 elif action == 'changeAssignee':
                     try:
                         task.assignee = filter(lambda a: a.name == curr['assignee'], project.assignees)[0]
+                        changes_count += 1
                     except:
-                        return HttpResponse('Error! There is no assignee ' + curr['assignee'] + ' at this project')
+                        return HttpResponse('Error! There is no assignee ' + curr['assignee'] + ' at this project ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
                 elif action == 'changeCategory':
                     try:
                         task.category = filter(lambda s: s.name == curr['category'], project.task_categories)[0]
+                        changes_count += 1
                     except:
-                        return HttpResponse('Error! There is no category ' + curr['category'] + ' at this project')
+                        return HttpResponse('Error! There is no category ' + curr['category'] + ' at this project ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
                 elif action == 'changeMilestone':
                     try:
                         task.state = filter(lambda m: m.name == curr['milestone'], project.milestones)[0]
+                        changes_count += 1
                     except:
-                        return HttpResponse('Error! There is no milestone ' + curr['milestone'] + ' at this project')
+                        return HttpResponse('Error! There is no milestone ' + curr['milestone'] + ' at this project ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
 
         elif type == 'relation':
 
@@ -271,12 +282,15 @@ def change_graph(request):
             elif action == 'changeType':
                 relation = filter(lambda r: r.identifier == id, project.tasks_relations)
                 if (len(relation) == 0):
-                    return HttpResponse('Error! There is no relation with id ' + str(id) + ' at this project')
+                    return HttpResponse('Error! There is no relation with id ' + str(id) + ' at this project ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
                 relation = relation[0]
                 try:
                     relation.type = filter(lambda t: t.name == curr['param'], project.task_relation_types)[0]
+                    changes_count += 1
                 except:
-                    return HttpResponse('Error! There is no relation type ' + curr['param'] + ' at this project')
+                    return HttpResponse('Error! There is no relation type ' + curr['param'] + ' at this project ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
 
         #todo: requests to tracker
 
