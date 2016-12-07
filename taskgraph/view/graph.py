@@ -236,7 +236,7 @@ def change_graph(request):
             else:
                 task = filter(lambda t: t.identifier == id, project.tasks)
                 if (len(task) == 0):
-                    return 'Error! There is no task with id ' + str(id) + ' at this project'
+                    return HttpResponse('Error! There is no task with id ' + str(id) + ' at this project')
                 task = task[0]
 
                 if action == 'changeStatus':
