@@ -106,6 +106,9 @@ Edit
                 var listOfNodeCategorys = ['category1', 'category2', 'category3', 'category4', 'category5',
                     'category6', 'category7', 'category8', 'category9', 'category10', 'category11', 'category12'];
 
+                var listOfNodeMilestones = ['milestone1', 'milestone2', 'milestone3', 'milestone4', 'milestone5',
+                    'milestone6', 'milestone7', 'milestone8', 'milestone9', 'milestone10', 'milestone11', 'milestone12'];
+
 
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
@@ -286,6 +289,7 @@ Edit
 	                        	cxt.appendMenuItem(changeNodeStatus)
 								cxt.appendMenuItem(changeNodeAssignee)
 								cxt.appendMenuItem(changeNodeCategory)
+								cxt.appendMenuItem(changeNodeMilestone)
 	                        	console.log(changes);
                             },
                             hasTrailingDivider: true,
@@ -309,6 +313,7 @@ Edit
                         	cxt.appendMenuItem(changeNodeStatus)
 							cxt.appendMenuItem(changeNodeAssignee)
 							cxt.appendMenuItem(changeNodeCategory)
+							cxt.appendMenuItem(changeNodeMilestone)
                         },
                         hasTrailingDivider: true,
                         disabled: false,
@@ -323,6 +328,7 @@ Edit
 							cxt.removeMenuItem('changeNodeStatus')
 							cxt.removeMenuItem('changeNodeAssignee')
 							cxt.removeMenuItem('changeNodeCategory')
+							cxt.removeMenuItem('changeNodeMilestone')
 							cxt.appendMenuItem(cancelChangeNodeStatus)
 							if(cxtNodeStatuses.length > 5){
 								for(var i = 0; i < 5; i++){
@@ -420,6 +426,7 @@ Edit
 	                        	cxt.appendMenuItem(changeNodeStatus)
 								cxt.appendMenuItem(changeNodeAssignee)
 								cxt.appendMenuItem(changeNodeCategory)
+								cxt.appendMenuItem(changeNodeMilestone)
 	                        	console.log(changes);
                             },
                             hasTrailingDivider: true,
@@ -443,6 +450,7 @@ Edit
                         	cxt.appendMenuItem(changeNodeStatus)
 							cxt.appendMenuItem(changeNodeAssignee)
 							cxt.appendMenuItem(changeNodeCategory)
+							cxt.appendMenuItem(changeNodeMilestone)
                         },
                         hasTrailingDivider: true,
                         disabled: false,
@@ -457,6 +465,7 @@ Edit
 							cxt.removeMenuItem('changeNodeStatus')
 							cxt.removeMenuItem('changeNodeAssignee')
 							cxt.removeMenuItem('changeNodeCategory')
+							cxt.removeMenuItem('changeNodeMilestone')
 							cxt.appendMenuItem(cancelChangeNodeAssignee)
 							if(cxtNodeAssignees.length > 5){
 								for(var i = 0; i < 5; i++){
@@ -556,6 +565,7 @@ Edit
 	                        	cxt.appendMenuItem(changeNodeStatus)
 								cxt.appendMenuItem(changeNodeAssignee)
 								cxt.appendMenuItem(changeNodeCategory)
+								cxt.appendMenuItem(changeNodeMilestone)
 	                        	console.log(changes);
                             },
                             hasTrailingDivider: true,
@@ -579,6 +589,7 @@ Edit
                         	cxt.appendMenuItem(changeNodeStatus)
 							cxt.appendMenuItem(changeNodeAssignee)
 							cxt.appendMenuItem(changeNodeCategory)
+							cxt.appendMenuItem(changeNodeMilestone)
                         },
                         hasTrailingDivider: true,
                         disabled: false,
@@ -593,6 +604,7 @@ Edit
 							cxt.removeMenuItem('changeNodeStatus')
 							cxt.removeMenuItem('changeNodeAssignee')
 							cxt.removeMenuItem('changeNodeCategory')
+							cxt.removeMenuItem('changeNodeMilestone')
 							cxt.appendMenuItem(cancelChangeNodeCategory)
 							if(cxtNodeCategorys.length > 5){
 								for(var i = 0; i < 5; i++){
@@ -656,6 +668,143 @@ Edit
 								cxt.appendMenuItem(cxtNodeCategorysPred);
 							}
 							cxt.appendMenuItem(cxtNodeCategorysNext);
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+
+					var currentMilestoneIndex;
+
+					var cxtNodeMilestones = listOfNodeMilestones.map(function(e){
+						return {
+							id: 'cxtNodeMilestone' + listOfNodeMilestones.indexOf(e),
+							title: 'Milestone: ' + e,
+							selector: 'node',
+							onClickFunction: function (event) {
+								var info = event.cyTarget.attr('info')
+								info['milestone'] = e
+								event.cyTarget.data('info', info)
+								changes.push({
+								    'type': 'task',
+								    'action': 'changeMilestone',
+								    'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
+                                  	'milestone': e,
+                                  });
+								cxt.removeMenuItem('cancelChangeNodeMilestone');
+								cxt.removeMenuItem('cxtNodeMilestonesNext')
+								cxt.removeMenuItem('cxtNodeMilestonesPred')
+	                        	listOfNodeMilestones.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeMilestone' + listOfNodeMilestones.indexOf(e));
+	                        	})
+	                        	cxt.appendMenuItem(changeNodeStatus)
+								cxt.appendMenuItem(changeNodeAssignee)
+								cxt.appendMenuItem(changeNodeCategory)
+								cxt.appendMenuItem(changeNodeMilestone)
+	                        	console.log(changes);
+                            },
+                            hasTrailingDivider: true,
+                            disabled: false,
+                            coreAsWell: false
+						}
+					})
+
+
+					var cancelChangeNodeMilestone = {
+						id: 'cancelChangeNodeMilestone',
+						title: 'Cancel',
+						selector: 'node',
+						onClickFunction: function (event) {
+                        	cxt.removeMenuItem('cancelChangeNodeMilestone');
+							cxt.removeMenuItem('cxtNodeMilestonesNext')
+							cxt.removeMenuItem('cxtNodeMilestonesPred')
+                        	listOfNodeMilestones.map(function(e){
+                        		cxt.removeMenuItem('cxtNodeMilestone' + listOfNodeMilestones.indexOf(e));
+                        	})
+                        	cxt.appendMenuItem(changeNodeStatus)
+							cxt.appendMenuItem(changeNodeAssignee)
+							cxt.appendMenuItem(changeNodeCategory)
+							cxt.appendMenuItem(changeNodeMilestone)
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var changeNodeMilestone = {
+						id: 'changeNodeMilestone',
+						title: 'Change milestone',
+						selector: 'node',
+						onClickFunction: function (event) {
+							cxt.removeMenuItem('changeNodeStatus')
+							cxt.removeMenuItem('changeNodeAssignee')
+							cxt.removeMenuItem('changeNodeCategory')
+							cxt.removeMenuItem('changeNodeMilestone')
+							cxt.appendMenuItem(cancelChangeNodeMilestone)
+							if(cxtNodeMilestones.length > 5){
+								for(var i = 0; i < 5; i++){
+									cxt.appendMenuItem(cxtNodeMilestones[i]);
+								}
+								cxt.appendMenuItem(cxtNodeMilestonesNext);
+								currentMilestoneIndex = 0;
+							}
+							else{
+								cxt.appendMenuItems(cxtNodeMilestones);
+							}
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtNodeMilestonesNext = {
+						id: 'cxtNodeMilestonesNext',
+						title: 'Next 5 milestones',
+						selector: 'node',
+						onClickFunction: function (event) {
+							listOfNodeMilestones.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeMilestone' + listOfNodeMilestones.indexOf(e));
+	                        })
+							cxt.removeMenuItem('cxtNodeMilestonesNext')
+							cxt.removeMenuItem('cxtNodeMilestonesPred')
+							currentMilestoneIndex += 5
+							var next = currentMilestoneIndex + 5;
+							for(var i = currentMilestoneIndex; i < next && i < listOfNodeMilestones.length; i++){
+								cxt.appendMenuItem(cxtNodeMilestones[i]);
+							}
+							cxt.appendMenuItem(cxtNodeMilestonesPred);
+							if(listOfNodeMilestones.length > next){
+								cxt.appendMenuItem(cxtNodeMilestonesNext);
+							}
+
+                        },
+                        hasTrailingDivider: true,
+                        disabled: false,
+                        coreAsWell: false
+					}
+
+					var cxtNodeMilestonesPred = {
+						id: 'cxtNodeMilestonesPred',
+						title: 'Previous 5 milestones',
+						selector: 'node',
+						onClickFunction: function (event) {
+							listOfNodeMilestones.map(function(e){
+	                        		cxt.removeMenuItem('cxtNodeMilestone' + listOfNodeMilestones.indexOf(e));
+	                        })
+							cxt.removeMenuItem('cxtNodeMilestonesNext')
+							cxt.removeMenuItem('cxtNodeMilestonesPred')
+							var next = currentMilestoneIndex;
+							currentMilestoneIndex -= 5;
+							for(var i = currentMilestoneIndex; i < next; i++){
+								cxt.appendMenuItem(cxtNodeMilestones[i]);
+							}
+							if(currentMilestoneIndex){
+								cxt.appendMenuItem(cxtNodeMilestonesPred);
+							}
+							cxt.appendMenuItem(cxtNodeMilestonesNext);
 
                         },
                         hasTrailingDivider: true,
@@ -965,6 +1114,7 @@ Edit
 							 changeNodeStatus,
 							 changeNodeAssignee,
 							 changeNodeCategory,
+							 changeNodeMilestone,
                         ],
                         menuItemClasses: ['qtip-bootstrap'],
                         contextMenuClasses: ['qtip-bootstrap']
