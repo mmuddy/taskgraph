@@ -226,7 +226,7 @@ def change_graph(request):
     for curr in json.loads(request.POST['history']):
         type = curr['type']
         action = curr['action']
-        id = int(['id'])
+        id = int(curr['id'])
 
         if type == 'task':
 
