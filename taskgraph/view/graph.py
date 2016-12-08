@@ -58,10 +58,10 @@ def edit_page(request):
                'all_nodes': all_nodes,
                'coords': coords,
                'info': info,
-               'assignees': [i.name for i in project.assignees if i.name != '__NONE'],
-               'milestones': [i.name for i in project.milestones if i.name != '__NONE'],
-               'states': [i.name for i in project.task_states if i.name != '__NONE'],
-               'categories': [i.name for i in project.task_categories if i.name != '__NONE'],
+               'assignees': [i.name for i in project.assignees if i.name != '__NONE' and i.active],
+               'milestones': [i.name for i in project.milestones if i.name != '__NONE' and i.active],
+               'states': [i.name for i in project.task_states if i.name != '__NONE' and i.active],
+               'categories': [i.name for i in project.task_categories if i.name != '__NONE' and i.active],
                'relation_types': [i.name for i in project.task_relation_types]}
 
     return render(request, 'taskgraph/graph/edit.html', context)
@@ -179,16 +179,20 @@ def task_edit_page(request):
     meta_fields = []
     if task.assignee.name != '__NONE':
         meta_fields.append({'name': 'Assignee', 'value': task.assignee.name,
-                       'list': [assignee.name for assignee in project.assignees if assignee.name != '__NONE']})
+                       'list': [assignee.name for assignee in project.assignees
+                                if assignee.name != '__NONE' and assignee.active]})
     if task.milestone.name != '__NONE':
         meta_fields.append({'name': 'Milestone', 'value': task.milestone.name,
-                       'list': [milestone.name for milestone in project.milestones if milestone.name != '__NONE']})
+                       'list': [milestone.name for milestone in project.milestones
+                                if milestone.name != '__NONE' and milestone.active]})
     if task.category.name != '__NONE':
         meta_fields.append({'name': 'Category', 'value': task.category.name,
-                       'list': [category.name for category in project.task_categories if category.name != '__NONE']})
+                       'list': [category.name for category in project.task_categories
+                                if category.name != '__NONE' and category.active]})
     if task.state.name != '__NONE':
         meta_fields.append({'name': 'State', 'value': task.state.name,
-                       'list': [state.name for state in project.task_states if state.name != '__NONE']})
+                       'list': [state.name for state in project.task_states
+                                if state.name != '__NONE' and state.active]})
 
     add_fields = []
     for field in task.additional_field:
