@@ -62,7 +62,7 @@ def edit_page(request):
                'milestones': [i.name for i in project.milestones if i.name != '__NONE'],
                'states': [i.name for i in project.task_states if i.name != '__NONE'],
                'categories': [i.name for i in project.task_categories if i.name != '__NONE'],
-               'relation_types': [i.name for i in project.task_relation_types}
+               'relation_types': [i.name for i in project.task_relation_types]}
 
     return render(request, 'taskgraph/graph/edit.html', context)
 
@@ -144,6 +144,7 @@ def task_edit_page(request):
         return render(request, 'taskgraph/graph/task_edit.html', context)
     task = task[0]
 
+
     if request.method == 'POST':
         if task.assignee.name != '__NONE':
             task.assignee = filter(lambda a: a.name == request.POST.get('Assignee'), project.assignees)[0]
@@ -161,16 +162,16 @@ def task_edit_page(request):
                 elif field.type == 'TextField':
                     field.text = value
                 elif field.type == 'DateField':
-                    print(field.date)
                     field.date = value
-                task.save()
+                task.save(save_on_tracker=True, i_tracker=get_interface(project.tracker.type))
             except:
                 alerts.append(alertfactory.error('Incorrect value of field ' + field.name.replace('_', ' ').capitalize()
                                                  + ' (' + field.type + ')'))
+                break
 
         if len(alerts) == 0:
             try:
-                task.save()
+                task.save(save_on_tracker=True, i_tracker=get_interface(project.tracker.type))
             except:
                 alerts.append(alertfactory.error('Task saving error'))
         if len(alerts) == 0: alerts = [alertfactory.success('Task succesfully updated')]
