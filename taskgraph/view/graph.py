@@ -41,11 +41,11 @@ def edit_page(request):
                                                 vertex_block_width=vertex_block_width,
                                                 vertex_block_height=80)
 
-    if len(edge_list) > len(adjacency_matrix) / 2:
-        tgraph.applyLayoutAlgorithm('Upward Planarization (OGDF)', tgraph.getLayoutProperty("viewLayout"))
-    else:
-        tgraph.applyLayoutAlgorithm('Random layout', tgraph.getLayoutProperty("viewLayout"))
-
+    #if len(edge_list) > len(adjacency_matrix) / 2:
+    #    tgraph.applyLayoutAlgorithm('Upward Planarization (OGDF)', tgraph.getLayoutProperty("viewLayout"))
+    #else:
+    #    tgraph.applyLayoutAlgorithm('Random layout', tgraph.getLayoutProperty("viewLayout"))
+    tgraph.applyLayoutAlgorithm('Planarization Grid (OGDF)', tgraph.getLayoutProperty("viewLayout"))
     scale_ind = 3
     coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
     all_nodes = [info[node_ind[node]] for node in tgraph.getNodes()]
@@ -88,11 +88,11 @@ def graph_view_page(request):
                                                 vertex_block_width=vertex_block_width,
                                                 vertex_block_height=80)
 
-    if len(edge_list) > len(adjacency_matrix) / 2:
-        tgraph.applyLayoutAlgorithm('Upward Planarization (OGDF)', tgraph.getLayoutProperty("viewLayout"))
-    else:
-        tgraph.applyLayoutAlgorithm('Random layout', tgraph.getLayoutProperty("viewLayout"))
-
+    #if len(edge_list) > len(adjacency_matrix) / 2:
+    #    tgraph.applyLayoutAlgorithm('Upward Planarization (OGDF)', tgraph.getLayoutProperty("viewLayout"))
+    #else:
+    #    tgraph.applyLayoutAlgorithm('Random layout', tgraph.getLayoutProperty("viewLayout"))
+    tgraph.applyLayoutAlgorithm('Planarization Grid (OGDF)', tgraph.getLayoutProperty("viewLayout"))
     scale_ind = 3
     coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
     all_nodes = [info[node_ind[node]] for node in tgraph.getNodes()]
@@ -246,7 +246,7 @@ def change_graph(request):
             else:
                 id = int(id) if id[0] != '_' else 12345
                 task = filter(lambda t: t.identifier == id, project.tasks)
-                if (len(task) == 0):
+                if not task:
                     return HttpResponse('Error! There is no task with id ' + str(id) + ' at this project ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
                 task = task[0]
@@ -279,6 +279,8 @@ def change_graph(request):
                     except:
                         return HttpResponse('Error! There is no milestone ' + curr['milestone'] + ' at this project ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
+
+                task.save(save_on_tracker=True, i_tracker=get_interface(project.tracker.type))
 
         elif type == 'relation':
 
