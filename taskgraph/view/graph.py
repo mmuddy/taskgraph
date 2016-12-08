@@ -113,7 +113,7 @@ def graph_view_page(request):
 def task_edit_page(request):
 
     alerts = []
-    request_task_id = request.GET.get('task');
+    request_task_id = request.GET.get('task')
     if request_task_id is None:
         context = {
             'is_user_active': True,
@@ -134,7 +134,7 @@ def task_edit_page(request):
     project = project[0]
 
     task = filter(lambda t: t.identifier == int(request_task_id), project.tasks)
-    if (len(task) == 0):
+    if not task:
         context = {
             'is_user_active': True,
             'contains_menu': True,
@@ -143,7 +143,6 @@ def task_edit_page(request):
         }
         return render(request, 'taskgraph/graph/task_edit.html', context)
     task = task[0]
-
 
     if request.method == 'POST':
         if task.assignee.name != '__NONE':
@@ -164,31 +163,33 @@ def task_edit_page(request):
                 elif field.type == 'DateField':
                     field.date = value
                 task.save(save_on_tracker=True, i_tracker=get_interface(project.tracker.type))
-            except:
+            except Exception as e:
                 alerts.append(alertfactory.error('Incorrect value of field ' + field.name.replace('_', ' ').capitalize()
                                                  + ' (' + field.type + ')'))
                 break
 
-        if len(alerts) == 0:
+        if not alerts:
             try:
                 task.save(save_on_tracker=True, i_tracker=get_interface(project.tracker.type))
             except:
                 alerts.append(alertfactory.error('Task saving error'))
-        if len(alerts) == 0: alerts = [alertfactory.success('Task succesfully updated')]
+
+        if not alerts:
+            alerts = [alertfactory.success('Task succesfully updated')]
 
     meta_fields = []
     if task.assignee.name != '__NONE':
         meta_fields.append({'name': 'Assignee', 'value': task.assignee.name,
-                       'list': [assignee.name for assignee in project.assignees if assignee.name != '__NONE']})
+                            'list': [assignee.name for assignee in project.assignees if assignee.name != '__NONE']})
     if task.milestone.name != '__NONE':
         meta_fields.append({'name': 'Milestone', 'value': task.milestone.name,
-                       'list': [milestone.name for milestone in project.milestones if milestone.name != '__NONE']})
+                            'list': [milestone.name for milestone in project.milestones if milestone.name != '__NONE']})
     if task.category.name != '__NONE':
         meta_fields.append({'name': 'Category', 'value': task.category.name,
-                       'list': [category.name for category in project.task_categories if category.name != '__NONE']})
+                            'list': [category.name for category in project.task_categories if category.name != '__NONE']})
     if task.state.name != '__NONE':
         meta_fields.append({'name': 'State', 'value': task.state.name,
-                       'list': [state.name for state in project.task_states if state.name != '__NONE']})
+                            'list': [state.name for state in project.task_states if state.name != '__NONE']})
 
     add_fields = []
     for field in task.additional_field:
