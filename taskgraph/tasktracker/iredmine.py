@@ -176,13 +176,13 @@ class IRedmine(TrackerInterface):
         d = {}
 
         if obj.assignee:
-            d['assigned_to'] = obj.project_identifier, obj.assignee
+            d['assigned_to_id'] = obj.assignee
         """if obj.milestone:
             d['milestone'] = obj.milestone"""
         if obj.category:
-            d['category'] = obj.project_identifier, obj.category
+            d['category_id'] = obj.category
         if obj.status:
-            d['status'] = obj.status
+            d['status_id'] = obj.status
 
         for add_field in obj.additional_fields:
             d.update(Task.additional_field_as_arg(add_field))
