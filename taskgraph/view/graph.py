@@ -236,7 +236,7 @@ def change_graph(request):
     for curr in history:
         type = curr['type']
         action = curr['action']
-        id = int(curr['id'])
+        id = curr['id']
 
         if type == 'task':
 
@@ -244,6 +244,7 @@ def change_graph(request):
                 #todo: add task
                 pass
             else:
+                id = int(id) if id[0] != '_' else 12345
                 task = filter(lambda t: t.identifier == id, project.tasks)
                 if (len(task) == 0):
                     return HttpResponse('Error! There is no task with id ' + str(id) + ' at this project ('
