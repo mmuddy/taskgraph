@@ -139,6 +139,9 @@ def normalize_graph_coords(tgraph, vertex_block_height, node_ind, scale_index):
     node_dists = []
     node_list = [node for node in tgraph.getNodes()]
 
+    if not node_list:
+        return []
+
     for node_i in node_list:
         for node_j in node_list[1:int(len(node_list) / 2)]:
             node_i_value = tgraph.getLayoutProperty("viewLayout").getNodeValue(node_i)
@@ -148,10 +151,20 @@ def normalize_graph_coords(tgraph, vertex_block_height, node_ind, scale_index):
             if dist:
                 node_dists.append(dist)
 
-    ideal_dist = vertex_block_height * scale_index
-    min_dist = min(node_dists)
-    proportion = ideal_dist / min_dist
+    if not node_dists:
+        node_dists = [0]
 
+    ideal_dist = vertex_block_height * scale_index
+    max_dist = max(node_dists)
+
+    if max_dist > ideal_dist * len(node_list) * 1.3:
+        proportion = 1
+    else:
+        min_dist = min(node_dists)
+        proportion = ideal_dist / min_dist
+
+    print proportion
+    
     coords = []
     for node in tgraph.getNodes():
         coords.append((node_ind[node],
@@ -159,3 +172,4 @@ def normalize_graph_coords(tgraph, vertex_block_height, node_ind, scale_index):
                        tgraph.getLayoutProperty("viewLayout").getNodeValue(node)[1] * proportion))
 
     return coords
+

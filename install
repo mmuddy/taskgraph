@@ -1,6 +1,6 @@
 #! /bin/bash
 
-apt-get install python python-dev python-setuptools apache2 apache2-dev libapache2-mod-wsgi mongodb &&
+apt-get install python python-pip python-dev python-setuptools apache2 apache2-dev libapache2-mod-wsgi mongodb &&
 pip install --upgrade pip &&
 pip install -r requirements.txt
 
