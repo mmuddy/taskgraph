@@ -164,7 +164,7 @@ def normalize_graph_coords(tgraph, vertex_block_height, node_ind, scale_index):
         proportion = ideal_dist / min_dist
 
     print proportion
-    
+
     coords = []
     for node in tgraph.getNodes():
         coords.append((node_ind[node],
