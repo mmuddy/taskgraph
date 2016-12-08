@@ -93,22 +93,35 @@ Edit
 
 		$(function(){
 
-                var listOfEdgeTypes = ['type1', 'type2', 'type3', 'type4', 'type5',
-                     'type6', 'type7', 'type8', 'type9', 'type10', 'type11', 'type12'];
+		        var listOfEdgeTypes = [
+		                {% for i in relation_types %}
+		                            '{{i}}',
+		                {% endfor %}
+		        ]
 
-                var listOfNodeStatuses = ['status1', 'status2', 'status3', 'status4', 'status5',
-                    'status6', 'status7', 'status8', 'status9', 'status10', 'status11', 'status12','status13', 'status14',
-                    'status15','status16', 'status17', 'status18','status19', 'status20', 'status21'];
+		        var listOfNodeStatuses = [
+		                {% for i in states %}
+		                            '{{i}}',
+		                {% endfor %}
+		        ]
 
-                var listOfNodeAssignees = ['assignee1', 'assignee2', 'assignee3', 'assignee4', 'assignee5',
-                    'assignee6', 'assignee7', 'assignee8', 'assignee9', 'assignee10', 'assignee11', 'assignee12'];
+		        var listOfNodeAssignees = [
+		                {% for i in assignees %}
+		                            '{{i}}',
+		                {% endfor %}
+		        ]
 
-                var listOfNodeCategorys = ['category1', 'category2', 'category3', 'category4', 'category5',
-                    'category6', 'category7', 'category8', 'category9', 'category10', 'category11', 'category12'];
+                var listOfNodeCategorys = [
+		                {% for i in categories %}
+		                            '{{i}}',
+		                {% endfor %}
+		        ]
 
-                var listOfNodeMilestones = ['milestone1', 'milestone2', 'milestone3', 'milestone4', 'milestone5',
-                    'milestone6', 'milestone7', 'milestone8', 'milestone9', 'milestone10', 'milestone11', 'milestone12'];
-
+		        var listOfNodeMilestones = [
+		                {% for i in milestones %}
+		                            '{{i}}',
+		                {% endfor %}
+		        ]
 
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
