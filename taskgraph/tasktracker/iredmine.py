@@ -138,11 +138,17 @@ class IRedmine(TrackerInterface):
 
     def update_task(self, action):
         if action.type == Action.Type.CREATE:
-            self.redmine.issue.create(action.obj.project_identifier, **self._translate_task_object(action.obj))
+            res = self.redmine.issue.create(action.obj.identifier, **self._translate_task_object(action.obj))
+            if not res:
+                raise abstract.SaveError('Create task with id %s failed' % action.obj.identifier)
         elif action.type == Action.Type.CHANGE:
-            self.redmine.issue.update(action.obj.identifier, **self._translate_task_object(action.obj))
+            res = self.redmine.issue.update(action.obj.identifier, **self._translate_task_object(action.obj))
+            if not res:
+                raise abstract.SaveError('Update task with id %s failed' % action.obj.identifier)
         elif action.type == Action.Type.DELETE:
-            self.redmine.issue.delete(action.obj.identifie)
+            res = self.redmine.issue.delete(action.obj.identifie)
+            if not res:
+                raise abstract.SaveError('Create task with id %s failed' % action.obj.identifier)
 
     def update_relation(self, action):
         to_id = action.obj.to_task.identifier
@@ -154,7 +160,9 @@ class IRedmine(TrackerInterface):
             relation.issue_id = from_id
             relation.issue_to_id = to_id
             relation.relation_type = rel_type
-            relation.save()
+            res = relation.save()
+            if not res:
+                raise abstract.SaveError('Create relation from %i to %i failed' % (from_id, to_id))
         elif action.type == Action.Type.CHANGE:
             raise NotImplementedError
         elif action.type == Action.Type.DELETE:
@@ -166,7 +174,9 @@ class IRedmine(TrackerInterface):
                     break
             if not requested:
                 raise KeyError
-            self.redmine.issue_relation.delete(requested.id)
+            res = self.redmine.issue_relation.delete(requested.id)
+            if not res:
+                raise abstract.SaveError('Delete relation from %i to %i failed' % (from_id, to_id))
 
     def my_name(self):
         return self.current_name

@@ -82,9 +82,18 @@ class Project:
 
 
 class ConnectionError(Exception):
-     def __init__(self, value):
-         self.value = value
-     def __str__(self):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
+class SaveError(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
         return repr(self.value)
 
 
