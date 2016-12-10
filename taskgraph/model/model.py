@@ -163,7 +163,11 @@ class Project(models.Model):
 
         for task, _, task_children in tasks:
             for child_id, rel_type in task_children or []:
-                self._create_relation(task.identifier, child_id, rel_type).save()
+                try:
+                     self._create_relation(task.identifier, child_id, rel_type).save()
+                except IndexError:
+                    print 'can\'t create relation from %i to %i  with type %s' \
+                          % (task.identifier, child_id, rel_type.name)
 
         self.save()
 
@@ -182,9 +186,16 @@ class Project(models.Model):
                 old_model_set.append(cls_model.objects.create(**new_model))
 
     def _create_relation(self, parent_id, child_id, rel_type_name):
-        rel_type = filter(lambda rt: rt.name == rel_type_name, self.task_relation_types)[0]
-        parent = filter(lambda t: t.identifier == parent_id, self.tasks)[0]
-        child = filter(lambda t: t.identifier == child_id, self.tasks)[0]
+        def get(predicate, collection):
+            fltr = filter(predicate, collection)
+            if not fltr or len(fltr) > 1:
+                raise IndexError
+            return fltr[0]
+
+        rel_type = get(lambda rt: rt.name == rel_type_name, self.task_relation_types)
+        parent = get(lambda t: t.identifier == parent_id, self.tasks)
+        child = get(lambda t: t.identifier == child_id, self.tasks)
+
         tr = TaskRelation(project=self, from_task=parent, to_task=child, type=rel_type)
         return tr
 
