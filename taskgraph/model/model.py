@@ -167,7 +167,7 @@ class Project(models.Model):
                      self._create_relation(task.identifier, child_id, rel_type).save()
                 except IndexError:
                     print 'can\'t create relation from %i to %i  with type %s' \
-                          % (task.identifier, child_id, rel_type.name)
+                          % (task.identifier, child_id, rel_type)
 
         self.save()
 
