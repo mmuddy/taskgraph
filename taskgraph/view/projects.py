@@ -6,7 +6,10 @@ from django.http import HttpResponse
 from json import dumps, loads
 
 
-def projects_page(request):
+def projects_page(request, update=None):
+    if update:
+        for tracker in Tracker.objects.all():
+            tracker.restore_project_list(get_interface(tracker.type))
     context = {'is_user_active': True,
                'contains_menu': True,
                'tree_json': dumps(_tree_view_json())}

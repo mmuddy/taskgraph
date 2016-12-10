@@ -70,6 +70,7 @@ Projects
     <div id="tree"></div>
     <input class="btn btn-lg btn-default" data-toggle="dropdown"
            type="button" value="Update active" onclick="post_active();"/>
+    <a class="btn btn-lg btn-default" href="{% url 'projects' 'update'%}">Restore projects</a>
 
     <script>
         var tree_view_data = {{ tree_json|safe }};
