@@ -164,7 +164,7 @@ class Project(models.Model):
         for task, _, task_children in tasks:
             for child_id, rel_type in task_children or []:
                 try:
-                     self._create_relation(task.identifier, child_id, rel_type).save()
+                    self._create_relation(task.identifier, child_id, rel_type).save()
                 except IndexError:
                     print 'can\'t create relation from %i to %i  with type %s' \
                           % (task.identifier, child_id, rel_type)
