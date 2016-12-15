@@ -6,4 +6,5 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^taskgraph/', include('taskgraph.urls')),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^.*', include('taskgraph.urls'))
 )
