@@ -89,7 +89,13 @@
                 $.post( window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/change-graph/",
                     {history: JSON.stringify(changes)}).done(function(data){alert(data);location.reload()});
             }
-            var colors1 = 1
+            var colors1 = ['#f8f8f8', '#efebe9', '#eceff1', '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6', '#e8eaf6', '#e3f2fd', '#e1f5fe',
+                           '#e0f7fa', '#e0f2f1', '#e8f5e9', '#f1f8e9', '#f9fbe7', '#fffde7', '#fff8e1', '#fff3e0', '#fbe9e7']
+            var colors3 = ['#cccccc', '#d7ccc8', '#cfd8dc', '#ffcdd2', '#f8bbd0', '#e1bee7', '#d1c4e9', '#c5cae9', '#bbdefb', '#b3e5fc',
+                           '#b2ebf2', '#b2dfdb', '#c8e6c9', '#dcedc8', '#f0f4c3', '#fff9c4', '#ffecb3', '#ffe0b2', '#ffccbc']
+            var colors2 = ['#bbbbbb', '#bcaaa4', '#b0bec5', '#ef9a9a', '#f48fb1', '#ce93d8', '#b39ddb', '#9fa8da', '#90caf9', '#81d4fa',
+                           '#80deea', '#80cbc4', '#a5d6a7', '#c5e1a5', '#e6ee9c', '#fff59d', '#ffe082', '#ffcc80', '#ffab91']
+
             var change_colors;
 			$(function(){
 
@@ -131,14 +137,26 @@
 						{
 							selector: 'node:selected',
 							style: {
-						        'border-color': '#999',
-						        'background-color': '#CCC',
-                                'text-outline-color': '#CCC',
+						        'border-color': 'data(color2)',
+						        'background-color': 'data(color3)',
+                                'text-outline-color': 'data(color3)',
                                 'color' : '#444'
 						        //'text-outline-color': '#b89fdd'
 							}
 
-						}
+						},
+
+						{
+							selector: 'edge:selected',
+							style: {
+
+								'width': 3,
+								'target-arrow-shape': 'triangle',
+								'line-color': '#333',
+								'target-arrow-color': '#333',
+								'curve-style': 'bezier'
+							}
+						},
 					],
 
 					elements: {
@@ -147,65 +165,12 @@
 						{% for i in all_nodes %}
 						    { data:
                             { id: '{{i.0}}', name: '{{i.1}}', type: '{{i.2}}',
-                                 {% if i.6 == 0 %}
-                                     color1: '#f8f8f8', color2: '#bbbbbb'
-                                 {% endif %}
-                                 {% if i.6 == 1 %}
-                                     color1: '#efebe9', color2: '#d7ccc8'
-                                 {% endif %}
-                                 {% if i.6 == 2 %}
-                                     color1: '#eceff1', color2: '#cfd8dc'
-                                 {% endif %}
-                                 {% if i.6 == 3 %}
-                                     color1: '#ffebee', color2: '#ffcdd2'
-                                 {% endif %}
-                                 {% if i.6 == 4 %}
-                                     color1: '#fce4ec', color2: '#f8bbd0'
-                                 {% endif %}
-                                 {% if i.6 == 5 %}
-                                     color1: '#f3e5f5', color2: '#e1bee7'
-                                 {% endif %}
-                                 {% if i.6 == 6 %}
-                                     color1: '#ede7f6', color2: '#d1c4e9'
-                                 {% endif %}
-                                 {% if i.6 == 7 %}
-                                     color1: '#e8eaf6', color2: '#c5cae9'
-                                 {% endif %}
-                                 {% if i.6 == 8 %}
-                                     color1: '#e3f2fd', color2: '#bbdefb'
-                                 {% endif %}
-                                 {% if i.6 == 9 %}
-                                     color1: '#e1f5fe', color2: '#b3e5fc'
-                                 {% endif %}
-                                 {% if i.6 == 10 %}
-                                     color1: '#e0f7fa', color2: '#b2ebf2'
-                                 {% endif %}
-                                 {% if i.6 == 11 %}
-                                     color1: '#e0f2f1', color2: '#b2dfdb'
-                                 {% endif %}
-                                 {% if i.6 == 12 %}
-                                     color1: '#e8f5e9', color2: '#c8e6c9'
-                                 {% endif %}
-                                 {% if i.6 == 13 %}
-                                     color1: '#f1f8e9', color2: '#dcedc8'
-                                 {% endif %}
-                                 {% if i.6 == 14 %}
-                                     color1: '#f9fbe7', color2: '#f0f4c3'
-                                 {% endif %}
-                                 {% if i.6 == 15 %}
-                                     color1: '#fffde7', color2: '#fff9c4'
-                                 {% endif %}
-                                 {% if i.6 == 16 %}
-                                     color1: '#fff8e1', color2: '#ffecb3'
-                                 {% endif %}
-                                 {% if i.6 == 17 %}
-                                     color1: '#fff3e0', color2: '#ffe0b2'
-                                 {% endif %}
-                                 {% if i.6 == 18 %}
-                                     color1: '#fbe9e7', color2: '#ffccbc'
-                                 {% endif %}
 
-                                 ,
+                                 color1: colors1[{{i.6}}],
+
+                                 color2: colors2[{{i.6}}],
+
+                                 color3: colors3[{{i.6}}],
 
                                  info: {
 
@@ -360,12 +325,16 @@
                                 'color' : index
                              })
 
-
-
+                            node.data('color1', colors1[index - 1])
+                            node.data('color2', colors2[index - 1])
+                            node.data('color3', colors3[index - 1])
+                            cy.forceRender()
 
                         }
 
+                        selectedNodes.unselect();
 
+                        document.getElementById('select_color').selectedIndex = 0
                     }
 
 			});
@@ -375,29 +344,27 @@
 
         {% include 'taskgraph/alerts.html' %}
 
-        <input type='text' placeholder='input substring to match'/>
-
-        Color:
-          <select id="select_color" onchange="change_colors()">
-            <option selected="selected" style="background:#F8F8F8">default</option>
-            <option style="background:#D7CCC8">brown</option>
-            <option style="background:#CFD8DC">steel</option>
-            <option style="background:#FFCDD2">pink</option>
-            <option style="background:#F8BBD0">violet</option>
-            <option style="background:#E1BEE7">plum</option>
-            <option style="background:#D1C4E9">purple</option>
-            <option style="background:#C5CAE9">cobalt</option>
-            <option style="background:#BBDEFB">blue</option>
-            <option style="background:#B3E5FC">aqua</option>
-            <option style="background:#B2EBF2">sea</option>
-            <option style="background:#B2DFDB">aquamarine</option>
-            <option style="background:#C8E6C9">forest</option>
-            <option style="background:#DCEDC8">green</option>
-            <option style="background:#F0F4C3">lime</option>
-            <option style="background:#FFF9C4">yellow</option>
-            <option style="background:#FFECB3">orange</option>
-            <option style="background:#FFE0B2">bisque</option>
-            <option style="background:#FFCCBC">peach</option>
+          <select id="select_color">
+            <option selected="selected" disabled="disabled" hidden="hidden">Choose color</option>
+            <option onclick="change_colors()" style="background:#F8F8F8">default</option>
+            <option onclick="change_colors()" style="background:#D7CCC8">brown</option>
+            <option onclick="change_colors()" style="background:#CFD8DC">steel</option>
+            <option onclick="change_colors()" style="background:#FFCDD2">pink</option>
+            <option onclick="change_colors()" style="background:#F8BBD0">violet</option>
+            <option onclick="change_colors()" style="background:#E1BEE7">plum</option>
+            <option onclick="change_colors()" style="background:#D1C4E9">purple</option>
+            <option onclick="change_colors()" style="background:#C5CAE9">cobalt</option>
+            <option onclick="change_colors()" style="background:#BBDEFB">blue</option>
+            <option onclick="change_colors()" style="background:#B3E5FC">aqua</option>
+            <option onclick="change_colors()" style="background:#B2EBF2">sea</option>
+            <option onclick="change_colors()" style="background:#B2DFDB">aquamarine</option>
+            <option onclick="change_colors()" style="background:#C8E6C9">forest</option>
+            <option onclick="change_colors()" style="background:#DCEDC8">green</option>
+            <option onclick="change_colors()" style="background:#F0F4C3">lime</option>
+            <option onclick="change_colors()" style="background:#FFF9C4">yellow</option>
+            <option onclick="change_colors()" style="background:#FFECB3">orange</option>
+            <option onclick="change_colors()" style="background:#FFE0B2">bisque</option>
+            <option onclick="change_colors()" style="background:#FFCCBC">peach</option>
           <select/>
 
         <input type='button' value="Save changes" onclick='sendpost()'/>
