@@ -96,23 +96,24 @@ def graph_view_page(request):
     scale_ind = 3
     coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
 
-    for color in project.task_colors:
-        print 'task id: ' + color.task.identifier + ', color: ' + color.color
+    if project.task_colors:
+        print 'task_colors is OK'
+    else:
+        print 'task_colors is empty'
 
     all_nodes = []
     for node in tgraph.getNodes():
         task_id = info[node_ind[node]][1]
-        print 'id=' + task_id
-        task_color = filter(lambda c: c.task.identifier == task_id, project.task_colors)
+        #print 'id=' + task_id
+        task_color = filter(lambda c: c.task.identifier == int(task_id), project.task_colors)
         if task_color:
             task_color = task_color[0]
             color = task_color.color
-            print 'color found: ' + color
+            #print 'color found: ' + str(color)
         else:
             color = 0
-            print 'color not found: '
+            #print 'color not found: '
         all_nodes.append(info[node_ind[node]]+[color])
-    print 'all nodes: ' + str(all_nodes)
 
     #all_nodes = [[info[node_ind[node]]] for node in tgraph.getNodes()]
 
@@ -258,6 +259,7 @@ def change_graph(request):
         type = curr['type']
         action = curr['action']
         id = curr['id']
+        print 'curr: ' + str(curr)
 
         if type == 'task':
 
@@ -300,15 +302,24 @@ def change_graph(request):
                     except:
                         return HttpResponse('Error! There is no milestone ' + curr['milestone'] + ' at this project ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
-                elif action == 'cahngeColor':
+                elif action == 'changeColor':
+                    print 'changing color of task ' + str(task.identifier)
                     try:
                         task_color = filter(lambda c: c.task == task, project.task_colors)
                         if task_color:
                             task_color = task_color[0]
                             task_color.color = curr['color']
+                            task_color.save()
+                            print 'new color assigned'
                         else:
+                            print 'creating new color'
                             task_color = TaskColor.objects.create(task=task, color=curr['color'])
-                        task_color.save()
+                            task_color.save()
+                            project.task_colors.append(task_color)
+                            project.save()
+                            print 'task color saved in db'
+
+                        print 'task_colors now: ' + str([i.color for i in project.task_colors])
                     except:
                         return HttpResponse('Error at task color saving ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
@@ -339,4 +350,5 @@ def change_graph(request):
 
         #todo: requests to tracker
 
+    print 'success'
     return HttpResponse('Graph was successfully updated')
