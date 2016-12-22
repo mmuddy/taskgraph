@@ -196,15 +196,12 @@ Edit
 						{% for i in all_nodes %}
 						    { data:
                             { id: '{{i.0}}', name: '{{i.1}}', type: '{{i.2}}',
-						         {% if i.2 == 'StartNode' %}
-                                     color1: '#f8f8f8', color2: '#000000'
-                                 {% else %}
-                                     {% if i.2 == 'EndNode' %}
-                                         color1: '#f8f8f8', color2: '#000000'
-                                     {% else %}
-                                         color1: '#f8f8f8', color2: '#BBB'
-                                     {% endif %}
-                                 {% endif %},
+
+						         color1: colors1[{{i.6}}],
+
+                                 color2: colors2[{{i.6}}],
+
+                                 color3: colors3[{{i.6}}],
 
                                  info: {
 
