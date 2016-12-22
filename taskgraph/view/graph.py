@@ -11,7 +11,7 @@ from . import alertfactory, graphview
 from django.shortcuts import render
 from django.http import HttpResponse
 import json
-
+import traceback
 
 
 def analysis_page(request):
@@ -234,6 +234,7 @@ def change_graph(request):
         return HttpResponse('Error! No active project')
     assert len(project) == 1
     project = project[0]
+    tracker = get_interface(project.tracker.type)
     history = json.loads(request.POST['history'])
     changes_count = 0
     changes = len(history)
@@ -246,6 +247,26 @@ def change_graph(request):
         if type == 'task':
 
             if action == 'add':
+
+                print 'adding'
+                assignee = filter(lambda i: i.name == '__NONE', project.assignees)[0]
+                state = project.task_states[0]
+                milestone = filter(lambda i: i.name == '__NONE', project.milestones)[0]
+                category = filter(lambda i: i.name == '__NONE', project.task_categories)[0]
+
+                try:
+                    task = Task.objects.create(project=project, identifier=int(id[1:]), assignee=assignee, category=category, state=state, milestone=milestone, additional_field=[])
+                    print task.identifier
+                    task.save(create_on_tracker=True, i_tracker=tracker)
+                except Exception as e:
+                    print 'exc'
+                    traceback.print_exc()
+                    return HttpResponse('Error! Task saving error ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
+                print 'added'
+
+
+
                 #todo: add task
                 pass
             else:
@@ -285,7 +306,7 @@ def change_graph(request):
                         return HttpResponse('Error! There is no milestone ' + curr['milestone'] + ' at this project ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
 
-                task.save(save_on_tracker=True, i_tracker=get_interface(project.tracker.type))
+                task.save(save_on_tracker=True, i_tracker=tracker)
 
         elif type == 'relation':
 
