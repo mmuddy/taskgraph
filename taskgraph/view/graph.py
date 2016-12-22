@@ -95,7 +95,27 @@ def graph_view_page(request):
     tgraph.applyLayoutAlgorithm('Planarization Grid (OGDF)', tgraph.getLayoutProperty("viewLayout"))
     scale_ind = 3
     coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
-    all_nodes = [info[node_ind[node]] for node in tgraph.getNodes()]
+
+    for color in project.task_colors:
+        print 'task id: ' + color.task.identifier + ', color: ' + color.color
+
+    all_nodes = []
+    for node in tgraph.getNodes():
+        task_id = info[node_ind[node]][1]
+        print 'id=' + task_id
+        task_color = filter(lambda c: c.task.identifier == task_id, project.task_colors)
+        if task_color:
+            task_color = task_color[0]
+            color = task_color.color
+            print 'color found: ' + color
+        else:
+            color = 0
+            print 'color not found: '
+        all_nodes.append(info[node_ind[node]]+[color])
+    print 'all nodes: ' + str(all_nodes)
+
+    #all_nodes = [[info[node_ind[node]]] for node in tgraph.getNodes()]
+
     all_edges = [(i, j, adjacency_matrix[int(i)][int(j)][0], adjacency_matrix[int(i)][int(j)][1])
                  for i in edge_list for j in edge_list[i]]
 
@@ -107,6 +127,7 @@ def graph_view_page(request):
                'info': info,
                'project_id': project.identifier}
 
+    print 'page returned'
     return render(request, 'taskgraph/graph/view.html', context)
 
 
@@ -279,8 +300,21 @@ def change_graph(request):
                     except:
                         return HttpResponse('Error! There is no milestone ' + curr['milestone'] + ' at this project ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
+                elif action == 'cahngeColor':
+                    try:
+                        task_color = filter(lambda c: c.task == task, project.task_colors)
+                        if task_color:
+                            task_color = task_color[0]
+                            task_color.color = curr['color']
+                        else:
+                            task_color = TaskColor.objects.create(task=task, color=curr['color'])
+                        task_color.save()
+                    except:
+                        return HttpResponse('Error at task color saving ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
 
                 task.save(save_on_tracker=True, i_tracker=get_interface(project.tracker.type))
+
 
         elif type == 'relation':
 

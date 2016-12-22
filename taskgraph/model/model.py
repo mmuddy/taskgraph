@@ -119,6 +119,7 @@ class Project(models.Model):
     milestones = ListField(EmbeddedModelField('Milestone'))
     task_categories = ListField(EmbeddedModelField('TaskCategory'))
     task_states = ListField(EmbeddedModelField('TaskState'))
+    task_colors = ListField(EmbeddedModelField('TaskColor'))
 
     def is_member(self, name):
         return len(filter(lambda a: a.name == name, self.assignees)) == 1
@@ -383,4 +384,10 @@ class TaskRelation(models.Model):
         self.project.tasks_relations.append(self)
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using,
                           update_fields=update_fields)
+
+
+class TaskColor(models.Model):
+
+    task = models.ForeignKey(Task)
+    color = models.IntegerField()
 
