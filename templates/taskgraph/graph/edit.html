@@ -90,6 +90,13 @@ Edit
 			    {history: JSON.stringify(changes)}).done(function(data){alert(data);location.reload()});
 		}
 
+		var colors1 = ['#f8f8f8', '#efebe9', '#eceff1', '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6', '#e8eaf6', '#e3f2fd', '#e1f5fe',
+                       '#e0f7fa', '#e0f2f1', '#e8f5e9', '#f1f8e9', '#f9fbe7', '#fffde7', '#fff8e1', '#fff3e0', '#fbe9e7']
+        var colors3 = ['#cccccc', '#d7ccc8', '#cfd8dc', '#ffcdd2', '#f8bbd0', '#e1bee7', '#d1c4e9', '#c5cae9', '#bbdefb', '#b3e5fc',
+                       '#b2ebf2', '#b2dfdb', '#c8e6c9', '#dcedc8', '#f0f4c3', '#fff9c4', '#ffecb3', '#ffe0b2', '#ffccbc']
+        var colors2 = ['#bbbbbb', '#bcaaa4', '#b0bec5', '#ef9a9a', '#f48fb1', '#ce93d8', '#b39ddb', '#9fa8da', '#90caf9', '#81d4fa',
+                       '#80deea', '#80cbc4', '#a5d6a7', '#c5e1a5', '#e6ee9c', '#fff59d', '#ffe082', '#ffcc80', '#ffab91']
+
 
 		$(function(){
 
@@ -159,9 +166,9 @@ Edit
 						{
 							selector: 'node:selected',
 							style: {
-						        'border-color': '#999',
-						        'background-color': '#CCC',
-                                'text-outline-color': '#CCC',
+						        'border-color': 'data(color2)',
+						        'background-color': 'data(color3)',
+                                'text-outline-color': 'data(color3)',
                                 'color' : '#444'
 						        //'text-outline-color': '#b89fdd'
 							}
