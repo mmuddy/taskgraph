@@ -389,6 +389,6 @@ class TaskRelation(models.Model):
 
 class TaskColor(models.Model):
 
-    task = models.ForeignKey(Task)
+    task_identifier = models.IntegerField()
     color = models.IntegerField()
 

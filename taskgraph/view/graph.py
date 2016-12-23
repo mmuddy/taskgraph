@@ -56,7 +56,7 @@ def edit_page(request):
     for node in tgraph.getNodes():
         task_id = info[node_ind[node]][1]
         try:
-            task_color = filter(lambda c: c.task.identifier == int(task_id), project.tracker.task_colors)
+            task_color = filter(lambda c: c.task_identifier == int(task_id), project.tracker.task_colors)
         except Exception:
             task_color = []
         if task_color:
@@ -117,7 +117,7 @@ def graph_view_page(request):
     for node in tgraph.getNodes():
         task_id = info[node_ind[node]][1]
         try:
-            task_color = filter(lambda c: c.task.identifier == int(task_id), project.tracker.task_colors)
+            task_color = filter(lambda c: c.task_identifier == int(task_id), project.tracker.task_colors)
         except Exception:
             task_color = []
         if task_color:
@@ -315,7 +315,7 @@ def change_graph(request):
                 elif action == 'changeColor':
                     try:
                         try:
-                            task_color = filter(lambda c: c.task.identifier == task.identifier, project.tracker.task_colors)
+                            task_color = filter(lambda c: c.task_identifier == task.identifier, project.tracker.task_colors)
                         except Exception:
                             task_color = []
                         if task_color:
@@ -324,7 +324,7 @@ def change_graph(request):
                             task_color.save()
                             project.tracker.save()
                         else:
-                            task_color = TaskColor.objects.create(task=task, color=curr['color'])
+                            task_color = TaskColor.objects.create(task_identifier=task.identifier, color=curr['color'])
                             task_color.save()
                             project.tracker.task_colors.append(task_color)
                             project.tracker.save()
