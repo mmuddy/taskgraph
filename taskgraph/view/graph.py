@@ -113,7 +113,10 @@ def graph_view_page(request):
     all_nodes = []
     for node in tgraph.getNodes():
         task_id = info[node_ind[node]][1]
-        task_color = filter(lambda c: c.task.identifier == int(task_id), project.tracker.task_colors)
+        try:
+            task_color = filter(lambda c: c.task.identifier == int(task_id), project.tracker.task_colors)
+        except Exception:
+            task_color = []
         if task_color:
             task_color = task_color[0]
             color = task_color.color
