@@ -11,6 +11,7 @@ from . import alertfactory, graphview
 from django.shortcuts import render
 from django.http import HttpResponse
 import json
+import sys, traceback
 
 
 
@@ -48,7 +49,23 @@ def edit_page(request):
     tgraph.applyLayoutAlgorithm('Planarization Grid (OGDF)', tgraph.getLayoutProperty("viewLayout"))
     scale_ind = 3
     coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
-    all_nodes = [info[node_ind[node]] for node in tgraph.getNodes()]
+
+    #all_nodes = [info[node_ind[node]] for node in tgraph.getNodes()]
+
+    all_nodes = []
+    for node in tgraph.getNodes():
+        task_id = info[node_ind[node]][1]
+        try:
+            task_color = filter(lambda c: c.task_identifier == int(task_id), project.tracker.task_colors)
+        except Exception:
+            task_color = []
+        if task_color:
+            task_color = task_color[0]
+            color = task_color.color
+        else:
+            color = 0
+        all_nodes.append(info[node_ind[node]] + [color])
+
     all_edges = [(i, j, adjacency_matrix[int(i)][int(j)][0], adjacency_matrix[int(i)][int(j)][1])
                  for i in edge_list for j in edge_list[i]]
 
@@ -95,7 +112,23 @@ def graph_view_page(request):
     tgraph.applyLayoutAlgorithm('Planarization Grid (OGDF)', tgraph.getLayoutProperty("viewLayout"))
     scale_ind = 3
     coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
-    all_nodes = [info[node_ind[node]] for node in tgraph.getNodes()]
+
+    all_nodes = []
+    for node in tgraph.getNodes():
+        task_id = info[node_ind[node]][1]
+        try:
+            task_color = filter(lambda c: c.task_identifier == int(task_id), project.tracker.task_colors)
+        except Exception:
+            task_color = []
+        if task_color:
+            task_color = task_color[0]
+            color = task_color.color
+        else:
+            color = 0
+        all_nodes.append(info[node_ind[node]]+[color])
+
+    #all_nodes = [[info[node_ind[node]]] for node in tgraph.getNodes()]
+
     all_edges = [(i, j, adjacency_matrix[int(i)][int(j)][0], adjacency_matrix[int(i)][int(j)][1])
                  for i in edge_list for j in edge_list[i]]
 
@@ -279,8 +312,30 @@ def change_graph(request):
                     except:
                         return HttpResponse('Error! There is no milestone ' + curr['milestone'] + ' at this project ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
+                elif action == 'changeColor':
+                    try:
+                        try:
+                            task_color = filter(lambda c: c.task_identifier == task.identifier, project.tracker.task_colors)
+                        except Exception:
+                            task_color = []
+                        if task_color:
+                            task_color = task_color[0]
+                            task_color.color = curr['color']
+                            task_color.save()
+                            project.tracker.save()
+                        else:
+                            task_color = TaskColor.objects.create(task_identifier=task.identifier, color=curr['color'])
+                            task_color.save()
+                            project.tracker.task_colors.append(task_color)
+                            project.tracker.save()
+
+                    except Exception:
+                        print(traceback.format_exc())
+                        return HttpResponse('Error at task color saving ('
+                                        + str(changes_count) + '/' + str(changes) + ' changes applied)')
 
                 task.save(save_on_tracker=True, i_tracker=get_interface(project.tracker.type))
+
 
         elif type == 'relation':
 
@@ -302,7 +357,5 @@ def change_graph(request):
                 except:
                     return HttpResponse('Error! There is no relation type ' + curr['param'] + ' at this project ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
-
-        #todo: requests to tracker
 
     return HttpResponse('Graph was successfully updated')

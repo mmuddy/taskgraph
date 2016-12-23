@@ -40,6 +40,8 @@ class Tracker(models.Model):
 
     projects = ListField(EmbeddedModelField('Project'))
     projects_relations = ListField(EmbeddedModelField('ProjectRelation'))
+    task_colors = ListField(EmbeddedModelField('TaskColor'))
+
 
     def __str__(self):
         return '{} {}'.format(self.url, self.type)
@@ -383,4 +385,10 @@ class TaskRelation(models.Model):
         self.project.tasks_relations.append(self)
         models.Model.save(self, force_insert=force_insert, force_update=force_update, using=using,
                           update_fields=update_fields)
+
+
+class TaskColor(models.Model):
+
+    task_identifier = models.IntegerField()
+    color = models.IntegerField()
 

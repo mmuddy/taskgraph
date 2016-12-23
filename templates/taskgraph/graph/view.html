@@ -41,7 +41,65 @@
 
 {% block body_block %}
     <script>
+
+
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            var changes = [];
+
+            var csrftoken = getCookie('csrftoken');
+
+            function csrfSafeMethod(method) {
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+
+            function sameOrigin(url) {
+                var host = document.location.host;
+                var protocol = document.location.protocol;
+                var sr_origin = '//' + host;
+                var origin = protocol + sr_origin;
+                return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+                    (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+                    // or any other URL that isn't scheme relative or absolute i.e relative.
+                    !(/^(\/\/|http:|https:).*/.test(url));
+            }
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            function sendpost() {
+                $.post( window.location.toString().substr(0, window.location.toString().slice(0, -1).lastIndexOf("/")) + "/change-graph/",
+                    {history: JSON.stringify(changes)}).done(function(data){alert(data);location.reload()});
+            }
+            var colors1 = ['#f8f8f8', '#efebe9', '#eceff1', '#ffebee', '#fce4ec', '#f3e5f5', '#ede7f6', '#e8eaf6', '#e3f2fd', '#e1f5fe',
+                           '#e0f7fa', '#e0f2f1', '#e8f5e9', '#f1f8e9', '#f9fbe7', '#fffde7', '#fff8e1', '#fff3e0', '#fbe9e7']
+            var colors3 = ['#cccccc', '#d7ccc8', '#cfd8dc', '#ffcdd2', '#f8bbd0', '#e1bee7', '#d1c4e9', '#c5cae9', '#bbdefb', '#b3e5fc',
+                           '#b2ebf2', '#b2dfdb', '#c8e6c9', '#dcedc8', '#f0f4c3', '#fff9c4', '#ffecb3', '#ffe0b2', '#ffccbc']
+            var colors2 = ['#bbbbbb', '#bcaaa4', '#b0bec5', '#ef9a9a', '#f48fb1', '#ce93d8', '#b39ddb', '#9fa8da', '#90caf9', '#81d4fa',
+                           '#80deea', '#80cbc4', '#a5d6a7', '#c5e1a5', '#e6ee9c', '#fff59d', '#ffe082', '#ffcc80', '#ffab91']
+
+            var change_colors;
 			$(function(){
+
+
 
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
@@ -79,14 +137,26 @@
 						{
 							selector: 'node:selected',
 							style: {
-						        'border-color': '#999',
-						        'background-color': '#CCC',
-                                'text-outline-color': '#CCC',
+						        'border-color': 'data(color2)',
+						        'background-color': 'data(color3)',
+                                'text-outline-color': 'data(color3)',
                                 'color' : '#444'
 						        //'text-outline-color': '#b89fdd'
 							}
 
-						}
+						},
+
+						{
+							selector: 'edge:selected',
+							style: {
+
+								'width': 3,
+								'target-arrow-shape': 'triangle',
+								'line-color': '#333',
+								'target-arrow-color': '#333',
+								'curve-style': 'bezier'
+							}
+						},
 					],
 
 					elements: {
@@ -95,11 +165,14 @@
 						{% for i in all_nodes %}
 						    { data:
                             { id: '{{i.0}}', name: '{{i.1}}', type: '{{i.2}}',
-						         {% if i.2 == 'StartNode' %}
-                                     color1: '#f8f8f8', color2: '#BBB'
-                                 {% else %}
-                                     color1: '#f8f8f8', color2: '#BBB'
-                                 {% endif %},
+
+                                 color1: colors1[{{i.6}}],
+
+                                 color2: colors2[{{i.6}}],
+
+                                 color3: colors3[{{i.6}}],
+
+
 
                                  info: {
 
@@ -141,7 +214,7 @@
 
 				    	if(isTipsEnabled){
 				    		var attrs = Object.keys(node.attr('info'));
-					    	var s = '<b>id</b>: '+node.attr('id')+'<br>';
+					    	var s = '<b>id</b>: '+node.attr('name')+'<br>';
 					    	for (var i = 0; i < attrs.length; i++) {
 					    		s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
 					    	}
@@ -238,6 +311,34 @@
                         contextMenuClasses: ['qtip-bootstrap']
                     });
 
+                    change_colors = function(){
+                        var index = document.getElementById('select_color').selectedIndex
+
+                        console.log(cy.nodes(':selected'))
+
+                        var selectedNodes = cy.nodes(':selected')
+                        for(var i = 0; i < selectedNodes.length; i++){
+
+                            node = selectedNodes[i]
+                            changes.push({
+                                'type' : 'task',
+                                'action' : 'changeColor',
+                                'id' : node.attr(node.attr('id')[0] !='_'? 'name': 'id'),
+                                'color' : index - 1
+                             })
+
+                            node.data('color1', colors1[index - 1])
+                            node.data('color2', colors2[index - 1])
+                            node.data('color3', colors3[index - 1])
+                            cy.forceRender()
+
+                        }
+
+                        selectedNodes.unselect();
+
+                        document.getElementById('select_color').selectedIndex = 0
+                    }
+
 			});
 
 
@@ -245,32 +346,30 @@
 
         {% include 'taskgraph/alerts.html' %}
 
-        <input type='text' placeholder='input substring to match'/>
+          <select id="select_color">
+            <option selected="selected" disabled="disabled" hidden="hidden">Choose color</option>
+            <option onclick="change_colors()" style="background:#F8F8F8">default</option>
+            <option onclick="change_colors()" style="background:#D7CCC8">brown</option>
+            <option onclick="change_colors()" style="background:#CFD8DC">steel</option>
+            <option onclick="change_colors()" style="background:#FFCDD2">pink</option>
+            <option onclick="change_colors()" style="background:#F8BBD0">violet</option>
+            <option onclick="change_colors()" style="background:#E1BEE7">plum</option>
+            <option onclick="change_colors()" style="background:#D1C4E9">purple</option>
+            <option onclick="change_colors()" style="background:#C5CAE9">cobalt</option>
+            <option onclick="change_colors()" style="background:#BBDEFB">blue</option>
+            <option onclick="change_colors()" style="background:#B3E5FC">aqua</option>
+            <option onclick="change_colors()" style="background:#B2EBF2">sea</option>
+            <option onclick="change_colors()" style="background:#B2DFDB">aquamarine</option>
+            <option onclick="change_colors()" style="background:#C8E6C9">forest</option>
+            <option onclick="change_colors()" style="background:#DCEDC8">green</option>
+            <option onclick="change_colors()" style="background:#F0F4C3">lime</option>
+            <option onclick="change_colors()" style="background:#FFF9C4">yellow</option>
+            <option onclick="change_colors()" style="background:#FFECB3">orange</option>
+            <option onclick="change_colors()" style="background:#FFE0B2">bisque</option>
+            <option onclick="change_colors()" style="background:#FFCCBC">peach</option>
+          </select>
 
-        Color:
-          <select>
-            <option selected="selected" style="background:#F8F8F8">default</option>
-            <option style="background:#D7CCC8">brown</option>
-            <option style="background:#CFD8DC">steel</option>
-            <option style="background:#FFCDD2">pink</option>
-            <option style="background:#F8BBD0">violet</option>
-            <option style="background:#E1BEE7">plum</option>
-            <option style="background:#D1C4E9">purple</option>
-            <option style="background:#C5CAE9">cobalt</option>
-            <option style="background:#BBDEFB">blue</option>
-            <option style="background:#B3E5FC">aqua</option>
-            <option style="background:#B2EBF2">sea</option>
-            <option style="background:#B2DFDB">aquamarine</option>
-            <option style="background:#C8E6C9">forest</option>
-            <option style="background:#DCEDC8">green</option>
-            <option style="background:#F0F4C3">lime</option>
-            <option style="background:#FFF9C4">yellow</option>
-            <option style="background:#FFECB3">orange</option>
-            <option style="background:#FFE0B2">bisque</option>
-            <option style="background:#FFCCBC">peach</option>
-          <select/>
-
-        <input type='button' value="Save changes"/>
+        <input type='button' value="Save changes" onclick='sendpost()'/>
 
 		<div id="cy"></div>
 
