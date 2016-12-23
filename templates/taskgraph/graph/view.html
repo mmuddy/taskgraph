@@ -172,6 +172,8 @@
 
                                  color3: colors3[{{i.6}}],
 
+
+
                                  info: {
 
                                     {% for j in i.3 %}
@@ -322,7 +324,7 @@
                                 'type' : 'task',
                                 'action' : 'changeColor',
                                 'id' : node.attr(node.attr('id')[0] !='_'? 'name': 'id'),
-                                'color' : index
+                                'color' : index - 1
                              })
 
                             node.data('color1', colors1[index - 1])
