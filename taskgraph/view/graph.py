@@ -49,7 +49,20 @@ def edit_page(request):
     tgraph.applyLayoutAlgorithm('Planarization Grid (OGDF)', tgraph.getLayoutProperty("viewLayout"))
     scale_ind = 3
     coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
-    all_nodes = [info[node_ind[node]] for node in tgraph.getNodes()]
+
+    #all_nodes = [info[node_ind[node]] for node in tgraph.getNodes()]
+
+    all_nodes = []
+    for node in tgraph.getNodes():
+        task_id = info[node_ind[node]][1]
+        task_color = filter(lambda c: c.task.identifier == int(task_id), project.tracker.task_colors)
+        if task_color:
+            task_color = task_color[0]
+            color = task_color.color
+        else:
+            color = 0
+        all_nodes.append(info[node_ind[node]] + [color])
+
     all_edges = [(i, j, adjacency_matrix[int(i)][int(j)][0], adjacency_matrix[int(i)][int(j)][1])
                  for i in edge_list for j in edge_list[i]]
 
@@ -97,24 +110,15 @@ def graph_view_page(request):
     scale_ind = 3
     coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
 
-    if project.tracker.task_colors:
-        print 'task_colors is OK'
-        print str(len(project.tracker.task_colors))
-    else:
-        print 'task_colors is empty'
-
     all_nodes = []
     for node in tgraph.getNodes():
         task_id = info[node_ind[node]][1]
-        #print 'id=' + task_id
         task_color = filter(lambda c: c.task.identifier == int(task_id), project.tracker.task_colors)
         if task_color:
             task_color = task_color[0]
             color = task_color.color
-            #print 'color found: ' + str(color)
         else:
             color = 0
-            #print 'color not found: '
         all_nodes.append(info[node_ind[node]]+[color])
 
     #all_nodes = [[info[node_ind[node]]] for node in tgraph.getNodes()]
@@ -130,7 +134,6 @@ def graph_view_page(request):
                'info': info,
                'project_id': project.identifier}
 
-    print 'page returned'
     return render(request, 'taskgraph/graph/view.html', context)
 
 
@@ -261,7 +264,6 @@ def change_graph(request):
         type = curr['type']
         action = curr['action']
         id = curr['id']
-        print 'curr: ' + str(curr)
 
         if type == 'task':
 
@@ -305,25 +307,19 @@ def change_graph(request):
                         return HttpResponse('Error! There is no milestone ' + curr['milestone'] + ' at this project ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
                 elif action == 'changeColor':
-                    print 'changing color of task ' + str(task.identifier)
                     try:
                         task_color = filter(lambda c: c.task.identifier == task.identifier, project.tracker.task_colors)
-                        print('found colors: ' + str(len(task_color)))
                         if task_color:
                             task_color = task_color[0]
                             task_color.color = curr['color']
                             task_color.save()
                             project.tracker.save()
-                            print 'new color assigned'
                         else:
-                            print 'creating new color'
                             task_color = TaskColor.objects.create(task=task, color=curr['color'])
                             task_color.save()
                             project.tracker.task_colors.append(task_color)
                             project.tracker.save()
-                            print 'task color saved in db'
 
-                        print 'task_colors now: ' + str([i.color for i in project.tracker.task_colors])
                     except Exception:
                         print(traceback.format_exc())
                         return HttpResponse('Error at task color saving ('
@@ -353,7 +349,4 @@ def change_graph(request):
                     return HttpResponse('Error! There is no relation type ' + curr['param'] + ' at this project ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
 
-        #todo: requests to tracker
-
-    print 'success'
     return HttpResponse('Graph was successfully updated')
