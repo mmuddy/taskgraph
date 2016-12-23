@@ -40,6 +40,8 @@ class Tracker(models.Model):
 
     projects = ListField(EmbeddedModelField('Project'))
     projects_relations = ListField(EmbeddedModelField('ProjectRelation'))
+    task_colors = ListField(EmbeddedModelField('TaskColor'))
+
 
     def __str__(self):
         return '{} {}'.format(self.url, self.type)
@@ -119,7 +121,6 @@ class Project(models.Model):
     milestones = ListField(EmbeddedModelField('Milestone'))
     task_categories = ListField(EmbeddedModelField('TaskCategory'))
     task_states = ListField(EmbeddedModelField('TaskState'))
-    task_colors = ListField(EmbeddedModelField('TaskColor'))
 
     def is_member(self, name):
         return len(filter(lambda a: a.name == name, self.assignees)) == 1

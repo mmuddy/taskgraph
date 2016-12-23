@@ -11,6 +11,7 @@ from . import alertfactory, graphview
 from django.shortcuts import render
 from django.http import HttpResponse
 import json
+import sys, traceback
 
 
 
@@ -96,8 +97,9 @@ def graph_view_page(request):
     scale_ind = 3
     coords = graphview.normalize_graph_coords(tgraph, vertex_block_width, node_ind, scale_ind)
 
-    if project.task_colors:
+    if project.tracker.task_colors:
         print 'task_colors is OK'
+        print str(len(project.tracker.task_colors))
     else:
         print 'task_colors is empty'
 
@@ -105,7 +107,7 @@ def graph_view_page(request):
     for node in tgraph.getNodes():
         task_id = info[node_ind[node]][1]
         #print 'id=' + task_id
-        task_color = filter(lambda c: c.task.identifier == int(task_id), project.task_colors)
+        task_color = filter(lambda c: c.task.identifier == int(task_id), project.tracker.task_colors)
         if task_color:
             task_color = task_color[0]
             color = task_color.color
@@ -305,22 +307,25 @@ def change_graph(request):
                 elif action == 'changeColor':
                     print 'changing color of task ' + str(task.identifier)
                     try:
-                        task_color = filter(lambda c: c.task == task, project.task_colors)
+                        task_color = filter(lambda c: c.task.identifier == task.identifier, project.tracker.task_colors)
+                        print('found colors: ' + str(len(task_color)))
                         if task_color:
                             task_color = task_color[0]
                             task_color.color = curr['color']
                             task_color.save()
+                            project.tracker.save()
                             print 'new color assigned'
                         else:
                             print 'creating new color'
                             task_color = TaskColor.objects.create(task=task, color=curr['color'])
                             task_color.save()
-                            project.task_colors.append(task_color)
-                            project.save()
+                            project.tracker.task_colors.append(task_color)
+                            project.tracker.save()
                             print 'task color saved in db'
 
-                        print 'task_colors now: ' + str([i.color for i in project.task_colors])
-                    except:
+                        print 'task_colors now: ' + str([i.color for i in project.tracker.task_colors])
+                    except Exception:
+                        print(traceback.format_exc())
                         return HttpResponse('Error at task color saving ('
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
 
