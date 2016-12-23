@@ -55,7 +55,10 @@ def edit_page(request):
     all_nodes = []
     for node in tgraph.getNodes():
         task_id = info[node_ind[node]][1]
-        task_color = filter(lambda c: c.task.identifier == int(task_id), project.tracker.task_colors)
+        try:
+            task_color = filter(lambda c: c.task.identifier == int(task_id), project.tracker.task_colors)
+        except Exception:
+            task_color = []
         if task_color:
             task_color = task_color[0]
             color = task_color.color
@@ -311,7 +314,10 @@ def change_graph(request):
                                         + str(changes_count) + '/' + str(changes) + ' changes applied)')
                 elif action == 'changeColor':
                     try:
-                        task_color = filter(lambda c: c.task.identifier == task.identifier, project.tracker.task_colors)
+                        try:
+                            task_color = filter(lambda c: c.task.identifier == task.identifier, project.tracker.task_colors)
+                        except Exception:
+                            task_color = []
                         if task_color:
                             task_color = task_color[0]
                             task_color.color = curr['color']
