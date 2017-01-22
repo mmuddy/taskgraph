@@ -19,6 +19,23 @@ Edit
 
         .qtip_margin {}
 
+        .context_item {
+            list-style-type: none;
+        }
+
+        .context_list {
+            background: white;
+            padding-left: 5;
+            padding-right: 5;
+            border: 1px solid grey;
+            border-radius: 10px;
+            position:absolute;
+            z-index: 100;
+            top: 0px;
+            left: 0px;
+            display: none;
+        }
+
     </style>
 
 {% endblock %}
@@ -1275,4 +1292,20 @@ Edit
         <input type='button' onclick='sendpost()' value="Save changes"/>
 
 		<div id="cy"></div>
+
+        <ul id=cxtnode class='context_list'>
+            <li class="context_item">node1</li>
+            <li class="context_item">node2</li>
+        </ul>
+
+        <ul id=cxtedge class='context_list'>
+            <li class="context_item">edge1</li>
+            <li class="context_item">edge2</li>
+        </ul>
+
+        <ul id=cxtbody class='context_list'>
+            <li class="context_item">body1</li>
+            <li class="context_item">body2</li>
+        </ul>
+
 {% endblock %}
