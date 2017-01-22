@@ -1280,7 +1280,37 @@ Edit
                         contextMenuClasses: ['qtip-bootstrap']
                     });
 
+            cy.on('cxttap', function(event){
 
+                $('#cxtbody')[0].style.display = 'none';
+                $('#cxtnode')[0].style.display = 'none';
+                $('#cxtedge')[0].style.display = 'none';
+
+                if(event.cyTarget.length === undefined){
+                    console.log('body');
+                    ccxt = $('#cxtbody')[0];
+                    ccxt.style.display = 'block';
+                    ccxt.style.top = event.originalEvent.clientY;
+                    ccxt.style.left = event.originalEvent.clientX;
+                }
+
+                else if(event.cyTarget.isNode()){
+                    console.log('node');
+                    ccxt = $('#cxtnode')[0];
+                    ccxt.style.display = 'block';
+                    ccxt.style.top = event.originalEvent.clientY;
+                    ccxt.style.left = event.originalEvent.clientX;
+                }
+
+                else if(event.cyTarget.isEdge()){
+                    console.log('edge');
+                    ccxt = $('#cxtedge')[0];
+                    ccxt.style.display = 'block';
+                    ccxt.style.top = event.originalEvent.clientY;
+                    ccxt.style.left = event.originalEvent.clientX;
+                }
+
+            });
 
 
 			});
