@@ -301,8 +301,8 @@ Edit
 				    	$(".qtip").remove();
 
 				    	if(isTipsEnabled){
-				    		document.styleSheets[4].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
-					 		document.styleSheets[4].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
+				    		document.styleSheets[3].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
+					 		document.styleSheets[3].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
 
 						    edge.qtip({
 						         content: "<b>Type</b>: "+edge.attr('type'),
@@ -472,8 +472,14 @@ Edit
         }
         a=$('#cxt_status')[0];
         a.style.display = 'block';
-        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 60 + 'px';
-        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+        cxtnode = document.getElementById("cxtnode")
+        _cxt = document.getElementById("cxt_status")
+        _top = +cxtnode.style.top.slice(0, -2)
+        _left = +cxtnode.style.left.slice(0, -2)
+        a.style.top = (_top + 60 + _cxt.clientHeight + 2 > $(window).height()?
+                        $(window).height() - _cxt.clientHeight - 2: _top + 60) + 'px';
+        a.style.left = (_left + cxtnode.clientWidth + _cxt.clientWidth + 2 > $(window).width()?
+                        _left - _cxt.clientWidth - 1: _left + cxtnode.clientWidth + 1) + 'px';
     });
 
     b=$('li[id^=s_');
@@ -522,8 +528,14 @@ Edit
         }
         a=$('#cxt_assignee')[0];
         a.style.display = 'block';
-        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 80 + 'px';
-        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+        cxtnode = document.getElementById("cxtnode")
+        _cxt = document.getElementById("cxt_assignee")
+        _top = +cxtnode.style.top.slice(0, -2)
+        _left = +cxtnode.style.left.slice(0, -2)
+        a.style.top = (_top + 80 + _cxt.clientHeight + 2 > $(window).height()?
+                        $(window).height() - _cxt.clientHeight - 2: _top + 80) + 'px';
+        a.style.left = (_left + cxtnode.clientWidth + _cxt.clientWidth + 2 > $(window).width()?
+                        _left - _cxt.clientWidth - 1: _left + cxtnode.clientWidth + 1) + 'px';
     });
 
     b=$('li[id^=a_');
@@ -573,8 +585,14 @@ Edit
         }
         a=$('#cxt_category')[0];
         a.style.display = 'block';
-        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 100 + 'px';
-        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+        cxtnode = document.getElementById("cxtnode")
+        _cxt = document.getElementById("cxt_category")
+        _top = +cxtnode.style.top.slice(0, -2)
+        _left = +cxtnode.style.left.slice(0, -2)
+        a.style.top = (_top + 100 + _cxt.clientHeight + 2 > $(window).height()?
+                        $(window).height() - _cxt.clientHeight - 2: _top + 100) + 'px';
+        a.style.left = (_left + cxtnode.clientWidth + _cxt.clientWidth + 2 > $(window).width()?
+                        _left - _cxt.clientWidth - 1: _left + cxtnode.clientWidth + 1) + 'px';
     });
 
 
@@ -626,8 +644,14 @@ Edit
         }
         a=$('#cxt_milestone')[0];
         a.style.display = 'block';
-        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 120 + 'px';
-        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+        cxtnode = document.getElementById("cxtnode")
+        _cxt = document.getElementById("cxt_milestone")
+        _top = +cxtnode.style.top.slice(0, -2)
+        _left = +cxtnode.style.left.slice(0, -2)
+        a.style.top = (_top + 120 + _cxt.clientHeight + 2 > $(window).height()?
+                        $(window).height() - _cxt.clientHeight - 2: _top + 120) + 'px';
+        a.style.left = (_left + cxtnode.clientWidth + _cxt.clientWidth + 2 > $(window).width()?
+                        _left - _cxt.clientWidth - 1: _left + cxtnode.clientWidth + 1) + 'px';
     });
 
     b=$('li[id^=m_');
@@ -710,8 +734,14 @@ Edit
         }
         a=$('#cxt_type')[0];
         a.style.display = 'block';
-        a.style.top = +document.getElementById("cxtedge").style.top.slice(0, -2) + 20 + 'px';
-        a.style.left = +document.getElementById("cxtedge").style.left.slice(0, -2) + cxtedge.clientWidth + 1 + 'px';
+        cxtedge = document.getElementById("cxtedge")
+        _cxt = document.getElementById("cxt_type")
+        _top = +cxtedge.style.top.slice(0, -2)
+        _left = +cxtedge.style.left.slice(0, -2)
+        a.style.top = (_top + 20 + _cxt.clientHeight + 2 > $(window).height()?
+                        $(window).height() - _cxt.clientHeight - 2: _top + 20) + 'px';
+        a.style.left = (_left + cxtedge.clientWidth + _cxt.clientWidth + 2 > $(window).width()?
+                        _left - _cxt.clientWidth - 1: _left + cxtedge.clientWidth + 1) + 'px';
     });
 
     b=$('li[id^=t_');

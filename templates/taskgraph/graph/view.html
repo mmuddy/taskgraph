@@ -265,8 +265,8 @@
 				    	$(".qtip").remove();
 
 				    	if(isTipsEnabled){
-				    		document.styleSheets[4].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
-					 		document.styleSheets[4].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
+				    		document.styleSheets[3].cssRules[1].style.marginLeft = event.originalEvent.clientX + 'px';
+					 		document.styleSheets[3].cssRules[1].style.marginTop  = event.originalEvent.clientY + 'px';
 
 						    edge.qtip({
 						         content: "<b>Type</b>: "+edge.attr('type'),
@@ -415,8 +415,14 @@
         }
         a=$('#cxt_colors')[0];
         a.style.display = 'block';
-        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 20 + 'px';
-        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+        cxtnode = document.getElementById("cxtnode")
+        _cxt = document.getElementById("cxt_colors")
+        _top = +cxtnode.style.top.slice(0, -2)
+        _left = +cxtnode.style.left.slice(0, -2)
+        a.style.top = (_top + 20 + _cxt.clientHeight + 2 > $(window).height()?
+                        $(window).height() - _cxt.clientHeight - 2: _top + 20) + 'px';
+        a.style.left = (_left + cxtnode.clientWidth + _cxt.clientWidth + 2 > $(window).width()?
+                        _left - _cxt.clientWidth - 1: _left + cxtnode.clientWidth + 1) + 'px';
     });
 
     b=$('li[id^=o_');
