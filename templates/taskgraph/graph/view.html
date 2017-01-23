@@ -11,29 +11,36 @@
     <style>
 
         #cy {
-            float: left;
-            width: 100%;
-            height: 480px;
-            color: #337ab7;
-        }
+                float: left;
+                width: 100%;
+                height: 480px;
+                color: #337ab7;
+            }
 
-        .qtip_margin {}
+            .qtip_margin {}
 
-        .context_item {
-            list-style-type: none;
-        }
-        .context_list {
-            background: white;
-            padding-left: 5;
-            padding-right: 5;
-            border: 1px solid grey;
-            border-radius: 10px;
-            position:absolute;
-            z-index: 100;
-            top: 0px;
-            left: 0px;
-            display: none;
-        }
+            .context_item {
+                list-style-type: none;
+                padding-left: 5;
+                padding-right: 5;
+                cursor: default;
+            }
+
+            .context_item:hover{
+                background: #CCCCCC;
+            }
+
+            .context_list {
+                background: white;
+                padding: 0px;
+                border: 1px solid grey;
+                border-radius: 4px;
+                position:absolute;
+                z-index: 10000000;
+                top: 0px;
+                left: 0px;
+                display: none;
+            }
 
     </style>
 
@@ -75,6 +82,7 @@
             }
 
             var changes = [];
+            var curr_node_and_edge = [undefined, undefined, undefined];
 
             var csrftoken = getCookie('csrftoken');
 
@@ -115,7 +123,7 @@
             var change_colors;
 			$(function(){
 
-
+                var isTipsEnabled = true;
 
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
@@ -276,117 +284,172 @@
 
 					});
 
-					var isTipsEnabled = true;
+	cy.on('cxttap', function(event){
 
-					var disableTips = {
-								id: 'disableTips',
-                                title: 'Disable tips',
-                                selector: '*',
-                                onClickFunction: function (event) {
-                                	cxt.insertBeforeMenuItem(enableTips, 'disableTips');
-                                  	cxt.removeMenuItem('disableTips');
-                                  	isTipsEnabled = false;
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: true
-					}
+        a=$('ul[id^=cxt]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
 
-					var enableTips = {
-								id: 'enableTips',
-                                title: 'Enable tips',
-                                selector: '*',
-                                onClickFunction: function (event) {
-                                	cxt.insertBeforeMenuItem(disableTips, 'enableTips');
-                                  	cxt.removeMenuItem('enableTips');
-                                  	isTipsEnabled = true;
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: true
-					}
+        if(event.cyTarget.length === undefined){
+            ccxt = $('#cxtbody')[0];
+            ccxt.style.display = 'block';
+            ccxt.style.top = event.originalEvent.clientY + 'px';
+            ccxt.style.left = event.originalEvent.clientX + 'px';
+        }
 
-                    var normalSize = {
-                    			id: 'normalSize',
-                    			title: 'Normal size',
-                    			selector: '*',
-                    			onClickFunction: function (event) {
-                    				cy.fit();
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: true
-                    }
+        else if(event.cyTarget.isNode()){
+            ccxt = $('#cxtnode')[0];
+            ccxt.style.display = 'block';
+            ccxt.style.top = event.originalEvent.clientY + 'px';
+            ccxt.style.left = event.originalEvent.clientX + 'px';
+            curr_node_and_edge[0] = event.cyTarget;
+        }
 
-					var cxt = cy.contextMenus({
-                        menuItems: [
-                        	 normalSize,
-                        	 disableTips,
-                        ],
-                        menuItemClasses: ['qtip-bootstrap'],
-                        contextMenuClasses: ['qtip-bootstrap']
-                    });
+        else if(event.cyTarget.isEdge()){
+            ccxt = $('#cxtedge')[0];
+            ccxt.style.display = 'block';
+            ccxt.style.top = event.originalEvent.clientY + 'px';
+            ccxt.style.left = event.originalEvent.clientX + 'px';
+            curr_node_and_edge[1] = event.cyTarget;
+        }
 
-                    change_colors = function(){
-                        var index = document.getElementById('select_color').selectedIndex
+    });
 
-                        console.log(cy.nodes(':selected'))
+    cy.on('click', function(event){
+        a=$('ul[id^=cxt]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display='none';
+        }
+    });
 
-                        var selectedNodes = cy.nodes(':selected')
-                        for(var i = 0; i < selectedNodes.length; i++){
+    document.getElementById("_edit_task").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
 
-                            node = selectedNodes[i]
-                            changes.push({
-                                'type' : 'task',
-                                'action' : 'changeColor',
-                                'id' : node.attr(node.attr('id')[0] !='_'? 'name': 'id'),
-                                'color' : index - 1
-                             })
-
-                            node.data('color1', colors1[index - 1])
-                            node.data('color2', colors2[index - 1])
-                            node.data('color3', colors3[index - 1])
-                            cy.forceRender()
-
-                        }
-
-                        selectedNodes.unselect();
-
-                        document.getElementById('select_color').selectedIndex = 0
-                    }
+    document.getElementById("_edit_task").addEventListener("click", function(event){
+        document.getElementById("cxtnode").style.display = "none";
+        if(changes.length > 0){
+            alert('You should save changes')
+        }
+        else{
+            window.location = window.location.toString()
+            .substr(0, window.location.toString().slice(0, -1)
+            .lastIndexOf("/")) + "/task-edit/?task=" + curr_node_and_edge[0].attr('name')
+        }
+    });
 
 
-            cy.on('cxttap', function(event){
 
-                $('#cxtbody')[0].style.display = 'none';
-                $('#cxtnode')[0].style.display = 'none';
-                $('#cxtedge')[0].style.display = 'none';
+    document.getElementById("_normal_size").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
 
-                if(event.cyTarget.length === undefined){
-                    console.log('body');
-                    ccxt = $('#cxtbody')[0];
-                    ccxt.style.display = 'block';
-                    ccxt.style.top = event.originalEvent.clientY;
-                    ccxt.style.left = event.originalEvent.clientX;
+    document.getElementById("_normal_size").addEventListener("click", function(event){
+        document.getElementById("cxtbody").style.display = "none";
+        cy.fit();
+    });
+
+
+
+
+
+    document.getElementById("_disable_tips").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_disable_tips").addEventListener("click", function(event){
+        document.getElementById("cxtbody").style.display = "none";
+        if(document.getElementById("_disable_tips").innerHTML === 'Disable tips'){
+            isTipsEnabled = false;
+            document.getElementById("_disable_tips").innerHTML = 'Enable tips';
+        }
+        else{
+            isTipsEnabled = true;
+            document.getElementById("_disable_tips").innerHTML = 'Disable tips';
+        }
+    });
+
+
+
+    document.getElementById("_save_changes").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_save_changes").addEventListener("click", function(event){
+        a=$('ul[id^=cxt]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+        sendpost();
+    });
+
+
+
+
+
+    document.getElementById("_change_color").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+        a=$('#cxt_colors')[0];
+        a.style.display = 'block';
+        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 20 + 'px';
+        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+    });
+
+    b=$('li[id^=o_');
+    for (var i = b.length - 1; i >= 0; i--) {
+        b[i].addEventListener("click", function(event){
+            e=event.target.innerHTML
+            index = ['default', 'brown', 'steel', 'pink', 'violet', 'plum', 'purple', 'cobalt', 'blue', 'aqua',
+                     'sea', 'aquamarine', 'forest', 'green', 'lime', 'yellow', 'orange', 'bisque', 'peach'].indexOf(e)
+            document.getElementById("cxtnode").style.display = "none";
+            document.getElementById("cxt_colors").style.display = "none";
+            if(cy.nodes(':selected').length){
+                var selectedNodes = cy.nodes(':selected')
+                for(var i = 0; i < selectedNodes.length; i++){
+                    var node = selectedNodes[i]
+                    changes.push({
+                        'type' : 'task',
+                        'action' : 'changeColor',
+                        'id' : node.attr(node.attr('id')[0] !='_'? 'name': 'id'),
+                        'color' : index
+                     });
+                     node.data('color1', colors1[index])
+                     node.data('color2', colors2[index])
+                     node.data('color3', colors3[index])
                 }
-
-                else if(event.cyTarget.isNode()){
-                    console.log('node');
-                    ccxt = $('#cxtnode')[0];
-                    ccxt.style.display = 'block';
-                    ccxt.style.top = event.originalEvent.clientY;
-                    ccxt.style.left = event.originalEvent.clientX;
-                }
-
-                else if(event.cyTarget.isEdge()){
-                    console.log('edge');
-                    ccxt = $('#cxtedge')[0];
-                    ccxt.style.display = 'block';
-                    ccxt.style.top = event.originalEvent.clientY;
-                    ccxt.style.left = event.originalEvent.clientX;
-                }
-
-            });
+            }
+            else{
+                var node = curr_node_and_edge[0]
+                changes.push({
+                    'type' : 'task',
+                    'action' : 'changeColor',
+                    'id' : node.attr(node.attr('id')[0] !='_'? 'name': 'id'),
+                    'color' : index
+                 });
+                 node.data('color1', colors1[index])
+                 node.data('color2', colors2[index])
+                 node.data('color3', colors3[index])
+            }
+            selectedNodes.unselect();
+            console.log(changes);
+        });
+    }
 
 			});
 
@@ -395,47 +458,43 @@
 
         {% include 'taskgraph/alerts.html' %}
 
-          <select id="select_color">
-            <option selected="selected" disabled="disabled" hidden="hidden">Choose color</option>
-            <option onclick="change_colors()" style="background:#F8F8F8">default</option>
-            <option onclick="change_colors()" style="background:#D7CCC8">brown</option>
-            <option onclick="change_colors()" style="background:#CFD8DC">steel</option>
-            <option onclick="change_colors()" style="background:#FFCDD2">pink</option>
-            <option onclick="change_colors()" style="background:#F8BBD0">violet</option>
-            <option onclick="change_colors()" style="background:#E1BEE7">plum</option>
-            <option onclick="change_colors()" style="background:#D1C4E9">purple</option>
-            <option onclick="change_colors()" style="background:#C5CAE9">cobalt</option>
-            <option onclick="change_colors()" style="background:#BBDEFB">blue</option>
-            <option onclick="change_colors()" style="background:#B3E5FC">aqua</option>
-            <option onclick="change_colors()" style="background:#B2EBF2">sea</option>
-            <option onclick="change_colors()" style="background:#B2DFDB">aquamarine</option>
-            <option onclick="change_colors()" style="background:#C8E6C9">forest</option>
-            <option onclick="change_colors()" style="background:#DCEDC8">green</option>
-            <option onclick="change_colors()" style="background:#F0F4C3">lime</option>
-            <option onclick="change_colors()" style="background:#FFF9C4">yellow</option>
-            <option onclick="change_colors()" style="background:#FFECB3">orange</option>
-            <option onclick="change_colors()" style="background:#FFE0B2">bisque</option>
-            <option onclick="change_colors()" style="background:#FFCCBC">peach</option>
-          </select>
-
-        <input type='button' value="Save changes" onclick='sendpost()'/>
-
 		<div id="cy"></div>
 
-        <ul id=cxtnode class='context_list'>
-            <li class="context_item">node1</li>
-            <li class="context_item">node2</li>
-        </ul>
+{% endblock %}
 
-        <ul id=cxtedge class='context_list'>
-            <li class="context_item">edge1</li>
-            <li class="context_item">edge2</li>
-        </ul>
+{% block after_body %}
 
-        <ul id=cxtbody class='context_list'>
-            <li class="context_item">body1</li>
-            <li class="context_item">body2</li>
-        </ul>
+    <ul id="cxtnode" class='list-unstyled context_list'>
+        <li id="_edit_task" class="context_item">Edit task</li>
+        <li id="_change_color" class="context_item">Change color &nbsp;<span style="float: right;color: #AAAAAA">&#9658;</span></li>
+    </ul>
 
+    <ul id="cxtbody" class='list-unstyled context_list'>
+        <li id="_normal_size" class="context_item">Normal size</li>
+        <li id="_disable_tips" class="context_item">Disable tips</li>
+        <li id="_save_changes" class="context_item">Save changes</li>
+    </ul>
+
+    <ul id="cxt_colors" class='list-unstyled context_list'>
+        <li id="o_1" class="context_item" style="background:#F8F8F8">default</li>
+        <li id="o_2" class="context_item" style="background:#D7CCC8">brown</li>
+        <li id="o_3" class="context_item" style="background:#CFD8DC">steel</li>
+        <li id="o_4" class="context_item" style="background:#FFCDD2">pink</li>
+        <li id="o_5" class="context_item" style="background:#F8BBD0">violet</li>
+        <li id="o_6" class="context_item" style="background:#E1BEE7">plum</li>
+        <li id="o_7" class="context_item" style="background:#D1C4E9">purple</li>
+        <li id="o_8" class="context_item" style="background:#C5CAE9">cobalt</li>
+        <li id="o_9" class="context_item" style="background:#BBDEFB">blue</li>
+        <li id="o_10" class="context_item" style="background:#B3E5FC">aqua</li>
+        <li id="o_11" class="context_item" style="background:#B2EBF2">sea</li>
+        <li id="o_12" class="context_item" style="background:#B2DFDB">aquamarine</li>
+        <li id="o_13" class="context_item" style="background:#C8E6C9">forest</li>
+        <li id="o_14" class="context_item" style="background:#DCEDC8">green</li>
+        <li id="o_15" class="context_item" style="background:#F0F4C3">lime</li>
+        <li id="o_16" class="context_item" style="background:#FFF9C4">yellow</li>
+        <li id="o_17" class="context_item" style="background:#FFECB3">orange</li>
+        <li id="o_18" class="context_item" style="background:#FFE0B2">bisque</li>
+        <li id="o_19" class="context_item" style="background:#FFCCBC">peach</li>
+    </ul>
 
 {% endblock %}
