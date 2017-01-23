@@ -36,11 +36,10 @@ Edit
                 border: 1px solid grey;
                 border-radius: 4px;
                 position:absolute;
-                z-index: 100;
+                z-index: 10000000;
                 top: 0px;
                 left: 0px;
                 display: none;
-                margin: 0px;
             }
 
         </style>
@@ -322,7 +321,7 @@ Edit
 					});
 
 
-					cy.on('cxttap', function(event){
+	cy.on('cxttap', function(event){
 
         a=$('ul[id^=cxt]');
         for (var i = a.length - 1; i >= 0; i--) {
@@ -332,23 +331,23 @@ Edit
         if(event.cyTarget.length === undefined){
             ccxt = $('#cxtbody')[0];
             ccxt.style.display = 'block';
-            ccxt.style.top = event.originalEvent.clientY;
-            ccxt.style.left = event.originalEvent.clientX;
+            ccxt.style.top = event.originalEvent.clientY + 'px';
+            ccxt.style.left = event.originalEvent.clientX + 'px';
         }
 
         else if(event.cyTarget.isNode()){
             ccxt = $('#cxtnode')[0];
             ccxt.style.display = 'block';
-            ccxt.style['margin-top'] = event.originalEvent.clientY;
-            ccxt.style['margin-left'] = event.originalEvent.clientX;
+            ccxt.style.top = event.originalEvent.clientY + 'px';
+            ccxt.style.left = event.originalEvent.clientX + 'px';
             curr_node_and_edge[0] = event.cyTarget;
         }
 
         else if(event.cyTarget.isEdge()){
             ccxt = $('#cxtedge')[0];
             ccxt.style.display = 'block';
-            ccxt.style.top = event.originalEvent.clientY;
-            ccxt.style.left = event.originalEvent.clientX;
+            ccxt.style.top = event.originalEvent.clientY + 'px';
+            ccxt.style.left = event.originalEvent.clientX + 'px';
             curr_node_and_edge[1] = event.cyTarget;
         }
 
@@ -843,31 +842,31 @@ Edit
         <li id="_create_node" class="context_item">Create node</li>
     </ul>
 
-    <ul id="cxt_status" class='list-unstyled context_list'>
+    <ul id="cxt_status" class='context_list'>
         {% for i in states %}
               <li id="s_{{forloop.counter}}" class="context_item">{{i}}</li>
         {% endfor %}
     </ul>
 
-    <ul id="cxt_assignee" class='list-unstyled context_list'>
+    <ul id="cxt_assignee" class='context_list'>
         {% for i in assignees %}
               <li id="a_{{forloop.counter}}" class="context_item">{{i}}</li>
         {% endfor %}
     </ul>
 
-    <ul id="cxt_category" class='list-unstyled context_list'>
+    <ul id="cxt_category" class='context_list'>
         {% for i in categories %}
               <li id="c_{{forloop.counter}}" class="context_item">{{i}}</li>
         {% endfor %}
     </ul>
 
-    <ul id="cxt_milestone" class='list-unstyled context_list'>
+    <ul id="cxt_milestone" class='context_list'>
         {% for i in milestones %}
               <li id="m_{{forloop.counter}}" class="context_item">{{i}}</li>
         {% endfor %}
     </ul>
 
-    <ul id="cxt_type" class='list-unstyled context_list'>
+    <ul id="cxt_type" class='context_list'>
         {% for i in relation_types %}
               <li id="t_{{forloop.counter}}" class="context_item">{{i}}</li>
         {% endfor %}
