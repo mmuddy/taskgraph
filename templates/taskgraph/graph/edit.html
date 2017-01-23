@@ -796,7 +796,7 @@ Edit
                     color1: '#f8f8f8', color2: '#BBB',
                     info: {}}
         });
-        node.renderedPosition({x:event.clientX - 50, y: event.clientY - 90});
+        node.renderedPosition({x:event.clientX - 100, y: event.clientY - 150});
         changes.push({
             'type': 'task',
             'action': 'add',
@@ -806,13 +806,23 @@ Edit
     });
 
 
+    document.getElementById("_save_changes").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_save_changes").addEventListener("click", function(event){
+        sendpost();
+    });
+
+
 			});
 
 		</script>
 
         {% include 'taskgraph/alerts.html' %}
-
-        <input type='button' onclick='sendpost()' value="Save changes"/>
 
 		<div id="cy"></div>
 
@@ -840,6 +850,7 @@ Edit
         <li id="_normal_size" class="context_item">Normal size</li>
         <li id="_disable_tips" class="context_item">Disable tips</li>
         <li id="_create_node" class="context_item">Create node</li>
+        <li id="_save_changes" class="context_item">Save changes</li>
     </ul>
 
     <ul id="cxt_status" class='context_list'>
