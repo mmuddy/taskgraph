@@ -13,10 +13,7 @@
 
     <title>TaskGraph | {% block title_block %}Web-app for popular task trackers{% endblock %}</title>
 
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <!-- Custom styles for this template -->
-    <link href="{% static "css/base.css" %}" rel="stylesheet">
+    <link href="{% static 'css/base.css' %}" rel="stylesheet">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/2.7.10/cytoscape.min.js"></script>
 	<script src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
@@ -116,7 +113,10 @@
 
 </div><!-- /.container -->
 
+{% block after_body %}
+{% endblock %}
 
 
 </body>
 </html>
+

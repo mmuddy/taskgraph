@@ -10,33 +10,40 @@ Edit
 
     <style>
 
-        #cy {
-            float: left;
-            width: 100%;
-            height: 480px;
-            color: #337ab7;
-        }
+            #cy {
+                float: left;
+                width: 100%;
+                height: 480px;
+                color: #337ab7;
+            }
 
-        .qtip_margin {}
+            .qtip_margin {}
 
-        .context_item {
-            list-style-type: none;
-        }
+            .context_item {
+                list-style-type: none;
+                padding-left: 5;
+                padding-right: 5;
+                cursor: default;
+            }
 
-        .context_list {
-            background: white;
-            padding-left: 5;
-            padding-right: 5;
-            border: 1px solid grey;
-            border-radius: 10px;
-            position:absolute;
-            z-index: 100;
-            top: 0px;
-            left: 0px;
-            display: none;
-        }
+            .context_item:hover{
+                background: #CCCCCC;
+            }
 
-    </style>
+            .context_list {
+                background: white;
+                padding: 0px;
+                border: 1px solid grey;
+                border-radius: 4px;
+                position:absolute;
+                z-index: 100;
+                top: 0px;
+                left: 0px;
+                display: none;
+                margin: 0px;
+            }
+
+        </style>
 
 {% endblock %}
 
@@ -76,6 +83,7 @@ Edit
         }
 
         var changes = [];
+        var curr_node_and_edge = [undefined, undefined, undefined];
 
         var csrftoken = getCookie('csrftoken');
 
@@ -146,6 +154,8 @@ Edit
 		                            '{{i}}',
 		                {% endfor %}
 		        ]
+
+		        var isTipsEnabled = true;
 
 				var cy = window.cy = cytoscape({
 					container: document.getElementById('cy'),
@@ -312,1005 +322,489 @@ Edit
 					});
 
 
-					var currentStatusIndex;
-
-					var cxtNodeStatuses = listOfNodeStatuses.map(function(e){
-						return {
-							id: 'cxtNodeStatus' + listOfNodeStatuses.indexOf(e),
-							title: 'Status: ' + e,
-							selector: 'node',
-							onClickFunction: function (event) {
-							    if(cy.nodes(':selected').length){
-							        var selectedNodes = cy.nodes(':selected')
-                                    for(var i = 0; i < selectedNodes.length; i++){
-                                        var target = selectedNodes[i]
-                                        var info = target.attr('info')
-                                        info['status'] = e
-                                        target.data('info', info)
-                                        changes.push({
-                                            'type': 'task',
-                                            'action': 'changeStatus',
-                                            'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
-                                            'status': e,
-                                        });
-                                    }
-							    }
-							    else{
-                                    var info = event.cyTarget.attr('info')
-                                    info['status'] = e
-                                    event.cyTarget.data('info', info)
-                                    changes.push({
-                                        'type': 'task',
-                                        'action': 'changeStatus',
-                                        'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                        'status': e,
-                                      });
-							    }
-
-								cxt.removeMenuItem('cancelChangeNodeStatus');
-								cxt.removeMenuItem('cxtNodeStatusesNext')
-								cxt.removeMenuItem('cxtNodeStatusesPred')
-	                        	listOfNodeStatuses.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeStatus' + listOfNodeStatuses.indexOf(e));
-	                        	})
-	                        	cxt.appendMenuItem(changeNodeStatus)
-								cxt.appendMenuItem(changeNodeAssignee)
-								cxt.appendMenuItem(changeNodeCategory)
-								cxt.appendMenuItem(changeNodeMilestone)
-	                        	console.log(changes);
-                            },
-                            hasTrailingDivider: true,
-                            disabled: false,
-                            coreAsWell: false
-						}
-					})
-
-
-					var cancelChangeNodeStatus = {
-						id: 'cancelChangeNodeStatus',
-						title: 'Cancel',
-						selector: 'node',
-						onClickFunction: function (event) {
-                        	cxt.removeMenuItem('cancelChangeNodeStatus');
-							cxt.removeMenuItem('cxtNodeStatusesNext')
-							cxt.removeMenuItem('cxtNodeStatusesPred')
-                        	listOfNodeStatuses.map(function(e){
-                        		cxt.removeMenuItem('cxtNodeStatus' + listOfNodeStatuses.indexOf(e));
-                        	})
-                        	cxt.appendMenuItem(changeNodeStatus)
-							cxt.appendMenuItem(changeNodeAssignee)
-							cxt.appendMenuItem(changeNodeCategory)
-							cxt.appendMenuItem(changeNodeMilestone)
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var changeNodeStatus = {
-						id: 'changeNodeStatus',
-						title: 'Change status',
-						selector: 'node',
-						onClickFunction: function (event) {
-							cxt.removeMenuItem('changeNodeStatus')
-							cxt.removeMenuItem('changeNodeAssignee')
-							cxt.removeMenuItem('changeNodeCategory')
-							cxt.removeMenuItem('changeNodeMilestone')
-							cxt.appendMenuItem(cancelChangeNodeStatus)
-							if(cxtNodeStatuses.length > 5){
-								for(var i = 0; i < 5; i++){
-									cxt.appendMenuItem(cxtNodeStatuses[i]);
-								}
-								cxt.appendMenuItem(cxtNodeStatusesNext);
-								currentStatusIndex = 0;
-							}
-							else{
-								cxt.appendMenuItems(cxtNodeStatuses);
-							}
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtNodeStatusesNext = {
-						id: 'cxtNodeStatusesNext',
-						title: 'Next 5 statuses',
-						selector: 'node',
-						onClickFunction: function (event) {
-							listOfNodeStatuses.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeStatus' + listOfNodeStatuses.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtNodeStatusesNext')
-							cxt.removeMenuItem('cxtNodeStatusesPred')
-							currentStatusIndex += 5
-							var next = currentStatusIndex + 5;
-							for(var i = currentStatusIndex; i < next && i < listOfNodeStatuses.length; i++){
-								cxt.appendMenuItem(cxtNodeStatuses[i]);
-							}
-							cxt.appendMenuItem(cxtNodeStatusesPred);
-							if(listOfNodeStatuses.length > next){
-								cxt.appendMenuItem(cxtNodeStatusesNext);
-							}
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtNodeStatusesPred = {
-						id: 'cxtNodeStatusesPred',
-						title: 'Previous 5 statuses',
-						selector: 'node',
-						onClickFunction: function (event) {
-							listOfNodeStatuses.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeStatus' + listOfNodeStatuses.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtNodeStatusesNext')
-							cxt.removeMenuItem('cxtNodeStatusesPred')
-							var next = currentStatusIndex;
-							currentStatusIndex -= 5;
-							for(var i = currentStatusIndex; i < next; i++){
-								cxt.appendMenuItem(cxtNodeStatuses[i]);
-							}
-							if(currentStatusIndex){
-								cxt.appendMenuItem(cxtNodeStatusesPred);
-							}
-							cxt.appendMenuItem(cxtNodeStatusesNext);
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-
-					var currentAssigneeIndex;
-
-					var cxtNodeAssignees = listOfNodeAssignees.map(function(e){
-						return {
-							id: 'cxtNodeAssignee' + listOfNodeAssignees.indexOf(e),
-							title: 'Assignee: ' + e,
-							selector: 'node',
-							onClickFunction: function (event) {
-							    if(cy.nodes(':selected').length){
-							        var selectedNodes = cy.nodes(':selected')
-                                    for(var i = 0; i < selectedNodes.length; i++){
-                                        var target = selectedNodes[i]
-                                        var info = target.attr('info')
-                                        info['assignee'] = e
-                                        target.data('info', info)
-                                        changes.push({
-                                            'type': 'task',
-                                            'action': 'changeAssignee',
-                                            'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
-                                            'assignee': e,
-                                        });
-                                    }
-							    }
-							    else{
-							        var info = event.cyTarget.attr('info')
-                                    info['assignee'] = e
-                                    event.cyTarget.data('info', info)
-                                    changes.push({
-                                        'type': 'task',
-                                        'action': 'changeAssignee',
-                                        'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                        'assignee': e,
-                                      });
-							    }
-
-								cxt.removeMenuItem('cancelChangeNodeAssignee');
-								cxt.removeMenuItem('cxtNodeAssigneesNext')
-								cxt.removeMenuItem('cxtNodeAssigneesPred')
-	                        	listOfNodeAssignees.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeAssignee' + listOfNodeAssignees.indexOf(e));
-	                        	})
-	                        	cxt.appendMenuItem(changeNodeStatus)
-								cxt.appendMenuItem(changeNodeAssignee)
-								cxt.appendMenuItem(changeNodeCategory)
-								cxt.appendMenuItem(changeNodeMilestone)
-	                        	console.log(changes);
-                            },
-                            hasTrailingDivider: true,
-                            disabled: false,
-                            coreAsWell: false
-						}
-					})
-
-
-					var cancelChangeNodeAssignee = {
-						id: 'cancelChangeNodeAssignee',
-						title: 'Cancel',
-						selector: 'node',
-						onClickFunction: function (event) {
-                        	cxt.removeMenuItem('cancelChangeNodeAssignee');
-							cxt.removeMenuItem('cxtNodeAssigneesNext')
-							cxt.removeMenuItem('cxtNodeAssigneesPred')
-                        	listOfNodeAssignees.map(function(e){
-                        		cxt.removeMenuItem('cxtNodeAssignee' + listOfNodeAssignees.indexOf(e));
-                        	})
-                        	cxt.appendMenuItem(changeNodeStatus)
-							cxt.appendMenuItem(changeNodeAssignee)
-							cxt.appendMenuItem(changeNodeCategory)
-							cxt.appendMenuItem(changeNodeMilestone)
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var changeNodeAssignee = {
-						id: 'changeNodeAssignee',
-						title: 'Change assignee',
-						selector: 'node',
-						onClickFunction: function (event) {
-							cxt.removeMenuItem('changeNodeStatus')
-							cxt.removeMenuItem('changeNodeAssignee')
-							cxt.removeMenuItem('changeNodeCategory')
-							cxt.removeMenuItem('changeNodeMilestone')
-							cxt.appendMenuItem(cancelChangeNodeAssignee)
-							if(cxtNodeAssignees.length > 5){
-								for(var i = 0; i < 5; i++){
-									cxt.appendMenuItem(cxtNodeAssignees[i]);
-								}
-								cxt.appendMenuItem(cxtNodeAssigneesNext);
-								currentAssigneeIndex = 0;
-							}
-							else{
-								cxt.appendMenuItems(cxtNodeAssignees);
-							}
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtNodeAssigneesNext = {
-						id: 'cxtNodeAssigneesNext',
-						title: 'Next 5 assignees',
-						selector: 'node',
-						onClickFunction: function (event) {
-							listOfNodeAssignees.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeAssignee' + listOfNodeAssignees.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtNodeAssigneesNext')
-							cxt.removeMenuItem('cxtNodeAssigneesPred')
-							currentAssigneeIndex += 5
-							var next = currentAssigneeIndex + 5;
-							for(var i = currentAssigneeIndex; i < next && i < listOfNodeAssignees.length; i++){
-								cxt.appendMenuItem(cxtNodeAssignees[i]);
-							}
-							cxt.appendMenuItem(cxtNodeAssigneesPred);
-							if(listOfNodeAssignees.length > next){
-								cxt.appendMenuItem(cxtNodeAssigneesNext);
-							}
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtNodeAssigneesPred = {
-						id: 'cxtNodeAssigneesPred',
-						title: 'Previous 5 assignees',
-						selector: 'node',
-						onClickFunction: function (event) {
-							listOfNodeAssignees.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeAssignee' + listOfNodeAssignees.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtNodeAssigneesNext')
-							cxt.removeMenuItem('cxtNodeAssigneesPred')
-							var next = currentAssigneeIndex;
-							currentAssigneeIndex -= 5;
-							for(var i = currentAssigneeIndex; i < next; i++){
-								cxt.appendMenuItem(cxtNodeAssignees[i]);
-							}
-							if(currentAssigneeIndex){
-								cxt.appendMenuItem(cxtNodeAssigneesPred);
-							}
-							cxt.appendMenuItem(cxtNodeAssigneesNext);
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-
-
-
-					var currentCategoryIndex;
-
-					var cxtNodeCategorys = listOfNodeCategorys.map(function(e){
-						return {
-							id: 'cxtNodeCategory' + listOfNodeCategorys.indexOf(e),
-							title: 'Category: ' + e,
-							selector: 'node',
-							onClickFunction: function (event) {
-							    if(cy.nodes(':selected').length){
-							        var selectedNodes = cy.nodes(':selected')
-                                    for(var i = 0; i < selectedNodes.length; i++){
-                                        var target = selectedNodes[i]
-                                        var info = target.attr('info')
-                                        info['category'] = e
-                                        target.data('info', info)
-                                        changes.push({
-                                            'type': 'task',
-                                            'action': 'changeCategory',
-                                            'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
-                                            'category': e,
-                                        });
-                                    }
-							    }
-							    else{
-							        var info = event.cyTarget.attr('info')
-                                    info['category'] = e
-                                    event.cyTarget.data('info', info)
-                                    changes.push({
-                                        'type': 'task',
-                                        'action': 'changeCategory',
-                                        'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                        'category': e,
-                                      });
-							    }
-
-								cxt.removeMenuItem('cancelChangeNodeCategory');
-								cxt.removeMenuItem('cxtNodeCategorysNext')
-								cxt.removeMenuItem('cxtNodeCategorysPred')
-	                        	listOfNodeCategorys.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeCategory' + listOfNodeCategorys.indexOf(e));
-	                        	})
-	                        	cxt.appendMenuItem(changeNodeStatus)
-								cxt.appendMenuItem(changeNodeAssignee)
-								cxt.appendMenuItem(changeNodeCategory)
-								cxt.appendMenuItem(changeNodeMilestone)
-	                        	console.log(changes);
-                            },
-                            hasTrailingDivider: true,
-                            disabled: false,
-                            coreAsWell: false
-						}
-					})
-
-
-					var cancelChangeNodeCategory = {
-						id: 'cancelChangeNodeCategory',
-						title: 'Cancel',
-						selector: 'node',
-						onClickFunction: function (event) {
-                        	cxt.removeMenuItem('cancelChangeNodeCategory');
-							cxt.removeMenuItem('cxtNodeCategorysNext')
-							cxt.removeMenuItem('cxtNodeCategorysPred')
-                        	listOfNodeCategorys.map(function(e){
-                        		cxt.removeMenuItem('cxtNodeCategory' + listOfNodeCategorys.indexOf(e));
-                        	})
-                        	cxt.appendMenuItem(changeNodeStatus)
-							cxt.appendMenuItem(changeNodeAssignee)
-							cxt.appendMenuItem(changeNodeCategory)
-							cxt.appendMenuItem(changeNodeMilestone)
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var changeNodeCategory = {
-						id: 'changeNodeCategory',
-						title: 'Change category',
-						selector: 'node',
-						onClickFunction: function (event) {
-							cxt.removeMenuItem('changeNodeStatus')
-							cxt.removeMenuItem('changeNodeAssignee')
-							cxt.removeMenuItem('changeNodeCategory')
-							cxt.removeMenuItem('changeNodeMilestone')
-							cxt.appendMenuItem(cancelChangeNodeCategory)
-							if(cxtNodeCategorys.length > 5){
-								for(var i = 0; i < 5; i++){
-									cxt.appendMenuItem(cxtNodeCategorys[i]);
-								}
-								cxt.appendMenuItem(cxtNodeCategorysNext);
-								currentCategoryIndex = 0;
-							}
-							else{
-								cxt.appendMenuItems(cxtNodeCategorys);
-							}
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtNodeCategorysNext = {
-						id: 'cxtNodeCategorysNext',
-						title: 'Next 5 categories',
-						selector: 'node',
-						onClickFunction: function (event) {
-							listOfNodeCategorys.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeCategory' + listOfNodeCategorys.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtNodeCategorysNext')
-							cxt.removeMenuItem('cxtNodeCategorysPred')
-							currentCategoryIndex += 5
-							var next = currentCategoryIndex + 5;
-							for(var i = currentCategoryIndex; i < next && i < listOfNodeCategorys.length; i++){
-								cxt.appendMenuItem(cxtNodeCategorys[i]);
-							}
-							cxt.appendMenuItem(cxtNodeCategorysPred);
-							if(listOfNodeCategorys.length > next){
-								cxt.appendMenuItem(cxtNodeCategorysNext);
-							}
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtNodeCategorysPred = {
-						id: 'cxtNodeCategorysPred',
-						title: 'Previous 5 categories',
-						selector: 'node',
-						onClickFunction: function (event) {
-							listOfNodeCategorys.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeCategory' + listOfNodeCategorys.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtNodeCategorysNext')
-							cxt.removeMenuItem('cxtNodeCategorysPred')
-							var next = currentCategoryIndex;
-							currentCategoryIndex -= 5;
-							for(var i = currentCategoryIndex; i < next; i++){
-								cxt.appendMenuItem(cxtNodeCategorys[i]);
-							}
-							if(currentCategoryIndex){
-								cxt.appendMenuItem(cxtNodeCategorysPred);
-							}
-							cxt.appendMenuItem(cxtNodeCategorysNext);
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-
-					var currentMilestoneIndex;
-
-					var cxtNodeMilestones = listOfNodeMilestones.map(function(e){
-						return {
-							id: 'cxtNodeMilestone' + listOfNodeMilestones.indexOf(e),
-							title: 'Milestone: ' + e,
-							selector: 'node',
-							onClickFunction: function (event) {
-							    if(cy.nodes(':selected').length){
-							        var selectedNodes = cy.nodes(':selected')
-                                    for(var i = 0; i < selectedNodes.length; i++){
-                                        var target = selectedNodes[i]
-                                        var info = target.attr('info')
-                                        info['milestone'] = e
-                                        target.data('info', info)
-                                        changes.push({
-                                            'type': 'task',
-                                            'action': 'changeMilestone',
-                                            'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
-                                            'milestone': e,
-                                        });
-                                    }
-							    }
-							    else{
-							        var info = event.cyTarget.attr('info')
-                                    info['milestone'] = e
-                                    event.cyTarget.data('info', info)
-                                    changes.push({
-                                        'type': 'task',
-                                        'action': 'changeMilestone',
-                                        'id': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                        'milestone': e,
-                                      });
-							    }
-
-								cxt.removeMenuItem('cancelChangeNodeMilestone');
-								cxt.removeMenuItem('cxtNodeMilestonesNext')
-								cxt.removeMenuItem('cxtNodeMilestonesPred')
-	                        	listOfNodeMilestones.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeMilestone' + listOfNodeMilestones.indexOf(e));
-	                        	})
-	                        	cxt.appendMenuItem(changeNodeStatus)
-								cxt.appendMenuItem(changeNodeAssignee)
-								cxt.appendMenuItem(changeNodeCategory)
-								cxt.appendMenuItem(changeNodeMilestone)
-	                        	console.log(changes);
-                            },
-                            hasTrailingDivider: true,
-                            disabled: false,
-                            coreAsWell: false
-						}
-					})
-
-
-					var cancelChangeNodeMilestone = {
-						id: 'cancelChangeNodeMilestone',
-						title: 'Cancel',
-						selector: 'node',
-						onClickFunction: function (event) {
-                        	cxt.removeMenuItem('cancelChangeNodeMilestone');
-							cxt.removeMenuItem('cxtNodeMilestonesNext')
-							cxt.removeMenuItem('cxtNodeMilestonesPred')
-                        	listOfNodeMilestones.map(function(e){
-                        		cxt.removeMenuItem('cxtNodeMilestone' + listOfNodeMilestones.indexOf(e));
-                        	})
-                        	cxt.appendMenuItem(changeNodeStatus)
-							cxt.appendMenuItem(changeNodeAssignee)
-							cxt.appendMenuItem(changeNodeCategory)
-							cxt.appendMenuItem(changeNodeMilestone)
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var changeNodeMilestone = {
-						id: 'changeNodeMilestone',
-						title: 'Change milestone',
-						selector: 'node',
-						onClickFunction: function (event) {
-							cxt.removeMenuItem('changeNodeStatus')
-							cxt.removeMenuItem('changeNodeAssignee')
-							cxt.removeMenuItem('changeNodeCategory')
-							cxt.removeMenuItem('changeNodeMilestone')
-							cxt.appendMenuItem(cancelChangeNodeMilestone)
-							if(cxtNodeMilestones.length > 5){
-								for(var i = 0; i < 5; i++){
-									cxt.appendMenuItem(cxtNodeMilestones[i]);
-								}
-								cxt.appendMenuItem(cxtNodeMilestonesNext);
-								currentMilestoneIndex = 0;
-							}
-							else{
-								cxt.appendMenuItems(cxtNodeMilestones);
-							}
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtNodeMilestonesNext = {
-						id: 'cxtNodeMilestonesNext',
-						title: 'Next 5 milestones',
-						selector: 'node',
-						onClickFunction: function (event) {
-							listOfNodeMilestones.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeMilestone' + listOfNodeMilestones.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtNodeMilestonesNext')
-							cxt.removeMenuItem('cxtNodeMilestonesPred')
-							currentMilestoneIndex += 5
-							var next = currentMilestoneIndex + 5;
-							for(var i = currentMilestoneIndex; i < next && i < listOfNodeMilestones.length; i++){
-								cxt.appendMenuItem(cxtNodeMilestones[i]);
-							}
-							cxt.appendMenuItem(cxtNodeMilestonesPred);
-							if(listOfNodeMilestones.length > next){
-								cxt.appendMenuItem(cxtNodeMilestonesNext);
-							}
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtNodeMilestonesPred = {
-						id: 'cxtNodeMilestonesPred',
-						title: 'Previous 5 milestones',
-						selector: 'node',
-						onClickFunction: function (event) {
-							listOfNodeMilestones.map(function(e){
-	                        		cxt.removeMenuItem('cxtNodeMilestone' + listOfNodeMilestones.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtNodeMilestonesNext')
-							cxt.removeMenuItem('cxtNodeMilestonesPred')
-							var next = currentMilestoneIndex;
-							currentMilestoneIndex -= 5;
-							for(var i = currentMilestoneIndex; i < next; i++){
-								cxt.appendMenuItem(cxtNodeMilestones[i]);
-							}
-							if(currentMilestoneIndex){
-								cxt.appendMenuItem(cxtNodeMilestonesPred);
-							}
-							cxt.appendMenuItem(cxtNodeMilestonesNext);
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-
-					var currentTypeIndex;
-
-					var cxtEdgeTypes = listOfEdgeTypes.map(function(e){
-						return {
-							id: 'cxtEdgeType' + listOfEdgeTypes.indexOf(e),
-							title: 'Type: ' + e,
-							selector: 'edge',
-							onClickFunction: function (event) {
-							    if(cy.edges(':selected').length){
-							        var selectedEdges = cy.edges(':selected')
-                                    for(var i = 0; i < selectedEdges.length; i++){
-                                        var target = selectedEdges[i]
-                                        target.data('type', e)
-                                        changes.push({
-                                            'type': 'relation',
-                                            'action': 'changeType',
-                                            'id': target.attr('edge_id'),
-                                            'param': e,
-                                          });
-                                    }
-							    }
-							    else{
-                                    event.cyTarget.data('type', e)
-                                    changes.push({
-                                        'type': 'relation',
-                                        'action': 'changeType',
-                                        'id': event.cyTarget.attr('edge_id'),
-                                        'param': e,
-                                      });
-							    }
-
-								cxt.removeMenuItem('cancelChangeTypeOfEdge');
-								cxt.removeMenuItem('cxtEdgeTypesNext')
-								cxt.removeMenuItem('cxtEdgeTypesPred')
-	                        	listOfEdgeTypes.map(function(e){
-	                        		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
-	                        	})
-	                        	cxt.appendMenuItem(changeTypeOfEdge);
-                            },
-                            hasTrailingDivider: true,
-                            disabled: false,
-                            coreAsWell: false
-						}
-					})
-
-					var cancelChangeTypeOfEdge = {
-						id: 'cancelChangeTypeOfEdge',
-						title: 'Cancel',
-						selector: 'edge',
-						onClickFunction: function (event) {
-                        	cxt.removeMenuItem('cancelChangeTypeOfEdge');
-							cxt.removeMenuItem('cxtEdgeTypesNext')
-							cxt.removeMenuItem('cxtEdgeTypesPred')
-                        	listOfEdgeTypes.map(function(e){
-                        		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
-                        	})
-                        	cxt.appendMenuItem(changeTypeOfEdge);
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var changeTypeOfEdge = {
-						id: 'changeTypeOfEdge',
-						title: 'Change type',
-						selector: 'edge',
-						onClickFunction: function (event) {
-							cxt.removeMenuItem('changeTypeOfEdge')
-							cxt.appendMenuItem(cancelChangeTypeOfEdge)
-							if(cxtNodeStatuses.length > 5){
-								for(var i = 0; i < 5; i++){
-									cxt.appendMenuItem(cxtEdgeTypes[i]);
-								}
-								cxt.appendMenuItem(cxtEdgeTypesNext);
-								currentTypeIndex = 0;
-							}
-							else{
-								cxt.appendMenuItems(cxtEdgeTypes);
-							}
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtEdgeTypesNext = {
-						id: 'cxtEdgeTypesNext',
-						title: 'Next 5 types',
-						selector: 'edge',
-						onClickFunction: function (event) {
-							listOfEdgeTypes.map(function(e){
-	                        		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtEdgeTypesNext')
-							cxt.removeMenuItem('cxtEdgeTypesPred')
-							currentTypeIndex += 5
-							var next = currentTypeIndex + 5;
-							for(var i = currentTypeIndex; i < next && i < listOfEdgeTypes.length; i++){
-								cxt.appendMenuItem(cxtEdgeTypes[i]);
-							}
-							cxt.appendMenuItem(cxtEdgeTypesPred);
-							if(listOfEdgeTypes.length > next){
-								cxt.appendMenuItem(cxtEdgeTypesNext);
-							}
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var cxtEdgeTypesPred = {
-						id: 'cxtEdgeTypesPred',
-						title: 'Previous 5 types',
-						selector: 'edge',
-						onClickFunction: function (event) {
-							listOfEdgeTypes.map(function(e){
-	                        		cxt.removeMenuItem('cxtEdgeType' + listOfEdgeTypes.indexOf(e));
-	                        })
-							cxt.removeMenuItem('cxtEdgeTypesNext')
-							cxt.removeMenuItem('cxtEdgeTypesPred')
-							var next = currentTypeIndex;
-							currentTypeIndex -= 5;
-							for(var i = currentTypeIndex; i < next; i++){
-								cxt.appendMenuItem(cxtEdgeTypes[i]);
-							}
-							if(currentTypeIndex){
-								cxt.appendMenuItem(cxtEdgeTypesPred);
-							}
-							cxt.appendMenuItem(cxtEdgeTypesNext);
-
-                        },
-                        hasTrailingDivider: true,
-                        disabled: false,
-                        coreAsWell: false
-					}
-
-					var isTipsEnabled = true;
-
-					var disableTips = {
-								id: 'disableTips',
-                                title: 'Disable tips',
-                                selector: '',
-                                onClickFunction: function (event) {
-                                	cxt.insertBeforeMenuItem(enableTips, 'disableTips');
-                                  	cxt.removeMenuItem('disableTips');
-                                  	isTipsEnabled = false;
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: true
-					}
-
-					var enableTips = {
-								id: 'enableTips',
-                                title: 'Enable tips',
-                                selector: '',
-                                onClickFunction: function (event) {
-                                	cxt.insertBeforeMenuItem(disableTips, 'enableTips');
-                                  	cxt.removeMenuItem('enableTips');
-                                  	isTipsEnabled = true;
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: true
-					}
-
-					var createNode = {
-								id: 'createNode',
-                                title: 'Create node',
-                                selector: '',
-                                onClickFunction: function (event) {
-                                	var node = cy.add({
-                                		group: 'nodes',
-                                		data: { id: '_'+(Math.random()*1000000000|0),
-                                				name: 'New', type: '',
-                                				color1: '#f8f8f8', color2: '#BBB',
-                                				info: {}}
-                                	});
-                                	node.renderedPosition({x:event.originalEvent.clientX - 50, y: event.originalEvent.clientY - 90});
-                                	changes.push({
-                                		'type': 'task',
-                                		'action': 'add',
-                                		'id': node.attr('id'),
-                                	});
-                                	console.log(changes);
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: true
-					}
-
-					var remove = {
-                                id: 'remove',
-                                title: 'Remove',
-                                selector: 'node, edge',
-                                onClickFunction: function (event) {
-
-                                  var target = event.cyTarget;
-                                  if(target.isEdge()){
-                                  	target.remove();
-									changes.push({
-	                                  	'type': 'relation',
-	                                  	'action': 'delete',
-	                                  	'id': target.attr('edge_id'),
-	                                  });
-                                	console.log(changes);
-                                  }
-                                  else if(target.isNode()){
-                                  	alert('You do not have permission to remove the task');
-                                  }
-
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: false
-                    }
-
-					var newEdge = {
-                                id: 'newEdge',
-                                title: 'New edge',
-                                selector: 'node',
-                                onClickFunction: function (event) {
-                                	cxt.removeMenuItem('newEdge');
-                                	cxt.appendMenuItem(createEdge);
-                                	cxt.appendMenuItem(finish);
-                                	cxt.firstEdge = event.cyTarget;
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: false
-                    }
-
-					var createEdge = {
-                                id: 'createEdge',
-                                title: 'Create edge',
-                                selector: 'node',
-                                onClickFunction: function (event) {
-                                    if(cy.nodes(':selected').length){
-                                        var selectedNodes = cy.nodes(':selected')
-                                        for(var i = 0; i < selectedNodes.length; i++){
-                                            var target = selectedNodes[i]
-                                            var edge = cy.add({
-                                                group: 'edges',
-                                                data: { source: cxt.firstEdge.attr('id'),
-                                                        target: target.attr('id'),
-                                                        type: listOfEdgeTypes[0],
-                                                        edge_id:  '_'+(Math.random()*1000000000|0),}
-                                            });
-                                            changes.push({
-                                                'type': 'relation',
-                                                'action': 'add',
-                                                'id': edge.attr('edge_id'),
-                                                'from': cxt.firstEdge.attr(cxt.firstEdge.attr('id')[0] !='_'? 'name': 'id'),
-                                                'to': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
-                                            });
-                                        }
-                                    }
-                                    else{
-                                        var edge = cy.add({
-                                            group: 'edges',
-                                            data: { source: cxt.firstEdge.attr('id'),
-                                                    target: event.cyTarget.attr('id'),
-                                                    type: listOfEdgeTypes[0],
-                                                    edge_id:  '_'+(Math.random()*1000000000|0),}
-                                        });
-                                        changes.push({
-                                            'type': 'relation',
-                                            'action': 'add',
-                                            'id': edge.attr('edge_id'),
-                                            'from': cxt.firstEdge.attr(cxt.firstEdge.attr('id')[0] !='_'? 'name': 'id'),
-                                            'to': event.cyTarget.attr(event.cyTarget.attr('id')[0] !='_'? 'name': 'id'),
-                                        });
-                                    }
-
-                                	console.log(changes);
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: false
-                    }
-
-                    var finish = {
-                                id: 'finish',
-                                title: 'Finish',
-                                selector: '*',
-                                onClickFunction: function (event) {
-                                	cxt.removeMenuItem('createEdge');
-                                	cxt.removeMenuItem('finish');
-                                	cxt.appendMenuItem(newEdge);
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: true
-                    }
-
-                    var editTask = {
-                    			id: 'editTask',
-                    			title: 'Edit task',
-                    			selector: 'node',
-                    			onClickFunction: function (event) {
-                    			    if(changes.length > 0){
-                                        alert('You should save changes')
-                    			    }
-                    			    else{
-                    			        window.location = window.location.toString()
-                    			        .substr(0, window.location.toString().slice(0, -1)
-                    			        .lastIndexOf("/")) + "/task-edit/?task=" + event.cyTarget.attr('name')
-                    			    }
-                    			},
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: false
-                    }
-
-                    var normalSize = {
-                    			id: 'normalSize',
-                    			title: 'Normal size',
-                    			selector: '',
-                    			onClickFunction: function (event) {
-                    				cy.fit();
-                                },
-                                hasTrailingDivider: true,
-                                disabled: false,
-                                coreAsWell: true
-                    }
-
-					var cxt = cy.contextMenus({
-                        menuItems: [
-                        	 normalSize,
-                        	 disableTips,
-                        	 editTask,
-                             remove,
-                             newEdge,
-                             createNode,
-                             changeTypeOfEdge,
-							 changeNodeStatus,
-							 changeNodeAssignee,
-							 changeNodeCategory,
-							 changeNodeMilestone,
-                        ],
-                        menuItemClasses: ['qtip-bootstrap'],
-                        contextMenuClasses: ['qtip-bootstrap']
+					cy.on('cxttap', function(event){
+
+        a=$('ul[id^=cxt]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+
+        if(event.cyTarget.length === undefined){
+            ccxt = $('#cxtbody')[0];
+            ccxt.style.display = 'block';
+            ccxt.style.top = event.originalEvent.clientY;
+            ccxt.style.left = event.originalEvent.clientX;
+        }
+
+        else if(event.cyTarget.isNode()){
+            ccxt = $('#cxtnode')[0];
+            ccxt.style.display = 'block';
+            ccxt.style['margin-top'] = event.originalEvent.clientY;
+            ccxt.style['margin-left'] = event.originalEvent.clientX;
+            curr_node_and_edge[0] = event.cyTarget;
+        }
+
+        else if(event.cyTarget.isEdge()){
+            ccxt = $('#cxtedge')[0];
+            ccxt.style.display = 'block';
+            ccxt.style.top = event.originalEvent.clientY;
+            ccxt.style.left = event.originalEvent.clientX;
+            curr_node_and_edge[1] = event.cyTarget;
+        }
+
+    });
+
+    cy.on('click', function(event){
+        a=$('ul[id^=cxt]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display='none';
+        }
+    });
+
+    document.getElementById("_edit_task").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_edit_task").addEventListener("click", function(event){
+        document.getElementById("cxtnode").style.display = "none";
+        if(changes.length > 0){
+            alert('You should save changes')
+        }
+        else{
+            window.location = window.location.toString()
+            .substr(0, window.location.toString().slice(0, -1)
+            .lastIndexOf("/")) + "/task-edit/?task=" + curr_node_and_edge[0].attr('name')
+        }
+    });
+
+
+
+
+    document.getElementById("_remo_task").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_remo_task").addEventListener("click", function(event){
+        document.getElementById("cxtnode").style.display = "none";
+        alert('You do not have permission to remove the task');
+    });
+
+
+
+
+    document.getElementById("_new_edge").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_new_edge").addEventListener("click", function(event){
+        document.getElementById("cxtnode").style.display = "none";
+        if(document.getElementById("_new_edge").innerHTML === 'New edge from here'){
+            document.getElementById("_new_edge").innerHTML = 'New edge from '+
+                curr_node_and_edge[0].attr(curr_node_and_edge[0].attr('id')[0] !='_'? 'name': 'id') +' to there';
+            curr_node_and_edge[2] = curr_node_and_edge[0];
+        }
+        else{
+            if(cy.nodes(':selected').length){
+                var selectedNodes = cy.nodes(':selected')
+                for(var i = 0; i < selectedNodes.length; i++){
+                    var target = selectedNodes[i]
+                    var edge = cy.add({
+                        group: 'edges',
+                        data: { source: curr_node_and_edge[2].attr('id'),
+                                target: target.attr('id'),
+                                type: listOfEdgeTypes[0],
+                                edge_id:  '_'+(Math.random()*1000000000|0),}
                     });
-
-            cy.on('cxttap', function(event){
-
-                $('#cxtbody')[0].style.display = 'none';
-                $('#cxtnode')[0].style.display = 'none';
-                $('#cxtedge')[0].style.display = 'none';
-
-                if(event.cyTarget.length === undefined){
-                    console.log('body');
-                    ccxt = $('#cxtbody')[0];
-                    ccxt.style.display = 'block';
-                    ccxt.style.top = event.originalEvent.clientY;
-                    ccxt.style.left = event.originalEvent.clientX;
+                    changes.push({
+                        'type': 'relation',
+                        'action': 'add',
+                        'id': edge.attr('edge_id'),
+                        'from': curr_node_and_edge[2].attr(curr_node_and_edge[2].attr('id')[0] !='_'? 'name': 'id'),
+                        'to': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                    });
                 }
+            }
+            else{
+                var edge = cy.add({
+                    group: 'edges',
+                    data: { source: curr_node_and_edge[2].attr('id'),
+                            target: curr_node_and_edge[0].attr('id'),
+                            type: listOfEdgeTypes[0],
+                            edge_id:  '_'+(Math.random()*1000000000|0),}
+                });
+                changes.push({
+                    'type': 'relation',
+                    'action': 'add',
+                    'id': edge.attr('edge_id'),
+                    'from': curr_node_and_edge[2].attr(curr_node_and_edge[2].attr('id')[0] !='_'? 'name': 'id'),
+                    'to': curr_node_and_edge[0].attr(curr_node_and_edge[0].attr('id')[0] !='_'? 'name': 'id'),
+                });
+            }
+            document.getElementById("_new_edge").innerHTML = 'New edge from here';
+            console.log(changes);
+        }
+    });
 
-                else if(event.cyTarget.isNode()){
-                    console.log('node');
-                    ccxt = $('#cxtnode')[0];
-                    ccxt.style.display = 'block';
-                    ccxt.style.top = event.originalEvent.clientY;
-                    ccxt.style.left = event.originalEvent.clientX;
+
+
+
+
+    document.getElementById("_change_stat").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+        a=$('#cxt_status')[0];
+        a.style.display = 'block';
+        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 60 + 'px';
+        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+    });
+
+    b=$('li[id^=s_');
+    for (var i = b.length - 1; i >= 0; i--) {
+        b[i].addEventListener("click", function(event){
+            e=event.target.innerHTML
+            document.getElementById("cxtnode").style.display = "none";
+            document.getElementById("cxt_status").style.display = "none";
+            if(cy.nodes(':selected').length){
+                var selectedNodes = cy.nodes(':selected')
+                for(var i = 0; i < selectedNodes.length; i++){
+                    var target = selectedNodes[i]
+                    var info = target.attr('info')
+                    info['status'] = e
+                    target.data('info', info)
+                    changes.push({
+                        'type': 'task',
+                        'action': 'changeStatus',
+                        'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                        'status': e,
+                    });
                 }
+            }
+            else{
+                var info = curr_node_and_edge[0].attr('info')
+                info['status'] = e
+                curr_node_and_edge[0].data('info', info)
+                changes.push({
+                    'type': 'task',
+                    'action': 'changeStatus',
+                    'id': curr_node_and_edge[0].attr(curr_node_and_edge[0].attr('id')[0] !='_'? 'name': 'id'),
+                    'status': e,
+                  });
+            }
+            console.log(changes);
+        });
+    }
 
-                else if(event.cyTarget.isEdge()){
-                    console.log('edge');
-                    ccxt = $('#cxtedge')[0];
-                    ccxt.style.display = 'block';
-                    ccxt.style.top = event.originalEvent.clientY;
-                    ccxt.style.left = event.originalEvent.clientX;
+
+
+
+    document.getElementById("_change_assi").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+        a=$('#cxt_assignee')[0];
+        a.style.display = 'block';
+        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 80 + 'px';
+        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+    });
+
+    b=$('li[id^=a_');
+    for (var i = b.length - 1; i >= 0; i--) {
+        b[i].addEventListener("click", function(event){
+            e=event.target.innerHTML
+            document.getElementById("cxtnode").style.display = "none";
+            document.getElementById("cxt_assignee").style.display = "none";
+            if(cy.nodes(':selected').length){
+                var selectedNodes = cy.nodes(':selected')
+                for(var i = 0; i < selectedNodes.length; i++){
+                    var target = selectedNodes[i]
+                    var info = target.attr('info')
+                    info['assignee'] = e
+                    target.data('info', info)
+                    changes.push({
+                        'type': 'task',
+                        'action': 'changeAssignee',
+                        'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                        'assignee': e,
+                    });
                 }
+            }
+            else{
+                var info = curr_node_and_edge[0].attr('info')
+                info['assignee'] = e
+                curr_node_and_edge[0].data('info', info)
+                changes.push({
+                    'type': 'task',
+                    'action': 'changeAssignee',
+                    'id': curr_node_and_edge[0].attr(curr_node_and_edge[0].attr('id')[0] !='_'? 'name': 'id'),
+                    'assignee': e,
+                  });
+            }
+            console.log(changes);
+        });
+    }
 
+
+
+
+
+    document.getElementById("_change_cate").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+        a=$('#cxt_category')[0];
+        a.style.display = 'block';
+        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 100 + 'px';
+        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+    });
+
+
+    b=$('li[id^=c_');
+    for (var i = b.length - 1; i >= 0; i--) {
+        b[i].addEventListener("click", function(event){
+            e=event.target.innerHTML
+            document.getElementById("cxtnode").style.display = "none";
+            document.getElementById("cxt_category").style.display = "none";
+            if(cy.nodes(':selected').length){
+                var selectedNodes = cy.nodes(':selected')
+                for(var i = 0; i < selectedNodes.length; i++){
+                    var target = selectedNodes[i]
+                    var info = target.attr('info')
+                    info['category'] = e
+                    target.data('info', info)
+                    changes.push({
+                        'type': 'task',
+                        'action': 'changeCategory',
+                        'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                        'category': e,
+                    });
+                }
+            }
+            else{
+                var info = curr_node_and_edge[0].attr('info')
+                info['category'] = e
+                curr_node_and_edge[0].data('info', info)
+                changes.push({
+                    'type': 'task',
+                    'action': 'changeCategory',
+                    'id': curr_node_and_edge[0].attr(curr_node_and_edge[0].attr('id')[0] !='_'? 'name': 'id'),
+                    'category': e,
+                  });
+            }
+            console.log(changes);
+        });
+    }
+
+
+
+
+
+
+    document.getElementById("_change_mile").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+        a=$('#cxt_milestone')[0];
+        a.style.display = 'block';
+        a.style.top = +document.getElementById("cxtnode").style.top.slice(0, -2) + 120 + 'px';
+        a.style.left = +document.getElementById("cxtnode").style.left.slice(0, -2) + cxtnode.clientWidth + 1 + 'px';
+    });
+
+    b=$('li[id^=m_');
+    for (var i = b.length - 1; i >= 0; i--) {
+        b[i].addEventListener("click", function(event){
+            e=event.target.innerHTML
+            document.getElementById("cxtnode").style.display = "none";
+            document.getElementById("cxt_milestone").style.display = "none";
+            if(cy.nodes(':selected').length){
+                var selectedNodes = cy.nodes(':selected')
+                for(var i = 0; i < selectedNodes.length; i++){
+                    var target = selectedNodes[i]
+                    var info = target.attr('info')
+                    info['milestone'] = e
+                    target.data('info', info)
+                    changes.push({
+                        'type': 'task',
+                        'action': 'changeMilestone',
+                        'id': target.attr(target.attr('id')[0] !='_'? 'name': 'id'),
+                        'milestone': e,
+                    });
+                }
+            }
+            else{
+                var info = curr_node_and_edge[0].attr('info')
+                info['milestone'] = e
+                curr_node_and_edge[0].data('info', info)
+                changes.push({
+                    'type': 'task',
+                    'action': 'changeMilestone',
+                    'id': curr_node_and_edge[0].attr(curr_node_and_edge[0].attr('id')[0] !='_'? 'name': 'id'),
+                    'milestone': e,
+                  });
+            }
+            console.log(changes);
+        });
+    }
+
+
+
+    document.getElementById("_remo_edge").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_remo_edge").addEventListener("click", function(event){
+        document.getElementById("cxtedge").style.display = "none";
+        if(cy.edges(':selected').length){
+            var selectedEdges = cy.edges(':selected');
+            for(var i = 0; i < selectedEdges.length; i++){
+                var target = selectedEdges[i]
+                target.remove();
+                changes.push({
+                    'type': 'relation',
+                    'action': 'delete',
+                    'id': target.attr('edge_id'),
+                });
+            }
+        }
+        else{
+            curr_node_and_edge[1].remove();
+            changes.push({
+                'type': 'relation',
+                'action': 'delete',
+                'id': curr_node_and_edge[1].attr('edge_id'),
             });
+        }
+        console.log(changes)
+    });
+
+
+
+
+    document.getElementById("_change_type").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+        a=$('#cxt_type')[0];
+        a.style.display = 'block';
+        a.style.top = +document.getElementById("cxtedge").style.top.slice(0, -2) + 20 + 'px';
+        a.style.left = +document.getElementById("cxtedge").style.left.slice(0, -2) + cxtedge.clientWidth + 1 + 'px';
+    });
+
+    b=$('li[id^=t_');
+    for (var i = b.length - 1; i >= 0; i--) {
+        b[i].addEventListener("click", function(event){
+            e=event.target.innerHTML
+            document.getElementById("cxtedge").style.display = "none";
+            document.getElementById("cxt_type").style.display = "none";
+            if(cy.edges(':selected').length){
+                var selectedEdges = cy.edges(':selected')
+                for(var i = 0; i < selectedEdges.length; i++){
+                    var target = selectedEdges[i]
+                    target.data('type', e)
+                    changes.push({
+                        'type': 'relation',
+                        'action': 'changeType',
+                        'id': target.attr('edge_id'),
+                        'param': e,
+                    });
+                }
+            }
+            else{
+                curr_node_and_edge[1].data('type', e)
+                changes.push({
+                    'type': 'relation',
+                    'action': 'changeType',
+                    'id': curr_node_and_edge[1].attr('edge_id'),
+                    'param': e,
+                });
+            }
+            console.log(changes);
+        });
+    }
+
+
+
+
+
+    document.getElementById("_normal_size").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_normal_size").addEventListener("click", function(event){
+        document.getElementById("cxtbody").style.display = "none";
+        cy.fit();
+    });
+
+
+
+
+
+    document.getElementById("_disable_tips").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_disable_tips").addEventListener("click", function(event){
+        document.getElementById("cxtbody").style.display = "none";
+        if(document.getElementById("_disable_tips").innerHTML === 'Disable tips'){
+            isTipsEnabled = false;
+            document.getElementById("_disable_tips").innerHTML = 'Enable tips';
+        }
+        else{
+            isTipsEnabled = true;
+            document.getElementById("_disable_tips").innerHTML = 'Disable tips';
+        }
+    });
+
+
+
+
+    document.getElementById("_create_node").addEventListener("mouseover", function(event){
+        a=$('ul[id^=cxt_]');
+        for (var i = a.length - 1; i >= 0; i--) {
+            a[i].style.display = "none";
+        }
+    });
+
+    document.getElementById("_create_node").addEventListener("click", function(event){
+        document.getElementById("cxtbody").style.display = "none";
+        var node = cy.add({
+            group: 'nodes',
+            data: { id: '_'+(Math.random()*1000000000|0),
+                    name: 'New', type: '',
+                    color1: '#f8f8f8', color2: '#BBB',
+                    info: {}}
+        });
+        node.renderedPosition({x:event.clientX - 50, y: event.clientY - 90});
+        changes.push({
+            'type': 'task',
+            'action': 'add',
+            'id': node.attr('id'),
+        });
+        console.log(changes);
+    });
 
 
 			});
@@ -1323,60 +817,60 @@ Edit
 
 		<div id="cy"></div>
 
-        <ul id=cxtnode class='context_list'>
-            <li class="context_item">Edit task</li>
-            <li class="context_item">Remove</li>
-            <li class="context_item">New edge</li>
-            <li class="context_item">Change status</li>
-            <li class="context_item">Change assignee</li>
-            <li class="context_item">Change category</li>
-            <li class="context_item">Change milestone</li>
-        </ul>
+{% endblock %}
 
-        <ul id=cxtedge class='context_list'>
-            <li class="context_item">Remove</li>
-            <li class="context_item">Change type</li>
-        </ul>
 
-        <ul id=cxtbody class='context_list'>
-            <li class="context_item">Normal size</li>
-            <li class="context_item">Disable tips</li>
-            <li class="context_item">Create node</li>
-        </ul>
+{% block after_body %}
 
-        <ul id=cxtstatus class='context_list'>
-            <li class="context_item">Status 1</li>
-            <li class="context_item">Status 2</li>
-            <li class="context_item">Status 3</li>
-            <li class="context_item">Status 4</li>
-        </ul>
+    <ul id="cxtnode" class='list-unstyled context_list'>
+        <li id="_edit_task" class="context_item">Edit task</li>
+        <li id="_remo_task" class="context_item">Remove task</li>
+        <li id="_new_edge" class="context_item">New edge from here</li>
+        <li id="_change_stat" class="context_item">Change status &nbsp;<span style="float: right;color: #AAAAAA">&#9658;</span></li>
+        <li id="_change_assi" class="context_item">Change assignee &nbsp;<span style="float: right; color: #AAAAAA">&#9658;</span></li>
+        <li id="_change_cate" class="context_item">Change category &nbsp;<span style="float: right; color: #AAAAAA">&#9658;</span></li>
+        <li id="_change_mile" class="context_item">Change milestone &nbsp;<span style="float: right; color: #AAAAAA">&#9658;</span></li>
+    </ul>
 
-        <ul id=cxtassignee class='context_list'>
-            <li class="context_item">Assiggnee 1</li>
-            <li class="context_item">Assiggnee 2</li>
-            <li class="context_item">Assiggnee 3</li>
-            <li class="context_item">Assiggnee 4</li>
-        </ul>
+    <ul id="cxtedge" class='list-unstyled context_list'>
+        <li id="_remo_edge" class="context_item">Remove edge</li>
+        <li id="_change_type" class="context_item">Change type &nbsp;<span style="float: right; color: #AAAAAA">&#9658;</span></li>
+    </ul>
 
-        <ul id=cxtcategory class='context_list'>
-            <li class="context_item">Category 1</li>
-            <li class="context_item">Category 2</li>
-            <li class="context_item">Category 3</li>
-            <li class="context_item">Category 4</li>
-        </ul>
+    <ul id="cxtbody" class='list-unstyled context_list'>
+        <li id="_normal_size" class="context_item">Normal size</li>
+        <li id="_disable_tips" class="context_item">Disable tips</li>
+        <li id="_create_node" class="context_item">Create node</li>
+    </ul>
 
-        <ul id=cxtmilestone class='context_list'>
-            <li class="context_item">Milestone 1</li>
-            <li class="context_item">Milestone 2</li>
-            <li class="context_item">Milestone 3</li>
-            <li class="context_item">Milestone 4</li>
-        </ul>
+    <ul id="cxt_status" class='list-unstyled context_list'>
+        {% for i in states %}
+              <li id="s_{{forloop.counter}}" class="context_item">{{i}}</li>
+        {% endfor %}
+    </ul>
 
-        <ul id=cxttype class='context_list'>
-            <li class="context_item">Type 1</li>
-            <li class="context_item">Type 2</li>
-            <li class="context_item">Type 3</li>
-            <li class="context_item">Type 4</li>
-        </ul>
+    <ul id="cxt_assignee" class='list-unstyled context_list'>
+        {% for i in assignees %}
+              <li id="a_{{forloop.counter}}" class="context_item">{{i}}</li>
+        {% endfor %}
+    </ul>
+
+    <ul id="cxt_category" class='list-unstyled context_list'>
+        {% for i in categories %}
+              <li id="c_{{forloop.counter}}" class="context_item">{{i}}</li>
+        {% endfor %}
+    </ul>
+
+    <ul id="cxt_milestone" class='list-unstyled context_list'>
+        {% for i in milestones %}
+              <li id="m_{{forloop.counter}}" class="context_item">{{i}}</li>
+        {% endfor %}
+    </ul>
+
+    <ul id="cxt_type" class='list-unstyled context_list'>
+        {% for i in relation_types %}
+              <li id="t_{{forloop.counter}}" class="context_item">{{i}}</li>
+        {% endfor %}
+    </ul>
 
 {% endblock %}
