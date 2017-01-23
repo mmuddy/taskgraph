@@ -15,6 +15,8 @@ Edit
                 width: 100%;
                 height: 480px;
                 color: #337ab7;
+                border: 1px solid #DDDDDD;
+                border-radius: 4px;
             }
 
             .qtip_margin {}
@@ -275,7 +277,6 @@ Edit
 					    	for (var i = 0; i < attrs.length; i++) {
 					    		s+='<b>'+attrs[i]+'</b>: '+node.attr('info')[attrs[i]]+'<br>'
 					    	}
-					    	console.log(event)
 						    node.qtip({
 						         content: s,
 				         		 style: { classes: 'qtip-bootstrap' },
@@ -331,23 +332,30 @@ Edit
         if(event.cyTarget.length === undefined){
             ccxt = $('#cxtbody')[0];
             ccxt.style.display = 'block';
-            ccxt.style.top = event.originalEvent.clientY + 'px';
-            ccxt.style.left = event.originalEvent.clientX + 'px';
+            ccxt.style.top = (event.originalEvent.clientY + ccxt.clientHeight + 2 > $(window).height()?
+                               $(window).height() - ccxt.clientHeight - 2: event.originalEvent.clientY) + 'px';
+            ccxt.style.left = (event.originalEvent.clientX + ccxt.clientWidth + 2 > $(window).width()?
+                                   $(window).width() - ccxt.clientWidth - 2: event.originalEvent.clientX) + 'px';
         }
 
         else if(event.cyTarget.isNode()){
             ccxt = $('#cxtnode')[0];
             ccxt.style.display = 'block';
-            ccxt.style.top = event.originalEvent.clientY + 'px';
-            ccxt.style.left = event.originalEvent.clientX + 'px';
+            console.log(event.originalEvent)
+            ccxt.style.top = (event.originalEvent.clientY + ccxt.clientHeight + 2 > $(window).height()?
+                               $(window).height() - ccxt.clientHeight - 2: event.originalEvent.clientY) + 'px';
+            ccxt.style.left = (event.originalEvent.clientX + ccxt.clientWidth + 2 > $(window).width()?
+                                   $(window).width() - ccxt.clientWidth - 2: event.originalEvent.clientX) + 'px';
             curr_node_and_edge[0] = event.cyTarget;
         }
 
         else if(event.cyTarget.isEdge()){
             ccxt = $('#cxtedge')[0];
             ccxt.style.display = 'block';
-            ccxt.style.top = event.originalEvent.clientY + 'px';
-            ccxt.style.left = event.originalEvent.clientX + 'px';
+            ccxt.style.top = (event.originalEvent.clientY + ccxt.clientHeight + 2 > $(window).height()?
+                               $(window).height() - ccxt.clientHeight - 2: event.originalEvent.clientY) + 'px';
+            ccxt.style.left = (event.originalEvent.clientX + ccxt.clientWidth + 2 > $(window).width()?
+                                   $(window).width() - ccxt.clientWidth - 2: event.originalEvent.clientX) + 'px';
             curr_node_and_edge[1] = event.cyTarget;
         }
 
